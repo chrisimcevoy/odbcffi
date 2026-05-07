@@ -1,0 +1,5 @@
+*
+!odbcffi
+!tests
+!pyproject.toml
+!uv.lock

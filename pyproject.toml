@@ -1,0 +1,88 @@
+[project]
+name = "odbcffi"
+version = "0.1.0"
+description = "An ODBC library for Python."
+authors = [
+    {name = "Chris McEvoy", email = "chris@chrismcevoy.net"},
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "cffi>=2.0.0",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+    "Topic :: Database",
+]
+
+[project.urls]
+Repository = "https://github.com/chrisimcevoy/odbcffi"
+Changelog = "https://github.com/chrisimcevoy/odbcffi/blob/main/CHANGELOG.md"
+
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-xdist>=3.8.0",
+]
+
+[tool.docformatter]
+black = true
+recursive = true
+in-place = true
+wrap-summaries = 120
+wrap-descriptions = 120
+
+[tool.mypy]
+strict = true
+
+[tool.pytest.ini_options]
+xfail_strict = true
+
+[tool.ruff]
+fix = true
+unsafe-fixes = true
+line-length = 120
+lint.extend-select = [
+    "A",    # flake8-builtins
+    "ANN",  # flake8-annotations
+    "C4",   # flake8-comprehensions
+    "D",    # pydocstyle
+    "DTZ",  # flake8-datetimez
+    "E",    # pycodestyle - Error
+    "F",    # pyflakes
+    "FBT",  # flake8-boolean-trap
+    "FURB", # refurb
+    "I",    # isort
+    "PERF", # perflint
+    "PT",   # flake8-pytest-style
+    "RUF",  # ruff-specific fixes
+    "S",    # flake8-bandit
+    "SIM",  # flake8-simplify
+    "T10",  # flake8-debugger
+    "TC",   # flake8-type-checking
+    "UP",   # pyupgrade
+    "W",    # pycodestyle - Warning
+]
+lint.ignore = [
+    "ANN401",
+    "F403",
+    "F405",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**.py" = [
+    "D",
+    "S101",
+]
+
+[tool.uv]
+package = false
