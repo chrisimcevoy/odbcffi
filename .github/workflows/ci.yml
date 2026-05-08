@@ -63,46 +63,34 @@ jobs:
           choco install --verbose psqlodbc
           choco install --verbose mysql.odbc
 
-      - name: Set up Docker in WSL2 (Windows)
+      - name: Switch Docker Desktop to Linux containers (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Continue'
-          $distros = wsl --list --quiet 2>$null
-          if (-not ($distros -match 'Ubuntu')) {
-            Write-Output "Installing Ubuntu WSL2 distro..."
-            wsl --install -d Ubuntu 2>&1 | Out-String | Write-Output
+          & "C:\Program Files\Docker\Docker\Docker Desktop.exe" --quit 2>$null
+          Start-Sleep -Seconds 3
+          Get-Process "Docker Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force 2>$null
+
+          $settingsPath = "$env:APPDATA\Docker\settings.json"
+          if (Test-Path $settingsPath) {
+            $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json
+            $settings.platform = "linux"
+            $settings | ConvertTo-Json -Depth 32 | Set-Content $settingsPath -Encoding UTF8
           }
 
-          wsl -d Ubuntu bash -c '
-            set -e
-            if ! command -v docker &>/dev/null; then
-              echo "Installing Docker in WSL2..."
-              curl -fsSL https://get.docker.com | sudo sh
-              sudo usermod -aG docker $USER
-            fi
-            echo "Starting Docker daemon..."
-            sudo service docker start
-            echo "Docker ready:"
-            docker info --format "{{.OSType}} {{.ServerVersion}}"
-          '
+          Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 
-      - name: Build docker-compose stack (Windows via WSL2)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $wslPath = $env:GITHUB_WORKSPACE -replace '\\', '/' -replace '^([A-Z]):', '/mnt/$1'
-          $wslPath = $wslPath.ToLower()
+          for ($i = 0; $i -lt 30; $i++) {
+            Start-Sleep -Seconds 5
+            $info = docker info 2>&1
+            if ($LASTEXITCODE -eq 0 -and $info -match "OSType: linux") {
+              Write-Output "Docker ready in Linux container mode"
+              break
+            }
+            Write-Output "Waiting for Docker... attempt $($i+1)/30"
+          }
 
-          wsl -d Ubuntu bash -c "
-            set -e
-            cd $wslPath
-            sudo docker compose up -d --wait sqlserver postgresql mysql
-          "
-
-      - name: Build the docker-compose stack (Linux)
-        if: runner.os == 'Linux'
+      - name: Build the docker-compose stack
         run: docker compose up -d --wait sqlserver postgresql mysql
 
       - name: Set up Python
