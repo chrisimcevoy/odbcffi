@@ -176,7 +176,7 @@ class ConnectionInfo:
         pytest.param(
             ConnectionInfo(
                 dbms_name="MySQL",
-                driver="MySQL ODBC 9.3 Unicode Driver",
+                driver="MySQL ODBC 9.7 Unicode Driver",
                 host=MYSQL_HOST,
                 port=3306,
                 username="root",
@@ -196,7 +196,7 @@ class ConnectionInfo:
         pytest.param(
             ConnectionInfo(
                 dbms_name="MySQL",
-                driver="MySQL ODBC 9.3 ANSI Driver",
+                driver="MySQL ODBC 9.7 ANSI Driver",
                 host=MYSQL_HOST,
                 port=3306,
                 username="root",

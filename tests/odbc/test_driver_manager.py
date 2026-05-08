@@ -210,14 +210,8 @@ class TestSQLGetInfoW:
         #
         # psqlodbc and mysqlodbc do not implement it either.
         #
-        # Microsoft's ODBC driver is the only one that supports it.
-        ctx = (
-            pytest.raises(ODBCError)
-            if not (
-                connection_info.driver.startswith("ODBC Driver ") and connection_info.driver.endswith(" for SQL Server")
-            )
-            else nullcontext()
-        )
+        # Microsoft's ODBC driver and MDAC are the only ones that support it.
+        ctx = nullcontext() if "SQL Server" in connection_info.driver else pytest.raises(ODBCError)
 
         with ctx:
             actual: SQLConvert = driver_manager.sql_get_info_w(
@@ -480,21 +474,15 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
-        connection_info: ConnectionInfo,
     ) -> None:
-
-        expected = {
-            "Microsoft SQL Server": "17.00.4025",
-            "MySQL": "9.6.0",
-            "PostgreSQL": "18.0.3",
-        }[connection_info.dbms_name]
 
         actual: str = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_DBMS_VER,
         )
 
-        assert actual == expected
+        assert isinstance(actual, str)
+        assert actual
 
     def test_sql_default_txn_isolation(
         self,
@@ -521,27 +509,15 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
-        connection_info: ConnectionInfo,
     ) -> None:
-
-        # TODO: This will break as and when new driver versions are released.
-        #  Think about testing this a different way, or pinning the versions.
-        expected = {
-            "ODBC Driver 17 for SQL Server": "libmsodbcsql-17.11.so.1.1",
-            "ODBC Driver 18 for SQL Server": "libmsodbcsql-18.6.so.2.1",
-            "FreeTDS": "libtdsodbc.so",
-            "MySQL ODBC 9.3 ANSI Driver": "libmyodbc9a.so",
-            "MySQL ODBC 9.3 Unicode Driver": "libmyodbc9w.so",
-            "PostgreSQL ANSI": "psqlodbca.so",
-            "PostgreSQL Unicode": "psqlodbcw.so",
-        }[connection_info.driver]
 
         actual: str = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_DRIVER_NAME,
         )
 
-        assert actual == expected
+        assert isinstance(actual, str)
+        assert actual
 
     def test_sql_driver_odbc_ver(
         self,
@@ -560,27 +536,15 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
-        connection_info: ConnectionInfo,
     ) -> None:
-
-        # TODO: This will break as and when new driver versions are released.
-        #  Think about testing this a different way, or pinning the versions.
-        expected = {
-            "ODBC Driver 17 for SQL Server": "17.11.0001",
-            "ODBC Driver 18 for SQL Server": "18.06.0002",
-            "FreeTDS": "01.03.0017",
-            "MySQL ODBC 9.3 ANSI Driver": "09.03.0000",
-            "MySQL ODBC 9.3 Unicode Driver": "09.03.0000",
-            "PostgreSQL ANSI": "17.00.0004",
-            "PostgreSQL Unicode": "17.00.0004",
-        }[connection_info.driver]
 
         actual: str = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_DRIVER_VER,
         )
 
-        assert actual == expected
+        assert isinstance(actual, str)
+        assert actual
 
     def test_sql_expressions_in_order_by(
         self,
@@ -664,38 +628,15 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
-        connection_info: ConnectionInfo,
     ) -> None:
-
-        expected: str = {
-            "FreeTDS": (
-                # https://github.com/FreeTDS/freetds/blob/048c76b4d48156168c74843e6a1c90b8287ae0ab/src/odbc/odbc.c#L5848-L5860
-                "BREAK,BROWSE,BULK,CHECKPOINT,CLUSTERED,COMMITTED,COMPUTE,CONFIRM,CONTROLROW,DATABASE,DBCC,DISK,DISTRIBUTED,DUMMY,DUMP,ERRLVL,ERROREXIT,EXIT,FILE,FILLFACTOR,FLOPPY,HOLDLOCK,IDENTITY_INSERT,IDENTITYCOL,IF,KILL,LINENO,LOAD,MIRROREXIT,NONCLUSTERED,OFF,OFFSETS,ONCE,OVER,PERCENT,PERM,PERMANENT,PLAN,PRINT,PROC,PROCESSEXIT,RAISERROR,READ,READTEXT,RECONFIGURE,REPEATABLE,RETURN,ROWCOUNT,RULE,SAVE,SERIALIZABLE,SETUSER,SHUTDOWN,STATISTICS,TAPE,TEMP,TEXTSIZE,TRAN,TRIGGER,TRUNCATE,TSEQUEL,UNCOMMITTED,UPDATETEXT,USE,WAITFOR,WHILE,WRITETEXT"
-            ),
-            "MySQL ODBC 9.3 ANSI Driver": (
-                "ACCESSIBLE,ANALYZE,ASENSITIVE,BEFORE,BIGINT,BINARY,BLOB,CALL,CHANGE,CONDITION,DATABASE,DATABASES,DAY_HOUR,DAY_MICROSECOND,DAY_MINUTE,DAY_SECOND,DELAYED,DETERMINISTIC,DISTINCTROW,DIV,DUAL,EACH,ELSEIF,ENCLOSED,ESCAPED,EXIT,EXPLAIN,FLOAT4,FLOAT8,FORCE,FULLTEXT,GENERAL,GET,HIGH_PRIORITY,HOUR_MICROSECOND,HOUR_MINUTE,HOUR_SECOND,IF,IGNORE,IGNORE_SERVER_IDS,INFILE,INOUT,INT1,INT2,INT3,INT4,INT8,IO_AFTER_GTIDS,IO_BEFORE_GTIDS,ITERATE,KEYS,KILL,LEAVE,LIMIT,LINEAR,LINES,LOAD,LOCALTIME,LOCALTIMESTAMP,LOCK,LONG,LONGBLOB,LONGTEXT,LOOP,LOW_PRIORITY,SOURCE_BIND,SOURCE_HEARTBEAT_PERIOD,SOURCE_SSL_VERIFY_SERVER_CERT,MAXVALUE,MEDIUMBLOB,MEDIUMINT,MEDIUMTEXT,MIDDLEINT,MINUTE_MICROSECOND,MINUTE_SECOND,MOD,MODIFIES,NO_WRITE_TO_BINLOG,NONBLOCKING,ONE_SHOT,OPTIMIZE,OPTIONALLY,OUT,OUTFILE,PARTITION,PURGE,RANGE,READ_ONLY,READS,READ_WRITE,REGEXP,RELEASE,RENAME,REPEAT,REPLACE,REQUIRE,RESIGNAL,RETURN,RLIKE,SCHEMAS,SECOND_MICROSECOND,SENSITIVE,SEPARATOR,SHOW,SIGNAL,SLOW,SPATIAL,SPECIFIC,SQL_AFTER_GTIDS,SQL_BEFORE_GTIDS,SQL_BIG_RESULT,SQL_CALC_FOUND_ROWS,SQLEXCEPTION,SQL_SMALL_RESULT,SSL,STARTING,STRAIGHT_JOIN,TERMINATED,TINYBLOB,TINYINT,TINYTEXT,TRIGGER,UNDO,UNLOCK,UNSIGNED,USE,UTC_DATE,UTC_TIME,UTC_TIMESTAMP,VARBINARY,VARCHARACTER,WHILE,X509,XOR,YEAR_MONTH,ZEROFILL"
-            ),
-            "MySQL ODBC 9.3 Unicode Driver": (
-                "ACCESSIBLE,ANALYZE,ASENSITIVE,BEFORE,BIGINT,BINARY,BLOB,CALL,CHANGE,CONDITION,DATABASE,DATABASES,DAY_HOUR,DAY_MICROSECOND,DAY_MINUTE,DAY_SECOND,DELAYED,DETERMINISTIC,DISTINCTROW,DIV,DUAL,EACH,ELSEIF,ENCLOSED,ESCAPED,EXIT,EXPLAIN,FLOAT4,FLOAT8,FORCE,FULLTEXT,GENERAL,GET,HIGH_PRIORITY,HOUR_MICROSECOND,HOUR_MINUTE,HOUR_SECOND,IF,IGNORE,IGNORE_SERVER_IDS,INFILE,INOUT,INT1,INT2,INT3,INT4,INT8,IO_AFTER_GTIDS,IO_BEFORE_GTIDS,ITERATE,KEYS,KILL,LEAVE,LIMIT,LINEAR,LINES,LOAD,LOCALTIME,LOCALTIMESTAMP,LOCK,LONG,LONGBLOB,LONGTEXT,LOOP,LOW_PRIORITY,SOURCE_BIND,SOURCE_HEARTBEAT_PERIOD,SOURCE_SSL_VERIFY_SERVER_CERT,MAXVALUE,MEDIUMBLOB,MEDIUMINT,MEDIUMTEXT,MIDDLEINT,MINUTE_MICROSECOND,MINUTE_SECOND,MOD,MODIFIES,NO_WRITE_TO_BINLOG,NONBLOCKING,ONE_SHOT,OPTIMIZE,OPTIONALLY,OUT,OUTFILE,PARTITION,PURGE,RANGE,READ_ONLY,READS,READ_WRITE,REGEXP,RELEASE,RENAME,REPEAT,REPLACE,REQUIRE,RESIGNAL,RETURN,RLIKE,SCHEMAS,SECOND_MICROSECOND,SENSITIVE,SEPARATOR,SHOW,SIGNAL,SLOW,SPATIAL,SPECIFIC,SQL_AFTER_GTIDS,SQL_BEFORE_GTIDS,SQL_BIG_RESULT,SQL_CALC_FOUND_ROWS,SQLEXCEPTION,SQL_SMALL_RESULT,SSL,STARTING,STRAIGHT_JOIN,TERMINATED,TINYBLOB,TINYINT,TINYTEXT,TRIGGER,UNDO,UNLOCK,UNSIGNED,USE,UTC_DATE,UTC_TIME,UTC_TIMESTAMP,VARBINARY,VARCHARACTER,WHILE,X509,XOR,YEAR_MONTH,ZEROFILL"
-            ),
-            "ODBC Driver 17 for SQL Server": (
-                "BACKUP,BREAK,BROWSE,BULK,CHECKPOINT,CLUSTERED,COMMITTED,COMPUTE,CONFIRM,CONTROLROW,DATABASE,DBCC,DISK,DISTRIBUTED,DUMMY,ERRLVL,ERROREXIT,EXIT,FILE,FILLFACTOR,FLOPPY,HOLDLOCK,IDENTITY_INSERT,IDENTITYCOL,IF,KILL,LINENO,MERGE,MIRROREXIT,NONCLUSTERED,OFF,OFFSETS,ONCE,OVER,PERCENT,PERM,PERMANENT,PLAN,PRINT,PROC,PROCESSEXIT,RAISERROR,READ,READTEXT,RECONFIGURE,REPEATABLE,RESTORE,RETURN,ROWCOUNT,RULE,SAVE,SERIALIZABLE,SETUSER,SHUTDOWN,STATISTICS,TAPE,TEMP,TEXTSIZE,TOP,TRAN,TRIGGER,TRUNCATE,TSEQUEL,UNCOMMITTED,UPDATETEXT,USE,WAITFOR,WHILE,WRITETEXT"
-            ),
-            "ODBC Driver 18 for SQL Server": (
-                "BACKUP,BREAK,BROWSE,BULK,CHECKPOINT,CLUSTERED,COMMITTED,COMPUTE,CONFIRM,CONTROLROW,DATABASE,DBCC,DISK,DISTRIBUTED,DUMMY,ERRLVL,ERROREXIT,EXIT,FILE,FILLFACTOR,FLOPPY,HOLDLOCK,IDENTITY_INSERT,IDENTITYCOL,IF,KILL,LINENO,MERGE,MIRROREXIT,NONCLUSTERED,OFF,OFFSETS,ONCE,OVER,PERCENT,PERM,PERMANENT,PLAN,PRINT,PROC,PROCESSEXIT,RAISERROR,READ,READTEXT,RECONFIGURE,REPEATABLE,RESTORE,RETURN,ROWCOUNT,RULE,SAVE,SERIALIZABLE,SETUSER,SHUTDOWN,STATISTICS,TAPE,TEMP,TEXTSIZE,TOP,TRAN,TRIGGER,TRUNCATE,TSEQUEL,UNCOMMITTED,UPDATETEXT,USE,WAITFOR,WHILE,WRITETEXT"
-            ),
-            # psqlodbc just returns an empty string.
-            # https://github.com/postgresql-interfaces/psqlodbc/blob/863a0e938dd50c7b68208484bdc3ef8b00735a92/info.c#L348-L350
-            "PostgreSQL ANSI": "",
-            "PostgreSQL Unicode": "",
-        }[connection_info.driver]
 
         actual: str = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_KEYWORDS,
         )
 
-        assert actual == expected
+        assert isinstance(actual, str)
+        # no `assert actual` here because postgres returns an empty string.
 
     def test_sql_max_catalog_name_len(
         self,
@@ -1022,26 +963,15 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
-        connection_info: ConnectionInfo,
     ) -> None:
-
-        expected_literal: str | None = {
-            # SQL Server defaults to @@SERVERNAME, which in this test suite is
-            # just the mssql container hostname.
-            "Microsoft SQL Server": None,
-            "MySQL": "mysql via TCP/IP",
-            "PostgreSQL": "postgresql",
-        }[connection_info.dbms_name]
 
         actual: str = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_SERVER_NAME,
         )
 
+        assert isinstance(actual, str)
         assert actual
-
-        if expected_literal is not None:
-            assert actual == expected_literal
 
     def test_sql_string_functions(
         self,

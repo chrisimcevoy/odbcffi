@@ -1,0 +1,173 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit hooks
+        run: |
+          pre-commit run -a
+          pre-commit run -a --hook-stage pre-push
+
+  lint-pr-title:
+    if: github.event_name == 'pull_request'
+    name: lint pr title
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    name: test (${{ matrix.os }}, ${{ matrix.python-version }})
+    needs: [pre-commit]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+          - "pypy-3.10"
+          - "pypy-3.11"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Install ODBC drivers (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          # base deps
+          sudo apt install -y unixodbc freetds-bin freetds-dev tdsodbc odbc-postgresql
+
+          # msodbc
+          curl -sSL https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 msodbcsql18
+
+          # mysql connector
+          curl -L -o mysql-connector-odbc.deb https://dev.mysql.com/get/Downloads/Connector-ODBC/9.7/mysql-connector-odbc_9.7.0-1debian12_amd64.deb
+          sudo dpkg -i mysql-connector-odbc.deb
+          rm mysql-connector-odbc.deb
+          
+          odbcinst -j
+        
+          cat /etc/odbcinst.ini
+
+      - name: Install ODBC drivers (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install --verbose psqlodbc
+          choco install --verbose mysql.odbc
+
+      - name: Install SQL Server (Windows)
+        if: runner.os == 'Windows'
+        uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f
+        with:
+          install: sqlengine
+          version: 2025
+          sa-password: Password123
+          show-log: true
+
+      - name: Install PostgreSQL (Windows)
+        if: runner.os == 'Windows'
+        uses: ikalnytskyi/action-setup-postgres@c4dda34aae1c821e3a771b68b73b13af3198a7ee
+        with:
+          username: sa
+          password: Password123
+          database: sa
+
+      - name: Install MySQL (Windows)
+        if: runner.os == 'Windows'
+        uses: shogo82148/actions-setup-mysql@9c42ca180d5f1dd4dceb54c23c5eda0384f4d265
+        with:
+          mysql-version: "9.7.0"
+          root-password: super-secret-password
+          user: sa
+          password: Password123
+
+      - name: Build the docker-compose stack (Linux)
+        if: runner.os == 'Linux'
+        run: docker compose up -d --wait sqlserver postgresql mysql
+
+      - name: Set up Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run tests
+        run: uv run pytest -v --color=yes
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    needs: [test]
+    permissions:
+      contents: write
+      pull-requests: write
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - name: Release
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: python
+
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: needs.release.outputs.release_created == 'true'
+    permissions:
+      id-token: write
+    environment: pypi
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          enable-cache: false
+      - name: Build
+        run: uv build
+      - name: Publish
+        run: uv publish
