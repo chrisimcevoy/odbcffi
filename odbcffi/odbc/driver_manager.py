@@ -150,6 +150,7 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_SCHEMA_TERM,
         InfoType.SQL_SEARCH_PATTERN_ESCAPE,
         InfoType.SQL_SERVER_NAME,
+        InfoType.SQL_SPECIAL_CHARACTERS,
         InfoType.SQL_TABLE_TERM,
         InfoType.SQL_USER_NAME,
     }
@@ -964,6 +965,7 @@ class DriverManager:
             InfoType.SQL_SCHEMA_TERM,
             InfoType.SQL_SEARCH_PATTERN_ESCAPE,
             InfoType.SQL_SERVER_NAME,
+            InfoType.SQL_SPECIAL_CHARACTERS,
             InfoType.SQL_TABLE_TERM,
             InfoType.SQL_USER_NAME,
         ],

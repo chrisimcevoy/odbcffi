@@ -804,6 +804,13 @@ class InfoType(IntEnum):
     A SQL-92 Entry level-conformant driver will always return SQL_IC_SENSITIVE.
     """
     SQL_SPECIAL_CHARACTERS = 94
+    """A character string that contains all special characters (that is, all characters except a through z, A through Z,
+    0 through 9, and underscore) that can be used in an identifier name, such as a table name, column name, or index
+    name, on the data source.
+
+    For example, "#$^". If an identifier contains one or more of these characters, the identifier must be a delimited
+    identifier.
+    """
     SQL_SUBQUERIES = 95
     SQL_UNION = 96
     SQL_MAX_COLUMNS_IN_GROUP_BY = 97
