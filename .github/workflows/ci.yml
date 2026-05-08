@@ -40,6 +40,13 @@ jobs:
           curl -L -o mysql-connector-odbc.deb https://dev.mysql.com/get/Downloads/Connector-ODBC/9.3/mysql-connector-odbc_9.3.0-1debian12_amd64.deb
           sudo dpkg -i mysql-connector-odbc.deb
           rm mysql-connector-odbc.deb
+          
+          odbcinst -j
+        
+          cat /etc/odbcinst.ini
+
+      - name: Build the docker-compose stack
+        run: docker compose up -d --wait sqlserver postgresql mysql
 
       - name: Set up Python
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
