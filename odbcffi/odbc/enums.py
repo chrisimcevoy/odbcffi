@@ -31,6 +31,7 @@ __all__ = [
     "SQLCursorRollbackBehavior",
     "SQLFileUsage",
     "SQLGetDataExtensions",
+    "SQLGroupBy",
     "SQLIdentifierCase",
     "SQLNonNullableColumns",
     "SQLNullCollation",

@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Any, Final, Literal, overload
 from cffi import FFI
 
 from .enums import *
-from .enums import SQLGroupBy
 from .errors import ODBCError
 
 if TYPE_CHECKING:
@@ -1077,6 +1076,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_GETDATA_EXTENSIONS],
     ) -> SQLGetDataExtensions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_GROUP_BY],
+    ) -> SQLGroupBy: ...
 
     @overload
     def sql_get_info_w(

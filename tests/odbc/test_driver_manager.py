@@ -582,6 +582,15 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLGetDataExtensions)
 
+    def test_sql_group_by(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLGroupBy = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_GROUP_BY,
+        )
+
+        assert isinstance(actual, SQLGroupBy)
+
     def test_sql_identifier_case(
         self,
         driver_manager: DriverManager,
