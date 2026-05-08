@@ -23,6 +23,7 @@ __all__ = [
     "SQLAttrODBCVersion",
     "SQLAttrTrace",
     "SQLBookmarkPersistence",
+    "SQLCatalogUsage",
     "SQLConcatNullBehavior",
     "SQLConvert",
     "SQLConvertFunctions",
@@ -746,10 +747,15 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the statements in which schemas can be used.
 
     SQL_SU_DML_STATEMENTS = Schemas are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE,
-    DELETE, and if supported, SELECT FOR UPDATE and positioned update and delete statements. SQL_SU_PROCEDURE_INVOCATION
-    = Schemas are supported in the ODBC procedure invocation statement. SQL_SU_TABLE_DEFINITION = Schemas are supported
-    in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER TABLE, DROP TABLE, and DROP VIEW.
+    DELETE, and if supported, SELECT FOR UPDATE and positioned update and delete statements.
+
+    SQL_SU_PROCEDURE_INVOCATION = Schemas are supported in the ODBC procedure invocation statement.
+
+    SQL_SU_TABLE_DEFINITION = Schemas are supported in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER
+    TABLE, DROP TABLE, and DROP VIEW.
+
     SQL_SU_INDEX_DEFINITION = Schemas are supported in all index definition statements: CREATE INDEX and DROP INDEX.
+
     SQL_SU_PRIVILEGE_DEFINITION = Schemas are supported in all privilege definition statements: GRANT and REVOKE.
 
     A SQL-92 Entry level-conformant driver will always return the SQL_SU_DML_STATEMENTS, SQL_SU_TABLE_DEFINITION, and
@@ -758,6 +764,28 @@ class InfoType(IntEnum):
     This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_OWNER_USAGE.
     """
     SQL_CATALOG_USAGE = 92
+    """An SQLUINTEGER bitmask enumerating the statements in which catalogs can be used.
+
+    The following bitmasks are used to determine where catalogs can be used:
+
+    SQL_CU_DML_STATEMENTS = Catalogs are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE,
+    DELETE, and if supported, SELECT FOR UPDATE and positioned update and delete statements.
+
+    SQL_CU_PROCEDURE_INVOCATION = Catalogs are supported in the ODBC procedure invocation statement.
+
+    SQL_CU_TABLE_DEFINITION = Catalogs are supported in all table definition statements: CREATE TABLE, CREATE VIEW,
+    ALTER TABLE, DROP TABLE, and DROP VIEW.
+
+    SQL_CU_INDEX_DEFINITION = Catalogs are supported in all index definition statements: CREATE INDEX and DROP INDEX.
+
+    SQL_CU_PRIVILEGE_DEFINITION = Catalogs are supported in all privilege definition statements: GRANT and REVOKE.
+
+    A value of 0 is returned if catalogs are not supported by the data source. To determine whether catalogs are
+    supported, an application calls SQLGetInfo with the SQL_CATALOG_NAME information type. A SQL-92 Full
+    level-conformant driver will always return a bitmask with all of these bits set.
+
+    This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_USAGE.
+    """
     SQL_QUOTED_IDENTIFIER_CASE = 93
     SQL_SPECIAL_CHARACTERS = 94
     SQL_SUBQUERIES = 95
@@ -1090,6 +1118,30 @@ class SQLAttrTrace(IntEnum):
 
     SQL_OPT_TRACE_ON = 1
     """Tracing on."""
+
+
+class SQLCatalogUsage(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the statements in which catalogs can be used.
+
+    A value of 0 is returned if catalogs are not supported by the data source. To determine whether catalogs are
+    supported, an application calls SQLGetInfo with the SQL_CATALOG_NAME information type. A SQL-92 Full level-
+    conformant driver will always return a bitmask with all of these bits set.
+    """
+
+    SQL_CU_DML_STATEMENTS = 0x00000001
+    """Catalogs are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE, DELETE, and if
+    supported, SELECT FOR UPDATE and positioned update and delete statements.
+    """
+    SQL_CU_PROCEDURE_INVOCATION = 0x00000002
+    """Catalogs are supported in the ODBC procedure invocation statement."""
+    SQL_CU_TABLE_DEFINITION = 0x00000004
+    """Catalogs are supported in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER TABLE, DROP TABLE,
+    and DROP VIEW.
+    """
+    SQL_CU_INDEX_DEFINITION = 0x00000008
+    """Catalogs are supported in all index definition statements: CREATE INDEX and DROP INDEX."""
+    SQL_CU_PRIVILEGE_DEFINITION = 0x00000010
+    """Catalogs are supported in all privilege definition statements: GRANT and REVOKE."""
 
 
 class SQLConcatNullBehavior(IntEnum):
