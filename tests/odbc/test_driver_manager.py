@@ -940,6 +940,15 @@ class TestSQLGetInfoW:
 
         assert actual == expected
 
+    def test_sql_schema_usage(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLSchemaUsage = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SCHEMA_USAGE,
+        )
+
+        assert isinstance(actual, SQLSchemaUsage)
+
     def test_sql_scroll_concurrency(
         self,
         driver_manager: DriverManager,

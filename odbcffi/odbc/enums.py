@@ -40,6 +40,7 @@ __all__ = [
     "SQLOdbcSqlConformance",
     "SQLOuterJoins",
     "SQLReturn",
+    "SQLSchemaUsage",
     "SQLScrollConcurrency",
     "SQLScrollOptions",
     "SQLStringFunctions",
@@ -742,6 +743,20 @@ class InfoType(IntEnum):
     SQL_ORDER_BY_COLUMNS_IN_SELECT = 90
     """A character string: "Y" if the columns in the ORDER BY clause must be in the select list; otherwise, "N"."""
     SQL_SCHEMA_USAGE = 91
+    """An SQLUINTEGER bitmask enumerating the statements in which schemas can be used.
+
+    SQL_SU_DML_STATEMENTS = Schemas are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE,
+    DELETE, and if supported, SELECT FOR UPDATE and positioned update and delete statements. SQL_SU_PROCEDURE_INVOCATION
+    = Schemas are supported in the ODBC procedure invocation statement. SQL_SU_TABLE_DEFINITION = Schemas are supported
+    in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER TABLE, DROP TABLE, and DROP VIEW.
+    SQL_SU_INDEX_DEFINITION = Schemas are supported in all index definition statements: CREATE INDEX and DROP INDEX.
+    SQL_SU_PRIVILEGE_DEFINITION = Schemas are supported in all privilege definition statements: GRANT and REVOKE.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_SU_DML_STATEMENTS, SQL_SU_TABLE_DEFINITION, and
+    SQL_SU_PRIVILEGE_DEFINITION options, as supported.
+
+    This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_OWNER_USAGE.
+    """
     SQL_CATALOG_USAGE = 92
     SQL_QUOTED_IDENTIFIER_CASE = 93
     SQL_SPECIAL_CHARACTERS = 94
@@ -1544,6 +1559,31 @@ class SQLScrollOptions(IntFlag):
 
     (ODBC 2.0)
     """
+
+
+class SQLSchemaUsage(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the statements in which schemas can be used.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_SU_DML_STATEMENTS, SQL_SU_TABLE_DEFINITION, and
+    SQL_SU_PRIVILEGE_DEFINITION options, as supported.
+
+    This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_OWNER_USAGE.
+    """
+
+    SQL_SU_DML_STATEMENTS = 0x00000001
+    """Schemas are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE, DELETE, and if
+    supported, SELECT FOR UPDATE and positioned update and delete statements.
+    """
+    SQL_SU_PROCEDURE_INVOCATION = 0x00000002
+    """Schemas are supported in the ODBC procedure invocation statement."""
+    SQL_SU_TABLE_DEFINITION = 0x00000004
+    """Schemas are supported in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER TABLE, DROP TABLE,
+    and DROP VIEW.
+    """
+    SQL_SU_INDEX_DEFINITION = 0x00000008
+    """Schemas are supported in all index definition statements: CREATE INDEX and DROP INDEX."""
+    SQL_SU_PRIVILEGE_DEFINITION = 0x00000010
+    """Schemas are supported in all privilege definition statements: GRANT and REVOKE."""
 
 
 class SQLStringFunctions(IntFlag):

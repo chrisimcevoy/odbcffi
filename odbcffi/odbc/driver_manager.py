@@ -204,6 +204,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_NUMERIC_FUNCTIONS,
         InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE,
         InfoType.SQL_ODBC_SQL_CONFORMANCE,
+        InfoType.SQL_SCHEMA_USAGE,
         InfoType.SQL_SCROLL_CONCURRENCY,
         InfoType.SQL_SCROLL_OPTIONS,
         InfoType.SQL_STRING_FUNCTIONS,
@@ -255,6 +256,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_ODBC_SQL_CONFORMANCE: SQLOdbcSqlConformance,
     InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE: SQLOdbcSagCliConformance,
     InfoType.SQL_OUTER_JOINS: SQLOuterJoins,
+    InfoType.SQL_SCHEMA_USAGE: SQLSchemaUsage,
     InfoType.SQL_SCROLL_CONCURRENCY: SQLScrollConcurrency,
     InfoType.SQL_SCROLL_OPTIONS: SQLScrollOptions,
     InfoType.SQL_STRING_FUNCTIONS: SQLStringFunctions,
@@ -1134,6 +1136,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_OUTER_JOINS],
     ) -> SQLOuterJoins: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SCHEMA_USAGE],
+    ) -> SQLSchemaUsage: ...
 
     @overload
     def sql_get_info_w(
