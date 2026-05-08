@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+          - "pypy-3.10"
+          - "pypy-3.11"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Install ODBC drivers
+        run: |
+          sudo apt install -y unixodbc freetds-bin freetds-dev tdsodbc odbc-postgresql
+          curl -L -o mysql-connector-odbc.deb https://dev.mysql.com/get/Downloads/Connector-ODBC/9.3/mysql-connector-odbc_9.3.0-1debian12_amd64.deb
+          sudo dpkg -i mysql-connector-odbc.deb
+          rm mysql-connector-odbc.deb
+
+      - name: Set up Python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run tests
+        run: uv run pytest -v --color=yes
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    needs: [test]
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    environment: pypi
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Release
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: python
+
+      - name: Set up Python
+        if: steps.release.outputs.release_created
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          enable-cache: false
+
+      - name: Build
+        if: steps.release.outputs.release_created
+        run: uv build
+
+      - name: Publish
+        if: steps.release.outputs.release_created
+        run: uv publish
