@@ -734,6 +734,11 @@ class InfoType(IntEnum):
     """
 
     SQL_KEYWORDS = 89
+    """A character string that contains a comma-separated list of all data source-specific keywords.
+
+    This list does not contain keywords specific to ODBC or keywords used by both the data source and ODBC. This list
+    represents all the reserved keywords; interoperable applications should not use these words in object names.
+    """
     SQL_ORDER_BY_COLUMNS_IN_SELECT = 90
     SQL_SCHEMA_USAGE = 91
     SQL_CATALOG_USAGE = 92
