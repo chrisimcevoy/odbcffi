@@ -63,34 +63,34 @@ jobs:
           choco install --verbose psqlodbc
           choco install --verbose mysql.odbc
 
-      - name: Switch Docker Desktop to Linux containers (Windows)
+      - name: Install SQL Server (Windows)
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          & "C:\Program Files\Docker\Docker\Docker Desktop.exe" --quit 2>$null
-          Start-Sleep -Seconds 3
-          Get-Process "Docker Desktop" -ErrorAction SilentlyContinue | Stop-Process -Force 2>$null
+        uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f
+        with:
+          install: sqlengine
+          version: 2025
+          sa-password: Password123
+          show-log: true
 
-          $settingsPath = "$env:APPDATA\Docker\settings.json"
-          if (Test-Path $settingsPath) {
-            $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json
-            $settings.platform = "linux"
-            $settings | ConvertTo-Json -Depth 32 | Set-Content $settingsPath -Encoding UTF8
-          }
+      - name: Install PostgreSQL (Windows)
+        if: runner.os == 'Windows'
+        uses: ikalnytskyi/action-setup-postgres@c4dda34aae1c821e3a771b68b73b13af3198a7ee
+        with:
+          username: sa
+          password: Password123
+          database: sa
 
-          Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+      - name: Install MySQL (Windows)
+        if: runner.os == 'Windows'
+        uses: shogo82148/actions-setup-mysql@9c42ca180d5f1dd4dceb54c23c5eda0384f4d265
+        with:
+          mysql-version: "9.7.0"
+          root-password: super-secret-password
+          user: sa
+          password: Password123
 
-          for ($i = 0; $i -lt 30; $i++) {
-            Start-Sleep -Seconds 5
-            $info = docker info 2>&1
-            if ($LASTEXITCODE -eq 0 -and $info -match "OSType: linux") {
-              Write-Output "Docker ready in Linux container mode"
-              break
-            }
-            Write-Output "Waiting for Docker... attempt $($i+1)/30"
-          }
-
-      - name: Build the docker-compose stack
+      - name: Build the docker-compose stack (Linux)
+        if: runner.os == 'Linux'
         run: docker compose up -d --wait sqlserver postgresql mysql
 
       - name: Set up Python
