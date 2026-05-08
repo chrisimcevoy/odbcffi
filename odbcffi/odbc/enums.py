@@ -50,6 +50,7 @@ __all__ = [
     "SQLTimeDateFunctions",
     "SQLTxnCapable",
     "SQLTxnIsolationOption",
+    "SQLUnion",
 ]
 
 
@@ -827,6 +828,15 @@ class InfoType(IntEnum):
     A SQL-92 Entry level-conformant driver will always return a bitmask in which all of these bits are set.
     """
     SQL_UNION = 96
+    """An SQLUINTEGER bitmask enumerating the support for the UNION clause:
+
+    SQL_U_UNION = The data source supports the UNION clause.
+
+    SQL_U_UNION_ALL = The data source supports the ALL keyword in the UNION clause. (SQLGetInfo returns both
+    SQL_U_UNION and SQL_U_UNION_ALL in this case.)
+
+    A SQL-92 Entry level-conformant driver will always return both of these options as supported.
+    """
     SQL_MAX_COLUMNS_IN_GROUP_BY = 97
     SQL_MAX_COLUMNS_IN_INDEX = 98
     SQL_MAX_COLUMNS_IN_ORDER_BY = 99
@@ -2199,4 +2209,19 @@ class SQLTxnIsolationOption(IntFlag):
     """Transactions are serializable.
 
     Serializable transactions do not allow dirty reads, non-repeatable reads, or phantoms.
+    """
+
+
+class SQLUnion(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the support for the UNION clause.
+
+    A SQL-92 Entry level-conformant driver will always return both of the options as supported.
+    """
+
+    SQL_U_UNION = 0x00000001
+    """The data source supports the UNION clause."""
+    SQL_U_UNION_ALL = 0x00000002
+    """The data source supports the ALL keyword in the UNION clause.
+
+    (SQLGetInfo returns both SQL_U_UNION and SQL_U_UNION_ALL in this case.)
     """

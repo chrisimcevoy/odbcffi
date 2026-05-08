@@ -1135,6 +1135,15 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLTxnIsolationOption)
 
+    def test_sql_union(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLUnion = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_UNION,
+        )
+
+        assert isinstance(actual, SQLUnion)
+
     def test_sql_user_name(
         self,
         driver_manager: DriverManager,

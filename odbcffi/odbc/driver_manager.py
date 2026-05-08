@@ -216,6 +216,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_TIMEDATE_FUNCTIONS,
         InfoType.SQL_TXN_CAPABLE,
         InfoType.SQL_TXN_ISOLATION_OPTION,
+        InfoType.SQL_UNION,
     }
 )
 
@@ -271,6 +272,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_TIMEDATE_FUNCTIONS: SQLTimeDateFunctions,
     InfoType.SQL_TXN_CAPABLE: SQLTxnCapable,
     InfoType.SQL_TXN_ISOLATION_OPTION: SQLTxnIsolationOption,
+    InfoType.SQL_UNION: SQLUnion,
 }
 
 SQLWCHAR_SIZE: Final[int] = ffi.sizeof("SQLWCHAR")
@@ -1221,6 +1223,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_TXN_ISOLATION_OPTION],
     ) -> SQLTxnIsolationOption: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_UNION],
+    ) -> SQLUnion: ...
 
     def sql_get_info_w(
         self,
