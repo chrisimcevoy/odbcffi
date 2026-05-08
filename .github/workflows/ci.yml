@@ -15,11 +15,12 @@ concurrency:
 
 jobs:
   test:
-    name: test
-    runs-on: ubuntu-latest
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version:
           - "3.10"
           - "3.11"
@@ -34,7 +35,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install ODBC drivers
+      - name: Install ODBC drivers (Linux)
+        if: runner.os == 'Linux'
         run: |
           # base deps
           sudo apt install -y unixodbc freetds-bin freetds-dev tdsodbc odbc-postgresql
@@ -54,7 +56,41 @@ jobs:
         
           cat /etc/odbcinst.ini
 
-      - name: Build the docker-compose stack
+      - name: Install ODBC drivers (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install --verbose psqlodbc
+          choco install --verbose mysql.odbc
+
+      - name: Install SQL Server (Windows)
+        if: runner.os == 'Windows'
+        uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f
+        with:
+          install: sqlengine
+          version: 2025
+          sa-password: Password123
+          show-log: true
+
+      - name: Install PostgreSQL (Windows)
+        if: runner.os == 'Windows'
+        uses: ikalnytskyi/action-setup-postgres@c4dda34aae1c821e3a771b68b73b13af3198a7ee
+        with:
+          username: sa
+          password: Password123
+          database: sa
+
+      - name: Install MySQL (Windows)
+        if: runner.os == 'Windows'
+        uses: shogo82148/actions-setup-mysql@9c42ca180d5f1dd4dceb54c23c5eda0384f4d265
+        with:
+          mysql-version: "9.7.0"
+          root-password: super-secret-password
+          user: sa
+          password: Password123
+
+      - name: Build the docker-compose stack (Linux)
+        if: runner.os == 'Linux'
         run: docker compose up -d --wait sqlserver postgresql mysql
 
       - name: Set up Python
