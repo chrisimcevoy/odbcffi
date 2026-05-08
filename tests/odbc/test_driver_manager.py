@@ -210,14 +210,8 @@ class TestSQLGetInfoW:
         #
         # psqlodbc and mysqlodbc do not implement it either.
         #
-        # Microsoft's ODBC driver is the only one that supports it.
-        ctx = (
-            pytest.raises(ODBCError)
-            if not (
-                connection_info.driver.startswith("ODBC Driver ") and connection_info.driver.endswith(" for SQL Server")
-            )
-            else nullcontext()
-        )
+        # Microsoft's ODBC driver and MDAC are the only ones that support it.
+        ctx = nullcontext() if "SQL Server" in connection_info.driver else pytest.raises(ODBCError)
 
         with ctx:
             actual: SQLConvert = driver_manager.sql_get_info_w(
