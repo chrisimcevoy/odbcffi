@@ -3,7 +3,11 @@ from typing import Literal
 
 import pytest
 
-from odbcffi.odbc import *
+from odbcffi.odbc.connection_handle import ConnectionHandle
+from odbcffi.odbc.driver_manager import DriverManager
+from odbcffi.odbc.enums import *
+from odbcffi.odbc.environment_handle import EnvironmentHandle
+from odbcffi.odbc.errors import ODBCError
 from tests.conftest import ConnectionInfo
 
 

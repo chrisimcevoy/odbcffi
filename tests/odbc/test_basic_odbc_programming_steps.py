@@ -1,11 +1,8 @@
-from odbcffi.odbc import (
-    ConnectionHandle,
-    DriverManager,
-    EnvironmentHandle,
-    SQLAttrAutocommit,
-    SQLAttrODBCVersion,
-    StatementHandle,
-)
+from odbcffi.odbc.connection_handle import ConnectionHandle
+from odbcffi.odbc.driver_manager import DriverManager
+from odbcffi.odbc.enums import SQLAttrAutocommit, SQLAttrODBCVersion
+from odbcffi.odbc.environment_handle import EnvironmentHandle
+from odbcffi.odbc.statement_handle import StatementHandle
 
 
 def test_basic_odbc_programming_steps(connection_string: str) -> None:

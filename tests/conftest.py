@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from odbcffi.odbc import ConnectionHandle, DriverManager, EnvironmentHandle
+from odbcffi.odbc.connection_handle import ConnectionHandle
+from odbcffi.odbc.driver_manager import DriverManager
+from odbcffi.odbc.environment_handle import EnvironmentHandle
 
 if TYPE_CHECKING:
     from collections.abc import Generator

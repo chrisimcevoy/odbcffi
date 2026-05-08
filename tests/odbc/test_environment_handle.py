@@ -1,6 +1,7 @@
 import pytest
 
-from odbcffi.odbc import EnvironmentHandle, SQLAttrODBCVersion
+from odbcffi.odbc.enums import SQLAttrODBCVersion
+from odbcffi.odbc.environment_handle import EnvironmentHandle
 
 
 class TestEnvironmentHandle:

@@ -1,6 +1,7 @@
 import pytest
 
-from odbcffi.odbc import ConnectionHandle, SQLAttrAccessMode, SQLAttrAutocommit
+from odbcffi.odbc.connection_handle import ConnectionHandle
+from odbcffi.odbc.enums import SQLAttrAccessMode, SQLAttrAutocommit
 
 
 class TestConnectionHandle:

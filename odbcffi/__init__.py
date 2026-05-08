@@ -20,6 +20,9 @@ from .db_api import (
     ProgrammingError,
     Warning,  # noqa: A004
 )
+from .odbc.connection_handle import ConnectionHandle as _ConnectionHandle
+from .odbc.driver_manager import DriverManager as _DriverManager
+from .odbc.environment_handle import EnvironmentHandle as _EnvironmentHandle
 
 __all__ = [
     "Connection",
@@ -52,16 +55,16 @@ threadsafety: Final[Literal[1]] = 1
 paramstyle: Final[Literal["qmark"]] = "qmark"
 """String constant stating the type of parameter marker formatting expected by the interface."""
 
-__default_environment: odbc.EnvironmentHandle | None = None
+__default_environment: _EnvironmentHandle | None = None
 __default_environment_lock = threading.Lock()
 
 
-def __get_or_create_default_environment_handle() -> odbc.EnvironmentHandle:
+def __get_or_create_default_environment_handle() -> _EnvironmentHandle:
     global __default_environment
     if (env := __default_environment) is None:
         with __default_environment_lock:
             if (env := __default_environment) is None:
-                env = __default_environment = odbc.EnvironmentHandle(odbc.DriverManager.autoload())
+                env = __default_environment = _EnvironmentHandle(_DriverManager.autoload())
                 env.__enter__()
     return env
 
@@ -74,8 +77,8 @@ def connect(connection_string: str) -> Connection:
     :param connection_string: ODBC connection string.
     :return: A ``Connection`` object.
     """
-    environment_handle: odbc.EnvironmentHandle = __get_or_create_default_environment_handle()
-    connection_handle = odbc.ConnectionHandle(environment_handle=environment_handle)
+    environment_handle: _EnvironmentHandle = __get_or_create_default_environment_handle()
+    connection_handle = _ConnectionHandle(environment_handle=environment_handle)
     connection_handle.__enter__()
     raise NotImplementedError("Pending redisign into separate odbc/db_api sub-packages.")
 
