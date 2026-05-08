@@ -45,6 +45,7 @@ __all__ = [
     "SQLScrollConcurrency",
     "SQLScrollOptions",
     "SQLStringFunctions",
+    "SQLSubqueries",
     "SQLSystemFunctions",
     "SQLTimeDateFunctions",
     "SQLTxnCapable",
@@ -812,6 +813,19 @@ class InfoType(IntEnum):
     identifier.
     """
     SQL_SUBQUERIES = 95
+    """An SQLUINTEGER bitmask enumerating the predicates that support subqueries:
+
+    SQL_SQ_CORRELATED_SUBQUERIES
+    SQL_SQ_COMPARISON
+    SQL_SQ_EXISTS
+    SQL_SQ_IN
+    SQL_SQ_QUANTIFIED
+
+    The SQL_SQ_CORRELATED_SUBQUERIES bitmask indicates that all predicates that support subqueries support correlated
+    subqueries.
+
+    A SQL-92 Entry level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
     SQL_UNION = 96
     SQL_MAX_COLUMNS_IN_GROUP_BY = 97
     SQL_MAX_COLUMNS_IN_INDEX = 98
@@ -1864,6 +1878,24 @@ class SQLStringFunctions(IntFlag):
     Returns the position of the first character expression in the second character expression. The result is an exact
     numeric with an implementation-defined precision and a scale of 0.
     """
+
+
+class SQLSubqueries(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the predicates that support subqueries.
+
+    A SQL-92 Entry level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
+
+    SQL_SQ_COMPARISON = 0x00000001
+    """The comparison predicate."""
+    SQL_SQ_EXISTS = 0x00000002
+    """The *exists* predicate."""
+    SQL_SQ_IN = 0x00000004
+    """The *in* predicate."""
+    SQL_SQ_QUANTIFIED = 0x00000008
+    """The predicates containing a quantification scalar function."""
+    SQL_SQ_CORRELATED_SUBQUERIES = 0x00000010
+    """All predicates that support subqueries support correlated subqueries."""
 
 
 class SQLSystemFunctions(IntFlag):

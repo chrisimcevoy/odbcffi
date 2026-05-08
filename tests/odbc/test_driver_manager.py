@@ -1051,6 +1051,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLStringFunctions)
 
+    def test_sql_subqueries(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSubqueries = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SUBQUERIES,
+        )
+
+        assert isinstance(actual, SQLSubqueries)
+
     def test_sql_system_functions(
         self,
         driver_manager: DriverManager,
