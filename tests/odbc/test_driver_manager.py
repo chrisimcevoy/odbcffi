@@ -857,6 +857,17 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_order_by_columns_in_select(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ORDER_BY_COLUMNS_IN_SELECT,
+        )
+
+        assert actual in ("Y", "N")
+
     def test_sql_outer_joins(
         self,
         driver_manager: DriverManager,

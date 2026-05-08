@@ -740,6 +740,7 @@ class InfoType(IntEnum):
     represents all the reserved keywords; interoperable applications should not use these words in object names.
     """
     SQL_ORDER_BY_COLUMNS_IN_SELECT = 90
+    """A character string: "Y" if the columns in the ORDER BY clause must be in the select list; otherwise, "N"."""
     SQL_SCHEMA_USAGE = 91
     SQL_CATALOG_USAGE = 92
     SQL_QUOTED_IDENTIFIER_CASE = 93
