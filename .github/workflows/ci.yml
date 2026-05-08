@@ -27,9 +27,10 @@ jobs:
       - name: Install pre-commit
         run: pip install pre-commit
       - name: Run pre-commit hooks
-        run: |
-          pre-commit run -a
-          pre-commit run -a --hook-stage pre-push
+        run: pre-commit run -a
+      - name: Validate commit messages
+        if: github.event_name == 'pull_request'
+        run: pre-commit run -a --hook-stage pre-push
 
   lint-pr-title:
     if: github.event_name == 'pull_request'
