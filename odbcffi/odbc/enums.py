@@ -361,7 +361,10 @@ class InfoType(IntEnum):
     SQL_EXPRESSIONS_IN_ORDERBY = 27
     """ "Y" if the data source supports expressions in the ORDER BY list; "N" if it does not."""
     SQL_IDENTIFIER_CASE = 28
-    """An SQLUSMALLINT value indicating the case-sensitivity of identifiers.
+    """An SQLUSMALLINT value indicating the case-sensitivity of object names (such as table-name).
+
+    This should be contrasted with SQL_QUOTED_IDENTIFIER_CASE, which indicates the case-sensitivity of *quoted*
+    identifiers.
 
     Because identifiers in SQL-92 are never case-sensitive, a driver that conforms strictly to SQL-92 (any level) will
     never return the SQL_IC_SENSITIVE option as supported.
@@ -787,6 +790,19 @@ class InfoType(IntEnum):
     This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_USAGE.
     """
     SQL_QUOTED_IDENTIFIER_CASE = 93
+    """An SQLUSMALLINT value indicating how quoted identifiers are stored in the system catalog.
+
+    This should be contrasted with SQL_IDENTIFIER_CASE, which indicates the case-sensitivity of *unquoted* identifiers.
+
+    - SQL_IC_UPPER = Quoted identifiers in SQL are not case-sensitive and are stored in uppercase in the system catalog.
+    - SQL_IC_LOWER = Quoted identifiers in SQL are not case-sensitive and are stored in lowercase in the system catalog.
+    - SQL_IC_SENSITIVE = Quoted identifiers in SQL are case sensitive and are stored in mixed case in the system
+      catalog. (In a SQL-92-compliant database, quoted identifiers are always case-sensitive.)
+    - SQL_IC_MIXED = Quoted identifiers in SQL are not case-sensitive and are stored in mixed case in the system
+      catalog.
+
+    A SQL-92 Entry level-conformant driver will always return SQL_IC_SENSITIVE.
+    """
     SQL_SPECIAL_CHARACTERS = 94
     SQL_SUBQUERIES = 95
     SQL_UNION = 96

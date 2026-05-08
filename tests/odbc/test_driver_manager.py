@@ -920,6 +920,17 @@ class TestSQLGetInfoW:
 
         assert actual in ("Y", "N")
 
+    def test_sql_quoted_identifier_case(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLIdentifierCase = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_QUOTED_IDENTIFIER_CASE,
+        )
+
+        assert isinstance(actual, SQLIdentifierCase)
+
     def test_sql_row_updates(
         self,
         driver_manager: DriverManager,
