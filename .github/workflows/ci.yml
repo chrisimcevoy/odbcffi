@@ -36,7 +36,16 @@ jobs:
 
       - name: Install ODBC drivers
         run: |
+          # base deps
           sudo apt install -y unixodbc freetds-bin freetds-dev tdsodbc odbc-postgresql
+
+          # msodbc
+          curl -sSL https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 msodbcsql18
+
+          # mysql connector
           curl -L -o mysql-connector-odbc.deb https://dev.mysql.com/get/Downloads/Connector-ODBC/9.3/mysql-connector-odbc_9.3.0-1debian12_amd64.deb
           sudo dpkg -i mysql-connector-odbc.deb
           rm mysql-connector-odbc.deb
