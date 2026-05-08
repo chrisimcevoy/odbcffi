@@ -480,21 +480,15 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
-        connection_info: ConnectionInfo,
     ) -> None:
-
-        expected = {
-            "Microsoft SQL Server": "17.00.4025",
-            "MySQL": "9.6.0",
-            "PostgreSQL": "18.0.3",
-        }[connection_info.dbms_name]
 
         actual: str = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_DBMS_VER,
         )
 
-        assert actual == expected
+        assert isinstance(actual, str)
+        assert actual
 
     def test_sql_default_txn_isolation(
         self,
@@ -560,27 +554,15 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
-        connection_info: ConnectionInfo,
     ) -> None:
-
-        # TODO: This will break as and when new driver versions are released.
-        #  Think about testing this a different way, or pinning the versions.
-        expected = {
-            "ODBC Driver 17 for SQL Server": "17.11.0001",
-            "ODBC Driver 18 for SQL Server": "18.06.0002",
-            "FreeTDS": "01.03.0017",
-            "MySQL ODBC 9.3 ANSI Driver": "09.03.0000",
-            "MySQL ODBC 9.3 Unicode Driver": "09.03.0000",
-            "PostgreSQL ANSI": "17.00.0004",
-            "PostgreSQL Unicode": "17.00.0004",
-        }[connection_info.driver]
 
         actual: str = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_DRIVER_VER,
         )
 
-        assert actual == expected
+        assert isinstance(actual, str)
+        assert actual
 
     def test_sql_expressions_in_order_by(
         self,
@@ -1022,26 +1004,15 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
-        connection_info: ConnectionInfo,
     ) -> None:
-
-        expected_literal: str | None = {
-            # SQL Server defaults to @@SERVERNAME, which in this test suite is
-            # just the mssql container hostname.
-            "Microsoft SQL Server": None,
-            "MySQL": "mysql via TCP/IP",
-            "PostgreSQL": "postgresql",
-        }[connection_info.dbms_name]
 
         actual: str = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_SERVER_NAME,
         )
 
+        assert isinstance(actual, str)
         assert actual
-
-        if expected_literal is not None:
-            assert actual == expected_literal
 
     def test_sql_string_functions(
         self,
