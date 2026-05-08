@@ -33,7 +33,7 @@ RUN apt-get update && \
     && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 \
     \
     # MySQL Driver \
-    && curl -L -o mysql-connector-odbc.deb https://dev.mysql.com/get/Downloads/Connector-ODBC/9.3/mysql-connector-odbc_9.3.0-1debian12_amd64.deb \
+    && curl -L -o mysql-connector-odbc.deb https://dev.mysql.com/get/Downloads/Connector-ODBC/9.3/mysql-connector-odbc_9.7.0-1debian12_amd64.deb \
     && dpkg -i mysql-connector-odbc.deb \
     && rm mysql-connector-odbc.deb \
     && rm -rf /var/lib/apt/lists/*
