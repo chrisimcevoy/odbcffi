@@ -14,8 +14,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pre-commit:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit hooks
+        run: |
+          pre-commit run -a
+          pre-commit run -a --hook-stage pre-push
+
+  lint-pr-title:
+    if: github.event_name == 'pull_request'
+    name: lint pr title
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   test:
     name: test (${{ matrix.os }}, ${{ matrix.python-version }})
+    needs: [pre-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -108,17 +137,13 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      id-token: write
-    environment: pypi
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           persist-credentials: false
-
       - name: Release
         id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7
@@ -126,16 +151,23 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: python
 
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: needs.release.outputs.release_created == 'true'
+    permissions:
+      id-token: write
+    environment: pypi
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
       - name: Set up Python
-        if: steps.release.outputs.release_created
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
         with:
           enable-cache: false
-
       - name: Build
-        if: steps.release.outputs.release_created
         run: uv build
-
       - name: Publish
-        if: steps.release.outputs.release_created
         run: uv publish
