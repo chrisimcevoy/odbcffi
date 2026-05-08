@@ -48,7 +48,7 @@ jobs:
           sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17 msodbcsql18
 
           # mysql connector
-          curl -L -o mysql-connector-odbc.deb https://dev.mysql.com/get/Downloads/Connector-ODBC/9.3/mysql-connector-odbc_9.3.0-1debian12_amd64.deb
+          curl -L -o mysql-connector-odbc.deb https://dev.mysql.com/get/Downloads/Connector-ODBC/9.7/mysql-connector-odbc_9.7.0-1debian12_amd64.deb
           sudo dpkg -i mysql-connector-odbc.deb
           rm mysql-connector-odbc.deb
           
@@ -63,31 +63,43 @@ jobs:
           choco install --verbose psqlodbc
           choco install --verbose mysql.odbc
 
-      - name: Install SQL Server (Windows)
+      - name: Set up Docker in WSL2 (Windows)
         if: runner.os == 'Windows'
-        uses: potatoqualitee/mssqlsuite@2291d923e83859edd871679c05b379037376761f
-        with:
-          install: sqlengine
-          version: 2025
-          sa-password: Password123
-          show-log: true
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $distros = wsl --list --quiet 2>$null
+          if (-not ($distros -match 'Ubuntu')) {
+            Write-Output "Installing Ubuntu WSL2 distro..."
+            wsl --install -d Ubuntu 2>&1 | Out-String | Write-Output
+          }
 
-      - name: Install PostgreSQL (Windows)
-        if: runner.os == 'Windows'
-        uses: ikalnytskyi/action-setup-postgres@c4dda34aae1c821e3a771b68b73b13af3198a7ee
-        with:
-          username: sa
-          password: Password123
-          database: sa
+          wsl -d Ubuntu bash -c '
+            set -e
+            if ! command -v docker &>/dev/null; then
+              echo "Installing Docker in WSL2..."
+              curl -fsSL https://get.docker.com | sudo sh
+              sudo usermod -aG docker $USER
+            fi
+            echo "Starting Docker daemon..."
+            sudo service docker start
+            echo "Docker ready:"
+            docker info --format "{{.OSType}} {{.ServerVersion}}"
+          '
 
-      - name: Install MySQL (Windows)
+      - name: Build docker-compose stack (Windows via WSL2)
         if: runner.os == 'Windows'
-        uses: shogo82148/actions-setup-mysql@9c42ca180d5f1dd4dceb54c23c5eda0384f4d265
-        with:
-          mysql-version: "9.7.0"
-          root-password: super-secret-password
-          user: sa
-          password: Password123
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $wslPath = $env:GITHUB_WORKSPACE -replace '\\', '/' -replace '^([A-Z]):', '/mnt/$1'
+          $wslPath = $wslPath.ToLower()
+
+          wsl -d Ubuntu bash -c "
+            set -e
+            cd $wslPath
+            sudo docker compose up -d --wait sqlserver postgresql mysql
+          "
 
       - name: Build the docker-compose stack (Linux)
         if: runner.os == 'Linux'
