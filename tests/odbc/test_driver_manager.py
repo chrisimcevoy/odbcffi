@@ -690,6 +690,71 @@ class TestSQLGetInfoW:
 
         assert actual >= 0
 
+    def test_sql_max_columns_in_group_by(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_GROUP_BY,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_index(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_INDEX,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_order_by(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_ORDER_BY,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_select(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_SELECT,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_table(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_TABLE,
+        )
+
+        assert actual >= 0
+
     def test_sql_max_concurrent_activities(
         self,
         driver_manager: DriverManager,

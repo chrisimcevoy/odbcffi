@@ -838,10 +838,42 @@ class InfoType(IntEnum):
     A SQL-92 Entry level-conformant driver will always return both of these options as supported.
     """
     SQL_MAX_COLUMNS_IN_GROUP_BY = 97
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in a GROUP BY clause.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 6. An FIPS Intermediate level-conformant driver will
+    return at least 15.
+    """
     SQL_MAX_COLUMNS_IN_INDEX = 98
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in an index.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+    """
     SQL_MAX_COLUMNS_IN_ORDER_BY = 99
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in an ORDER BY clause.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 6. An FIPS Intermediate level-conformant driver will
+    return at least 15.
+    """
     SQL_MAX_COLUMNS_IN_SELECT = 100
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in a select list.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 100. An FIPS Intermediate level-conformant driver will
+    return at least 250.
+    """
     SQL_MAX_COLUMNS_IN_TABLE = 101
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in a table.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 100. An FIPS Intermediate level-conformant driver will
+    return at least 250.
+    """
     SQL_MAX_INDEX_SIZE = 102
     SQL_MAX_ROW_SIZE_INCLUDES_LONG = 103
     SQL_MAX_ROW_SIZE = 104
