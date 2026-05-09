@@ -880,6 +880,9 @@ class InfoType(IntEnum):
     If there is no specified limit or the limit is unknown, this value is set to zero.
     """
     SQL_MAX_ROW_SIZE_INCLUDES_LONG = 103
+    """A character string: "Y" if the maximum row size returned for the SQL_MAX_ROW_SIZE information type includes the
+    length of all SQL_LONGVARCHAR and SQL_LONGVARBINARY columns in the row; "N" otherwise.
+    """
     SQL_MAX_ROW_SIZE = 104
     SQL_MAX_STATEMENT_LEN = 105
     SQL_MAX_TABLES_IN_SELECT = 106
