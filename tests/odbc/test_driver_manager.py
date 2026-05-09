@@ -664,6 +664,19 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         # no `assert actual` here because postgres returns an empty string.
 
+    def test_sql_like_escape_clause(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_LIKE_ESCAPE_CLAUSE,
+        )
+
+        assert actual in ("Y", "N")
+
     def test_sql_max_binary_literal_len(
         self,
         driver_manager: DriverManager,

@@ -967,6 +967,9 @@ class InfoType(IntEnum):
     this value is set to zero.
     """
     SQL_LIKE_ESCAPE_CLAUSE = 113
+    """A character string: "Y" if the data source supports an escape character for the percent character (%) and
+    underscore character (_) in a LIKE predicate and the driver supports the ODBC syntax for defining a LIKE predicate
+    escape character; "N" otherwise."""
     SQL_CATALOG_LOCATION = 114
     SQL_OJ_CAPABILITIES = 115
     SQL_ACTIVE_ENVIRONMENTS = 116
