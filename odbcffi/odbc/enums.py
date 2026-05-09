@@ -907,6 +907,10 @@ class InfoType(IntEnum):
     return at least 50.
     """
     SQL_MAX_USER_NAME_LEN = 107
+    """An SQLUSMALLINT value that specifies the maximum length of a user name in the data source.
+
+    If there is no maximum length or the length is unknown, this value is set to zero.
+    """
     SQL_MAX_CHAR_LITERAL_LEN = 108
     SQL_TIMEDATE_ADD_INTERVALS = 109
     SQL_TIMEDATE_DIFF_INTERVALS = 110
