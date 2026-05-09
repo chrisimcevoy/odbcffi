@@ -208,6 +208,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_MAX_PROCEDURE_NAME_LEN,
         InfoType.SQL_MAX_ROW_SIZE,
         InfoType.SQL_MAX_SCHEMA_NAME_LEN,
+        InfoType.SQL_MAX_STATEMENT_LEN,
         InfoType.SQL_MAX_TABLE_NAME_LEN,
         InfoType.SQL_NON_NULLABLE_COLUMNS,
         InfoType.SQL_NULL_COLLATION,
@@ -1003,6 +1004,7 @@ class DriverManager:
             InfoType.SQL_MAX_ROW_SIZE,
             InfoType.SQL_MAX_PROCEDURE_NAME_LEN,
             InfoType.SQL_MAX_SCHEMA_NAME_LEN,
+            InfoType.SQL_MAX_STATEMENT_LEN,
             InfoType.SQL_MAX_TABLE_NAME_LEN,
         ],
     ) -> int: ...

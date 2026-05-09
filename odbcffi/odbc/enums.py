@@ -892,6 +892,11 @@ class InfoType(IntEnum):
     return at least 8,000.
     """
     SQL_MAX_STATEMENT_LEN = 105
+    """An SQLUINTEGER value that specifies the maximum length (number of characters, including white space) of a SQL
+    statement.
+
+    If there is no maximum length or the length is unknown, this value is set to zero.
+    """
     SQL_MAX_TABLES_IN_SELECT = 106
     SQL_MAX_USER_NAME_LEN = 107
     SQL_MAX_CHAR_LITERAL_LEN = 108

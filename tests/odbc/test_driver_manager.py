@@ -859,6 +859,19 @@ class TestSQLGetInfoW:
 
         assert actual >= 0
 
+    def test_sql_max_statement_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_STATEMENT_LEN,
+        )
+
+        assert actual >= 0
+
     def test_sql_max_table_name_len(
         self,
         driver_manager: DriverManager,
