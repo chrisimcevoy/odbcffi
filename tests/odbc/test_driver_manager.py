@@ -885,6 +885,19 @@ class TestSQLGetInfoW:
 
         assert actual >= 0
 
+    def test_sql_max_tables_in_select(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_TABLES_IN_SELECT,
+        )
+
+        assert actual >= 0
+
     def test_sql_mult_result_sets(
         self,
         driver_manager: DriverManager,

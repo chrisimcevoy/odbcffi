@@ -898,6 +898,14 @@ class InfoType(IntEnum):
     If there is no maximum length or the length is unknown, this value is set to zero.
     """
     SQL_MAX_TABLES_IN_SELECT = 106
+    """An SQLUSMALLINT value that specifies the maximum number of tables allowed in the FROM clause of a SELECT
+    statement.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 15. An FIPS Intermediate level-conformant driver will
+    return at least 50.
+    """
     SQL_MAX_USER_NAME_LEN = 107
     SQL_MAX_CHAR_LITERAL_LEN = 108
     SQL_TIMEDATE_ADD_INTERVALS = 109
