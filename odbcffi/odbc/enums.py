@@ -960,6 +960,12 @@ class InfoType(IntEnum):
     source, "N" if it does not.
     """
     SQL_MAX_BINARY_LITERAL_LEN = 112
+    """An SQLUINTEGER value that specifies the maximum length (number of hexadecimal characters, excluding the literal
+    prefix and suffix returned by SQLGetTypeInfo) of a binary literal in a SQL statement.
+
+    For example, the binary literal 0xFFAA has a length of 4. If there is no maximum length or the length is unknown,
+    this value is set to zero.
+    """
     SQL_LIKE_ESCAPE_CLAUSE = 113
     SQL_CATALOG_LOCATION = 114
     SQL_OJ_CAPABILITIES = 115

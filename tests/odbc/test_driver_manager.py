@@ -664,6 +664,19 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         # no `assert actual` here because postgres returns an empty string.
 
+    def test_sql_max_binary_literal_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_BINARY_LITERAL_LEN,
+        )
+
+        assert actual >= 0
+
     def test_sql_max_catalog_name_len(
         self,
         driver_manager: DriverManager,
