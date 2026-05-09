@@ -875,6 +875,10 @@ class InfoType(IntEnum):
     return at least 250.
     """
     SQL_MAX_INDEX_SIZE = 102
+    """An SQLUINTEGER value that specifies the maximum number of bytes allowed in the combined fields of an index.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+    """
     SQL_MAX_ROW_SIZE_INCLUDES_LONG = 103
     SQL_MAX_ROW_SIZE = 104
     SQL_MAX_STATEMENT_LEN = 105

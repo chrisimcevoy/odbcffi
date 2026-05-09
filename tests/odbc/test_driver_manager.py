@@ -794,6 +794,19 @@ class TestSQLGetInfoW:
 
         assert actual == 0
 
+    def test_sql_max_index_size(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_INDEX_SIZE,
+        )
+
+        assert actual >= 0
+
     def test_sql_max_procedure_name_len(
         self,
         driver_manager: DriverManager,
