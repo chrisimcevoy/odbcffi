@@ -23,6 +23,7 @@ __all__ = [
     "SQLAttrODBCVersion",
     "SQLAttrTrace",
     "SQLBookmarkPersistence",
+    "SQLCatalogLocation",
     "SQLCatalogUsage",
     "SQLConcatNullBehavior",
     "SQLConvert",
@@ -971,6 +972,21 @@ class InfoType(IntEnum):
     underscore character (_) in a LIKE predicate and the driver supports the ODBC syntax for defining a LIKE predicate
     escape character; "N" otherwise."""
     SQL_CATALOG_LOCATION = 114
+    """An SQLUSMALLINT value that indicates the position of the catalog in a qualified table name:
+
+    * SQL_CL_START
+    * SQL_CL_END
+
+    For example, an Xbase driver returns SQL_CL_START because the directory (catalog) name is at the start of the table
+    name, as in \\EMPDATA\\EMP.DBF. An ORACLE Server driver returns SQL_CL_END because the catalog is at the end of the
+    table name, as in ADMIN.EMP@EMPDATA.
+
+    A SQL-92 Full level-conformant driver will always return SQL_CL_START. A value of 0 is returned if catalogs are not
+    supported by the data source. To determine whether catalogs are supported, an application calls SQLGetInfo with the
+    SQL_CATALOG_NAME information type.
+
+    This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_LOCATION.
+    """
     SQL_OJ_CAPABILITIES = 115
     SQL_ACTIVE_ENVIRONMENTS = 116
     SQL_ALTER_DOMAIN = 117
@@ -1281,6 +1297,23 @@ class SQLAttrTrace(IntEnum):
 
     SQL_OPT_TRACE_ON = 1
     """Tracing on."""
+
+
+class SQLCatalogLocation(IntEnum):
+    r"""An SQLUSMALLINT value that indicates the position of the catalog in a qualified table name.
+
+    For example, an Xbase driver returns SQL_CL_START because the directory (catalog) name is at the start of the table
+    name, as in \EMPDATA\EMP.DBF. An ORACLE Server driver returns SQL_CL_END because the catalog is at the end of the
+    table name, as in ADMIN.EMP@EMPDATA.
+
+    A SQL-92 Full level-conformant driver will always return SQL_CL_START. A value of 0 is returned if catalogs are not
+    supported by the data source. To determine whether catalogs are supported, an application calls SQLGetInfo with the
+    SQL_CATALOG_NAME information type.
+    """
+
+    UNSUPPORTED = 0
+    SQL_CL_START = 0x0001
+    SQL_CL_END = 0x0002
 
 
 class SQLCatalogUsage(IntFlag):

@@ -163,6 +163,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
     {
         InfoType.SQL_ALTER_TABLE,
         InfoType.SQL_BOOKMARK_PERSISTENCE,
+        InfoType.SQL_CATALOG_LOCATION,
         InfoType.SQL_CATALOG_USAGE,
         InfoType.SQL_CONCAT_NULL_BEHAVIOR,
         InfoType.SQL_CONVERT_BIGINT,
@@ -240,6 +241,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
 SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_ALTER_TABLE: SQLAlterTable,
     InfoType.SQL_BOOKMARK_PERSISTENCE: SQLBookmarkPersistence,
+    InfoType.SQL_CATALOG_LOCATION: SQLCatalogLocation,
     InfoType.SQL_CATALOG_USAGE: SQLCatalogUsage,
     InfoType.SQL_CONCAT_NULL_BEHAVIOR: SQLConcatNullBehavior,
     InfoType.SQL_CONVERT_BIGINT: SQLConvert,
@@ -1038,6 +1040,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_BOOKMARK_PERSISTENCE],
     ) -> SQLBookmarkPersistence: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CATALOG_LOCATION],
+    ) -> SQLCatalogLocation: ...
 
     @overload
     def sql_get_info_w(
