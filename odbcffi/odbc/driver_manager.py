@@ -225,6 +225,8 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_STRING_FUNCTIONS,
         InfoType.SQL_SUBQUERIES,
         InfoType.SQL_SYSTEM_FUNCTIONS,
+        InfoType.SQL_TIMEDATE_ADD_INTERVALS,
+        InfoType.SQL_TIMEDATE_DIFF_INTERVALS,
         InfoType.SQL_TIMEDATE_FUNCTIONS,
         InfoType.SQL_TXN_CAPABLE,
         InfoType.SQL_TXN_ISOLATION_OPTION,
@@ -281,6 +283,8 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_STRING_FUNCTIONS: SQLStringFunctions,
     InfoType.SQL_SUBQUERIES: SQLSubqueries,
     InfoType.SQL_SYSTEM_FUNCTIONS: SQLSystemFunctions,
+    InfoType.SQL_TIMEDATE_ADD_INTERVALS: SQLTimestampIntervals,
+    InfoType.SQL_TIMEDATE_DIFF_INTERVALS: SQLTimestampIntervals,
     InfoType.SQL_TIMEDATE_FUNCTIONS: SQLTimeDateFunctions,
     InfoType.SQL_TXN_CAPABLE: SQLTxnCapable,
     InfoType.SQL_TXN_ISOLATION_OPTION: SQLTxnIsolationOption,
@@ -1226,6 +1230,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_SYSTEM_FUNCTIONS],
     ) -> SQLSystemFunctions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_TIMEDATE_ADD_INTERVALS, InfoType.SQL_TIMEDATE_DIFF_INTERVALS],
+    ) -> SQLTimestampIntervals: ...
 
     @overload
     def sql_get_info_w(

@@ -1251,6 +1251,28 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_timedate_add_intervals(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLTimestampIntervals = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_TIMEDATE_ADD_INTERVALS,
+        )
+
+        assert isinstance(actual, SQLTimestampIntervals)
+
+    def test_sql_timedate_diff_intervals(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLTimestampIntervals = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_TIMEDATE_DIFF_INTERVALS,
+        )
+
+        assert isinstance(actual, SQLTimestampIntervals)
+
     def test_sql_timedate_functions(
         self,
         driver_manager: DriverManager,

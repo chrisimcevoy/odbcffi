@@ -48,6 +48,7 @@ __all__ = [
     "SQLSubqueries",
     "SQLSystemFunctions",
     "SQLTimeDateFunctions",
+    "SQLTimestampIntervals",
     "SQLTxnCapable",
     "SQLTxnIsolationOption",
     "SQLUnion",
@@ -918,7 +919,41 @@ class InfoType(IntEnum):
     If there is no maximum length or the length is unknown, this value is set to zero.
     """
     SQL_TIMEDATE_ADD_INTERVALS = 109
+    """An SQLUINTEGER bitmask enumerating the timestamp intervals supported by the driver and associated data source for
+    the TIMESTAMPADD scalar function.
+
+    The following bitmasks are used to determine which intervals are supported:
+
+    SQL_FN_TSI_FRAC_SECOND
+    SQL_FN_TSI_SECOND
+    SQL_FN_TSI_MINUTE
+    SQL_FN_TSI_HOUR
+    SQL_FN_TSI_DAY
+    SQL_FN_TSI_WEEK
+    SQL_FN_TSI_MONTH
+    SQL_FN_TSI_QUARTER
+    SQL_FN_TSI_YEAR
+
+    An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
     SQL_TIMEDATE_DIFF_INTERVALS = 110
+    """An SQLUINTEGER bitmask enumerating the timestamp intervals supported by the driver and associated data source for
+    the TIMESTAMPDIFF scalar function.
+
+    The following bitmasks are used to determine which intervals are supported:
+
+    SQL_FN_TSI_FRAC_SECOND
+    SQL_FN_TSI_SECOND
+    SQL_FN_TSI_MINUTE
+    SQL_FN_TSI_HOUR
+    SQL_FN_TSI_DAY
+    SQL_FN_TSI_WEEK
+    SQL_FN_TSI_MONTH
+    SQL_FN_TSI_QUARTER
+    SQL_FN_TSI_YEAR
+
+    An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
     SQL_NEED_LONG_DATA_LEN = 111
     SQL_MAX_BINARY_LITERAL_LEN = 112
     SQL_LIKE_ESCAPE_CLAUSE = 113
@@ -2219,6 +2254,23 @@ class SQLTimeDateFunctions(IntFlag):
     The precision of the returned value is implementation-defined. The scale is 0 unless SECOND is specified, in which
     case the scale is not less than the fractional seconds precision of the extract-source field.
     """
+
+
+class SQLTimestampIntervals(IntFlag):
+    """The timestamp intervals which the driver and data source support for TIMESTAMPADD/TIMESTAMPDIFF scalar functions.
+
+    An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
+
+    SQL_FN_TSI_FRAC_SECOND = 0x00000001
+    SQL_FN_TSI_SECOND = 0x00000002
+    SQL_FN_TSI_MINUTE = 0x00000004
+    SQL_FN_TSI_HOUR = 0x00000008
+    SQL_FN_TSI_DAY = 0x00000010
+    SQL_FN_TSI_WEEK = 0x00000020
+    SQL_FN_TSI_MONTH = 0x00000040
+    SQL_FN_TSI_QUARTER = 0x00000080
+    SQL_FN_TSI_YEAR = 0x00000100
 
 
 class SQLTxnCapable(IntEnum):
