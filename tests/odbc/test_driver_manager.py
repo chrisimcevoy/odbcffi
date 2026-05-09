@@ -446,7 +446,7 @@ class TestSQLGetInfoW:
         open_connection_handle: ConnectionHandle,
     ) -> None:
 
-        actual: str = driver_manager.sql_get_info_w(
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_DATA_SOURCE_READ_ONLY,
         )
@@ -930,7 +930,7 @@ class TestSQLGetInfoW:
         open_connection_handle: ConnectionHandle,
     ) -> None:
 
-        actual: str = driver_manager.sql_get_info_w(
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_MULT_RESULT_SETS,
         )
@@ -943,9 +943,22 @@ class TestSQLGetInfoW:
         open_connection_handle: ConnectionHandle,
     ) -> None:
 
-        actual: str = driver_manager.sql_get_info_w(
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_MULTIPLE_ACTIVE_TXN,
+        )
+
+        assert actual in ("Y", "N")
+
+    def test_sql_need_long_data_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_NEED_LONG_DATA_LEN,
         )
 
         assert actual in ("Y", "N")

@@ -955,6 +955,10 @@ class InfoType(IntEnum):
     An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.
     """
     SQL_NEED_LONG_DATA_LEN = 111
+    """A character string: "Y" if the data source needs the length of a long data value (the data type is
+    SQL_LONGVARCHAR, SQL_LONGVARBINARY, or a long data source-specific data type) before that value is sent to the data
+    source, "N" if it does not.
+    """
     SQL_MAX_BINARY_LITERAL_LEN = 112
     SQL_LIKE_ESCAPE_CLAUSE = 113
     SQL_CATALOG_LOCATION = 114
