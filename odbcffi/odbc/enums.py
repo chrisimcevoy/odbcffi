@@ -884,6 +884,13 @@ class InfoType(IntEnum):
     length of all SQL_LONGVARCHAR and SQL_LONGVARBINARY columns in the row; "N" otherwise.
     """
     SQL_MAX_ROW_SIZE = 104
+    """An SQLUINTEGER value that specifies the maximum length of a single row in a table.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 2,000. An FIPS Intermediate level-conformant driver will
+    return at least 8,000.
+    """
     SQL_MAX_STATEMENT_LEN = 105
     SQL_MAX_TABLES_IN_SELECT = 106
     SQL_MAX_USER_NAME_LEN = 107
