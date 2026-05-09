@@ -912,6 +912,11 @@ class InfoType(IntEnum):
     If there is no maximum length or the length is unknown, this value is set to zero.
     """
     SQL_MAX_CHAR_LITERAL_LEN = 108
+    """An SQLUINTEGER value that specifies the maximum length (number of characters, excluding the literal prefix and
+    suffix returned by SQLGetTypeInfo) of a character literal in a SQL statement.
+
+    If there is no maximum length or the length is unknown, this value is set to zero.
+    """
     SQL_TIMEDATE_ADD_INTERVALS = 109
     SQL_TIMEDATE_DIFF_INTERVALS = 110
     SQL_NEED_LONG_DATA_LEN = 111

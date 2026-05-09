@@ -195,6 +195,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_GROUP_BY,
         InfoType.SQL_IDENTIFIER_CASE,
         InfoType.SQL_MAX_CATALOG_NAME_LEN,
+        InfoType.SQL_MAX_CHAR_LITERAL_LEN,
         InfoType.SQL_MAX_COLUMN_NAME_LEN,
         InfoType.SQL_MAX_COLUMNS_IN_GROUP_BY,
         InfoType.SQL_MAX_COLUMNS_IN_INDEX,
@@ -993,6 +994,7 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[
             InfoType.SQL_MAX_CATALOG_NAME_LEN,
+            InfoType.SQL_MAX_CHAR_LITERAL_LEN,
             InfoType.SQL_MAX_CONCURRENT_ACTIVITIES,
             InfoType.SQL_MAX_COLUMN_NAME_LEN,
             InfoType.SQL_MAX_COLUMNS_IN_GROUP_BY,
