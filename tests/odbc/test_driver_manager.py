@@ -1080,6 +1080,19 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_oj_capabilities(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLOuterJoinCapabilities = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_OJ_CAPABILITIES,
+        )
+
+        assert isinstance(actual, SQLOuterJoinCapabilities)
+
     def test_sql_order_by_columns_in_select(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:

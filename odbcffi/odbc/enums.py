@@ -40,6 +40,7 @@ __all__ = [
     "SQLNumericFunctions",
     "SQLOdbcSagCliConformance",
     "SQLOdbcSqlConformance",
+    "SQLOuterJoinCapabilities",
     "SQLOuterJoins",
     "SQLReturn",
     "SQLSchemaUsage",
@@ -988,6 +989,11 @@ class InfoType(IntEnum):
     This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_LOCATION.
     """
     SQL_OJ_CAPABILITIES = 115
+    """An SQLUINTEGER bitmask enumerating the types of outer joins supported by the driver and data source.
+
+    For information about the support of relational join operators in a SELECT statement, as defined by SQL-92, see
+    SQL_SQL92_RELATIONAL_JOIN_OPERATORS.
+    """
     SQL_ACTIVE_ENVIRONMENTS = 116
     SQL_ALTER_DOMAIN = 117
     SQL_SQL_CONFORMANCE = 118
@@ -1692,6 +1698,33 @@ class SQLOdbcSagCliConformance(IntEnum):
 
     SQL_OSCC_COMPLIANT = 1
     """The driver conforms to the SAG CLI specification."""
+
+
+class SQLOuterJoinCapabilities(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the types of outer joins supported by the driver and data source."""
+
+    SQL_OJ_LEFT = 0x00000001
+    """Left outer joins are supported."""
+    SQL_OJ_RIGHT = 0x00000002
+    """Right outer joins are supported."""
+    SQL_OJ_FULL = 0x00000004
+    """Full outer joins are supported."""
+    SQL_OJ_NESTED = 0x00000008
+    """Nested outer joins are supported."""
+    SQL_OJ_NOT_ORDERED = 0x00000010
+    """The column names in the ON clause of the outer join do not have to be in the same order as their respective table
+    names in the OUTER JOIN clause."""
+    SQL_OJ_INNER = 0x00000020
+    """The inner table (the right table in a left outer join or the left table in a right outer join) can also be used
+    in an inner join.
+
+    This does not apply to full outer joins, which do not have an inner table.
+    """
+    SQL_OJ_ALL_COMPARISON_OPS = 0x00000040
+    """The comparison operator in the ON clause can be any of the ODBC comparison operators.
+
+    If this bit is not set, only the equals (=) comparison operator can be used in outer joins.
+    """
 
 
 class SQLOuterJoins(Enum):
