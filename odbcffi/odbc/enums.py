@@ -47,6 +47,7 @@ __all__ = [
     "SQLSchemaUsage",
     "SQLScrollConcurrency",
     "SQLScrollOptions",
+    "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
     "SQLSystemFunctions",
@@ -1009,6 +1010,7 @@ class InfoType(IntEnum):
     A return value of "0" means that the ALTER DOMAIN statement is not supported.
     """
     SQL_SQL_CONFORMANCE = 118
+    """An SQLUINTEGER value that indicates the level of SQL-92 supported by the driver."""
     SQL_ANSI_SQL_DATETIME_LITERALS = 119
     SQL_BATCH_ROW_COUNT = 120
     SQL_BATCH_SUPPORT = 121
@@ -1920,6 +1922,19 @@ class SQLSchemaUsage(IntFlag):
     """Schemas are supported in all index definition statements: CREATE INDEX and DROP INDEX."""
     SQL_SU_PRIVILEGE_DEFINITION = 0x00000010
     """Schemas are supported in all privilege definition statements: GRANT and REVOKE."""
+
+
+class SQLSqlConformance(IntEnum):
+    """An SQLUINTEGER value that indicates the level of SQL-92 supported by the driver."""
+
+    SQL_SC_SQL92_ENTRY = 0x00000001
+    """Entry level SQL-92 compliant."""
+    SQL_SC_FIPS127_2_TRANSITIONAL = 0x00000002
+    """FIPS 127-2 transitional level compliant."""
+    SQL_SC_SQL92_INTERMEDIATE = 0x00000004
+    """Intermediate level SQL-92 compliant."""
+    SQL_SC_SQL92_FULL = 0x00000008
+    """Full level SQL-92 compliant."""
 
 
 class SQLStringFunctions(IntFlag):

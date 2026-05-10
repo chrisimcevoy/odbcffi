@@ -1282,6 +1282,19 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_sql_conformance(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSqlConformance = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL_CONFORMANCE,
+        )
+
+        assert isinstance(actual, SQLSqlConformance)
+
     def test_sql_string_functions(
         self,
         driver_manager: DriverManager,
