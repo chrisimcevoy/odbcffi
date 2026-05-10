@@ -68,6 +68,15 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLAlterTable)
 
+    def test_sql_batch_row_count(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLBatchRowCount = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_BATCH_ROW_COUNT,
+        )
+
+        assert isinstance(actual, SQLBatchRowCount)
+
     def test_sql_bookmark_persistence(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:

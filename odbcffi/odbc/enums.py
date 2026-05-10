@@ -23,6 +23,7 @@ __all__ = [
     "SQLAttrConnectionPooling",
     "SQLAttrODBCVersion",
     "SQLAttrTrace",
+    "SQLBatchRowCount",
     "SQLBookmarkPersistence",
     "SQLCatalogLocation",
     "SQLCatalogUsage",
@@ -1019,6 +1020,7 @@ class InfoType(IntEnum):
     literal escape clauses defined by ODBC.
     """
     SQL_BATCH_ROW_COUNT = 120
+    """A SQLUINTEGER bitmask that enumerates the driver's behavior with respect to the availability of row counts."""
     SQL_BATCH_SUPPORT = 121
     SQL_CONVERT_WCHAR = 122
     SQL_CONVERT_INTERVAL_DAY_TIME = 123
@@ -1366,6 +1368,28 @@ class SQLAttrTrace(IntEnum):
 
     SQL_OPT_TRACE_ON = 1
     """Tracing on."""
+
+
+class SQLBatchRowCount(IntFlag):
+    """A SQLUINTEGER bitmask that enumerates the driver's behavior with respect to the availability of row counts."""
+
+    SQL_BRC_PROCEDURES = 0x0000001
+    """Row counts, if any, are available when a batch is executed in a stored procedure.
+
+    If row counts are available, they can be rolled up or individually available, depending on the SQL_BRC_ROLLED_UP
+    bit.
+    """
+    SQL_BRC_EXPLICIT = 0x0000002
+    """Row counts, if any, are available when a batch is executed directly by calling SQLExecute or SQLExecDirect.
+
+    If row counts are available, they can be rolled up or individually available, depending on the SQL_BRC_ROLLED_UP
+    bit.
+    """
+    SQL_BRC_ROLLED_UP = 0x0000004
+    """Row counts for consecutive INSERT, DELETE, or UPDATE statements are rolled up into one.
+
+    If this bit is not set, row counts are available for each statement.
+    """
 
 
 class SQLCatalogLocation(IntEnum):
