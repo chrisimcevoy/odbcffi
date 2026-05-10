@@ -50,6 +50,15 @@ class TestSQLGetInfoW:
         assert isinstance(actual, int)
         assert actual >= 0
 
+    def test_sql_alter_domain(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLAlterDomain = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ALTER_DOMAIN,
+        )
+
+        assert isinstance(actual, SQLAlterDomain)
+
     def test_sql_alter_table(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
 
         actual: SQLAlterTable = driver_manager.sql_get_info_w(

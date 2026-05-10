@@ -15,6 +15,7 @@ __all__ = [
     "EnvironmentAttribute",
     "HandleType",
     "InfoType",
+    "SQLAlterDomain",
     "SQLAlterTable",
     "SQLAttrAccessMode",
     "SQLAttrAutocommit",
@@ -1000,6 +1001,13 @@ class InfoType(IntEnum):
     If there is no specified limit or the limit is unknown, this value is set to zero.
     """
     SQL_ALTER_DOMAIN = 117
+    """An SQLUINTEGER bitmask enumerating the clauses in the ALTER DOMAIN statement, as defined in SQL-92, supported by
+    the data source.
+
+    A SQL-92 Full level-compliant driver will always return all the bitmasks.
+
+    A return value of "0" means that the ALTER DOMAIN statement is not supported.
+    """
     SQL_SQL_CONFORMANCE = 118
     SQL_ANSI_SQL_DATETIME_LITERALS = 119
     SQL_BATCH_ROW_COUNT = 120
@@ -1075,6 +1083,49 @@ class InfoType(IntEnum):
     SQL_ASYNC_DBC_FUNCTIONS = 10023
     SQL_DRIVER_AWARE_POOLING_SUPPORTED = 10024
     SQL_ASYNC_NOTIFICATION = 10025
+
+
+class SQLAlterDomain(IntFlag):
+    """The clauses in the ALTER DOMAIN statement, as defined in SQL-92, which are supported by the data source.
+
+    A SQL-92 Full level-compliant driver will always return all the bitmasks.
+
+    A return value of "0" means that the ALTER DOMAIN statement is not supported.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_AD_CONSTRAINT_NAME_DEFINITION = 0x00000001
+    """<constraint name definition clause> is supported for naming domain constraint (Intermediate level)"""
+    SQL_AD_ADD_DOMAIN_CONSTRAINT = 0x00000002
+    """Adding a domain constraint is supported (Full level)"""
+    SQL_AD_DROP_DOMAIN_CONSTRAINT = 0x00000004
+    """<drop domain constraint clause> is supported (Full level)"""
+    SQL_AD_ADD_DOMAIN_DEFAULT = 0x00000008
+    """<alter domain> <set domain default clause> is supported (Full level)"""
+    SQL_AD_DROP_DOMAIN_DEFAULT = 0x00000010
+    """<alter domain> <drop domain default clause> is supported (Full level)"""
+    SQL_AD_ADD_CONSTRAINT_INITIALLY_DEFERRED = 0x00000020
+    """The INITIALLY DEFERRED constraint attribute is supported for added domain constraints. (Full level)
+
+    This bit is meaningful only if SQL_AD_ADD_DOMAIN_CONSTRAINT is also set.
+    """
+    SQL_AD_ADD_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000040
+    """The INITIALLY IMMEDIATE constraint attribute is supported for added domain constraints. (Full level)
+
+    This bit is meaningful only if SQL_AD_ADD_DOMAIN_CONSTRAINT is also set.
+    """
+    SQL_AD_ADD_CONSTRAINT_DEFERRABLE = 0x00000080
+    """The DEFERRABLE constraint attribute is supported for added domain constraints. (Full level)
+
+    This bit is meaningful only if SQL_AD_ADD_DOMAIN_CONSTRAINT is also set.
+    """
+    SQL_AD_ADD_CONSTRAINT_NON_DEFERRABLE = 0x00000100
+    """The NOT DEFERRABLE constraint attribute is supported for added domain constraints. (Full level)
+
+    This bit is meaningful only if SQL_AD_ADD_DOMAIN_CONSTRAINT is also set.
+    """
 
 
 class SQLAlterTable(IntFlag):

@@ -162,6 +162,7 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
 SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
     {
         InfoType.SQL_ACTIVE_ENVIRONMENTS,
+        InfoType.SQL_ALTER_DOMAIN,
         InfoType.SQL_ALTER_TABLE,
         InfoType.SQL_BOOKMARK_PERSISTENCE,
         InfoType.SQL_CATALOG_LOCATION,
@@ -241,6 +242,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
 )
 
 SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
+    InfoType.SQL_ALTER_DOMAIN: SQLAlterDomain,
     InfoType.SQL_ALTER_TABLE: SQLAlterTable,
     InfoType.SQL_BOOKMARK_PERSISTENCE: SQLBookmarkPersistence,
     InfoType.SQL_CATALOG_LOCATION: SQLCatalogLocation,
@@ -1030,6 +1032,13 @@ class DriverManager:
             InfoType.SQL_MAX_USER_NAME_LEN,
         ],
     ) -> int: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_ALTER_DOMAIN],
+    ) -> SQLAlterDomain: ...
 
     @overload
     def sql_get_info_w(
