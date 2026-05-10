@@ -77,6 +77,15 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLBatchRowCount)
 
+    def test_sql_batch_support(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLBatchSupport = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_BATCH_SUPPORT,
+        )
+
+        assert isinstance(actual, SQLBatchSupport)
+
     def test_sql_bookmark_persistence(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:

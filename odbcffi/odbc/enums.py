@@ -24,6 +24,7 @@ __all__ = [
     "SQLAttrODBCVersion",
     "SQLAttrTrace",
     "SQLBatchRowCount",
+    "SQLBatchSupport",
     "SQLBookmarkPersistence",
     "SQLCatalogLocation",
     "SQLCatalogUsage",
@@ -1022,6 +1023,7 @@ class InfoType(IntEnum):
     SQL_BATCH_ROW_COUNT = 120
     """A SQLUINTEGER bitmask that enumerates the driver's behavior with respect to the availability of row counts."""
     SQL_BATCH_SUPPORT = 121
+    """An SQLUINTEGER bitmask enumerating the driver's support for batches."""
     SQL_CONVERT_WCHAR = 122
     SQL_CONVERT_INTERVAL_DAY_TIME = 123
     SQL_CONVERT_INTERVAL_YEAR_MONTH = 124
@@ -1390,6 +1392,19 @@ class SQLBatchRowCount(IntFlag):
 
     If this bit is not set, row counts are available for each statement.
     """
+
+
+class SQLBatchSupport(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the driver's support for batches."""
+
+    SQL_BS_SELECT_EXPLICIT = 0x00000001
+    """The driver supports explicit batches that can have result-set generating statements."""
+    SQL_BS_ROW_COUNT_EXPLICIT = 0x00000002
+    """The driver supports explicit batches that can have row-count generating statements."""
+    SQL_BS_SELECT_PROC = 0x00000004
+    """The driver supports explicit procedures that can have result-set generating statements."""
+    SQL_BS_ROW_COUNT_PROC = 0x00000008
+    """The driver supports explicit procedures that can have row-count generating statements."""
 
 
 class SQLCatalogLocation(IntEnum):
