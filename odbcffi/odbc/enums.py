@@ -995,6 +995,10 @@ class InfoType(IntEnum):
     SQL_SQL92_RELATIONAL_JOIN_OPERATORS.
     """
     SQL_ACTIVE_ENVIRONMENTS = 116
+    """An SQLUSMALLINT value that specifies the maximum number of active environments that the driver can support.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+    """
     SQL_ALTER_DOMAIN = 117
     SQL_SQL_CONFORMANCE = 118
     SQL_ANSI_SQL_DATETIME_LITERALS = 119

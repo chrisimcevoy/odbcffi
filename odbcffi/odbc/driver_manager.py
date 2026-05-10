@@ -161,6 +161,7 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
 
 SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
     {
+        InfoType.SQL_ACTIVE_ENVIRONMENTS,
         InfoType.SQL_ALTER_TABLE,
         InfoType.SQL_BOOKMARK_PERSISTENCE,
         InfoType.SQL_CATALOG_LOCATION,
@@ -1006,6 +1007,7 @@ class DriverManager:
         self,
         connection_handle: ConnectionHandle,
         info_type: Literal[
+            InfoType.SQL_ACTIVE_ENVIRONMENTS,
             InfoType.SQL_MAX_BINARY_LITERAL_LEN,
             InfoType.SQL_MAX_CATALOG_NAME_LEN,
             InfoType.SQL_MAX_CHAR_LITERAL_LEN,
