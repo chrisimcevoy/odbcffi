@@ -32,6 +32,7 @@ __all__ = [
     "SQLCorrelationName",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
+    "SQLDatetimeLiterals",
     "SQLFileUsage",
     "SQLGetDataExtensions",
     "SQLGroupBy",
@@ -1011,7 +1012,12 @@ class InfoType(IntEnum):
     """
     SQL_SQL_CONFORMANCE = 118
     """An SQLUINTEGER value that indicates the level of SQL-92 supported by the driver."""
-    SQL_ANSI_SQL_DATETIME_LITERALS = 119
+    SQL_DATETIME_LITERALS = 119
+    """An SQLUINTEGER bitmask enumerating the SQL-92 datetime literals supported by the data source.
+
+    Note that these are the datetime literals listed in the SQL-92 specification and are separate from the datetime
+    literal escape clauses defined by ODBC.
+    """
     SQL_BATCH_ROW_COUNT = 120
     SQL_BATCH_SUPPORT = 121
     SQL_CONVERT_WCHAR = 122
@@ -1554,6 +1560,35 @@ class SQLBookmarkPersistence(IntFlag):
     SQL_BP_SCROLL = 0x00000040
     """Bookmarks are valid after an application scrolls through the result set using SQLFetchScroll or other cursor
     navigation operations."""
+
+
+class SQLDatetimeLiterals(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the SQL-92 datetime literals supported by the data source.
+
+    Note that these are the datetime literals listed in the SQL-92 specification and are separate from the datetime
+    literal escape clauses defined by ODBC.
+
+    A FIPS Transitional level-conformant driver will always return the "1" value in the bitmask for all bits.
+
+    A value of "0" means that SQL-92 datetime literals are not supported.
+    """
+
+    SQL_DL_SQL92_DATE = 0x00000001
+    SQL_DL_SQL92_TIME = 0x00000002
+    SQL_DL_SQL92_TIMESTAMP = 0x00000004
+    SQL_DL_SQL92_INTERVAL_YEAR = 0x00000008
+    SQL_DL_SQL92_INTERVAL_MONTH = 0x00000010
+    SQL_DL_SQL92_INTERVAL_DAY = 0x00000020
+    SQL_DL_SQL92_INTERVAL_HOUR = 0x00000040
+    SQL_DL_SQL92_INTERVAL_MINUTE = 0x00000080
+    SQL_DL_SQL92_INTERVAL_SECOND = 0x00000100
+    SQL_DL_SQL92_INTERVAL_YEAR_TO_MONTH = 0x00000200
+    SQL_DL_SQL92_INTERVAL_DAY_TO_HOUR = 0x00000400
+    SQL_DL_SQL92_INTERVAL_DAY_TO_MINUTE = 0x00000800
+    SQL_DL_SQL92_INTERVAL_DAY_TO_SECOND = 0x00001000
+    SQL_DL_SQL92_INTERVAL_HOUR_TO_MINUTE = 0x00002000
+    SQL_DL_SQL92_INTERVAL_HOUR_TO_SECOND = 0x00004000
+    SQL_DL_SQL92_INTERVAL_MINUTE_TO_SECOND = 0x00008000
 
 
 class SQLFileUsage(IntEnum):

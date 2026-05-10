@@ -194,6 +194,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_CORRELATION_NAME,
         InfoType.SQL_CURSOR_COMMIT_BEHAVIOR,
         InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR,
+        InfoType.SQL_DATETIME_LITERALS,
         InfoType.SQL_DEFAULT_TXN_ISOLATION,
         InfoType.SQL_FILE_USAGE,
         InfoType.SQL_GETDATA_EXTENSIONS,
@@ -275,6 +276,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_CORRELATION_NAME: SQLCorrelationName,
     InfoType.SQL_CURSOR_COMMIT_BEHAVIOR: SQLCursorCommitBehavior,
     InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR: SQLCursorRollbackBehavior,
+    InfoType.SQL_DATETIME_LITERALS: SQLDatetimeLiterals,
     InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption,
     InfoType.SQL_FILE_USAGE: SQLFileUsage,
     InfoType.SQL_GETDATA_EXTENSIONS: SQLGetDataExtensions,
@@ -1134,6 +1136,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR],
     ) -> SQLCursorRollbackBehavior: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DATETIME_LITERALS],
+    ) -> SQLDatetimeLiterals: ...
 
     @overload
     def sql_get_info_w(

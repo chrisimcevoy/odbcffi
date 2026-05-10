@@ -505,6 +505,25 @@ class TestSQLGetInfoW:
 
         assert actual == expected
 
+    def test_sql_datetime_literals(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        # Not implemented in psqlodbc
+        # https://github.com/postgresql-interfaces/psqlodbc/blob/863a0e938dd50c7b68208484bdc3ef8b00735a92/info.c#L1057
+        ctx = pytest.raises(ODBCError) if connection_info.driver.startswith("PostgreSQL") else nullcontext()
+
+        with ctx:
+            actual: SQLDatetimeLiterals = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_DATETIME_LITERALS,
+            )
+
+            assert isinstance(actual, SQLDatetimeLiterals)
+
     def test_sql_dbms_name(
         self,
         driver_manager: DriverManager,
