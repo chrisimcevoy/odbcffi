@@ -36,6 +36,7 @@ __all__ = [
     "SQLCreateCharacterSet",
     "SQLCreateCollation",
     "SQLCreateDomain",
+    "SQLCreateSchema",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1081,6 +1082,7 @@ class InfoType(IntEnum):
     SQL_CREATE_DOMAIN = 130
     """Bitmask of the clauses in the CREATE DOMAIN statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_SCHEMA = 131
+    """Bitmask of the clauses in the CREATE SCHEMA statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_TABLE = 132
     SQL_CREATE_TRANSLATION = 133
     SQL_CREATE_VIEW = 134
@@ -1641,6 +1643,20 @@ class SQLCreateDomain(IntFlag):
 
     Only meaningful if the SQL_CDO_DEFAULT bit is set.
     """
+
+
+class SQLCreateSchema(IntFlag):
+    """Bitmask of the clauses in the CREATE SCHEMA statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Intermediate level-conformant driver will always return the SQL_CS_CREATE_SCHEMA and SQL_CS_AUTHORIZATION
+    options as supported. These must also be supported at the SQL-92 Entry level, but not necessarily as SQL statements.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_CS_CREATE_SCHEMA = 0x00000001
+    SQL_CS_AUTHORIZATION = 0x00000002
+    SQL_CS_DEFAULT_CHARACTER_SET = 0x00000004
 
 
 class SQLCursorCommitBehavior(IntEnum):

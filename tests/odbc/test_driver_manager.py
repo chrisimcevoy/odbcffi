@@ -545,6 +545,15 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLCreateDomain)
 
+    def test_sql_create_schema(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLCreateSchema = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_SCHEMA,
+        )
+
+        assert isinstance(actual, SQLCreateSchema)
+
     def test_sql_cursor_rollback_behavior(
         self,
         driver_manager: DriverManager,
