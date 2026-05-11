@@ -751,6 +751,19 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_drop_assertion(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropAssertion = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_ASSERTION,
+        )
+
+        assert isinstance(actual, SQLDropAssertion)
+
     def test_sql_expressions_in_order_by(
         self,
         driver_manager: DriverManager,

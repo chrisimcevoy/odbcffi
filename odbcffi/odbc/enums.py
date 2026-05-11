@@ -43,6 +43,7 @@ __all__ = [
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
+    "SQLDropAssertion",
     "SQLFileUsage",
     "SQLGetDataExtensions",
     "SQLGroupBy",
@@ -1095,6 +1096,7 @@ class InfoType(IntEnum):
     """Bitmask of the clauses in the CREATE VIEW statement, as defined in SQL-92, supported by the data source."""
     SQL_DRIVER_HDESC = 135  # deliberately not implemented (exposes driver handles)
     SQL_DROP_ASSERTION = 136
+    """Bitmask of the clauses in the DROP ASSERTION statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_CHARACTER_SET = 137
     SQL_DROP_COLLATION = 138
     SQL_DROP_DOMAIN = 139
@@ -1463,6 +1465,32 @@ class SQLBatchSupport(IntFlag):
     """The driver supports explicit procedures that can have row-count generating statements."""
 
 
+class SQLBookmarkPersistence(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the operations through which bookmarks persist."""
+
+    SQL_BP_CLOSE = 0x00000001
+    """Bookmarks are valid after an application calls SQLFreeStmt with the SQL_CLOSE option, or SQLCloseCursor to close
+    the cursor associated with a statement."""
+    SQL_BP_DELETE = 0x00000002
+    """The bookmark for a row is valid after that row has been deleted."""
+    SQL_BP_DROP = 0x00000004
+    """Bookmarks are valid after an application calls SQLFreeHandle with a HandleType of SQL_HANDLE_STMT to drop a
+    statement."""
+    SQL_BP_TRANSACTION = 0x00000008
+    """Bookmarks are valid after an application commits or rolls back a transaction."""
+    SQL_BP_UPDATE = 0x00000010
+    """The bookmark for a row is valid after any column in that row has been updated, including key columns."""
+    SQL_BP_OTHER_HSTMT = 0x00000020
+    """A bookmark associated with one statement can be used with another statement.
+
+    Unless SQL_BP_CLOSE or SQL_BP_DROP is specified, the cursor on the first statement must be open.
+    """
+
+    SQL_BP_SCROLL = 0x00000040
+    """Bookmarks are valid after an application scrolls through the result set using SQLFetchScroll or other cursor
+    navigation operations."""
+
+
 class SQLCatalogLocation(IntEnum):
     r"""An SQLUSMALLINT value that indicates the position of the catalog in a qualified table name.
 
@@ -1800,32 +1828,6 @@ class SQLCursorRollbackBehavior(IntEnum):
     """
 
 
-class SQLBookmarkPersistence(IntFlag):
-    """An SQLUINTEGER bitmask enumerating the operations through which bookmarks persist."""
-
-    SQL_BP_CLOSE = 0x00000001
-    """Bookmarks are valid after an application calls SQLFreeStmt with the SQL_CLOSE option, or SQLCloseCursor to close
-    the cursor associated with a statement."""
-    SQL_BP_DELETE = 0x00000002
-    """The bookmark for a row is valid after that row has been deleted."""
-    SQL_BP_DROP = 0x00000004
-    """Bookmarks are valid after an application calls SQLFreeHandle with a HandleType of SQL_HANDLE_STMT to drop a
-    statement."""
-    SQL_BP_TRANSACTION = 0x00000008
-    """Bookmarks are valid after an application commits or rolls back a transaction."""
-    SQL_BP_UPDATE = 0x00000010
-    """The bookmark for a row is valid after any column in that row has been updated, including key columns."""
-    SQL_BP_OTHER_HSTMT = 0x00000020
-    """A bookmark associated with one statement can be used with another statement.
-
-    Unless SQL_BP_CLOSE or SQL_BP_DROP is specified, the cursor on the first statement must be open.
-    """
-
-    SQL_BP_SCROLL = 0x00000040
-    """Bookmarks are valid after an application scrolls through the result set using SQLFetchScroll or other cursor
-    navigation operations."""
-
-
 class SQLDatetimeLiterals(IntFlag):
     """An SQLUINTEGER bitmask enumerating the SQL-92 datetime literals supported by the data source.
 
@@ -1853,6 +1855,15 @@ class SQLDatetimeLiterals(IntFlag):
     SQL_DL_SQL92_INTERVAL_HOUR_TO_MINUTE = 0x00002000
     SQL_DL_SQL92_INTERVAL_HOUR_TO_SECOND = 0x00004000
     SQL_DL_SQL92_INTERVAL_MINUTE_TO_SECOND = 0x00008000
+
+
+class SQLDropAssertion(IntFlag):
+    """Bitmask of the clauses in the DROP ASSERTION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported.
+    """
+
+    SQL_DA_DROP_ASSERTION = 0x00000001
 
 
 class SQLFileUsage(IntEnum):
