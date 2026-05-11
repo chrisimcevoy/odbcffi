@@ -39,6 +39,7 @@ __all__ = [
     "SQLCreateSchema",
     "SQLCreateTable",
     "SQLCreateTranslation",
+    "SQLCreateView",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1091,6 +1092,7 @@ class InfoType(IntEnum):
     """Bitmask of the clauses in the CREATE TRANSLATION statement, as defined in SQL-92, supported by the data
     source."""
     SQL_CREATE_VIEW = 134
+    """Bitmask of the clauses in the CREATE VIEW statement, as defined in SQL-92, supported by the data source."""
     SQL_DRIVER_HDESC = 135  # deliberately not implemented (exposes driver handles)
     SQL_DROP_ASSERTION = 136
     SQL_DROP_CHARACTER_SET = 137
@@ -1726,6 +1728,23 @@ class SQLCreateTranslation(IntFlag):
     """
 
     SQL_CTR_CREATE_TRANSLATION = 0x00000001
+
+
+class SQLCreateView(IntFlag):
+    """Bitmask of the clauses in the CREATE VIEW statement, as defined in SQL-92, supported by the data source.
+
+    A return value of "0" means that the CREATE VIEW statement is not supported.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_CV_CREATE_VIEW and SQL_CV_CHECK_OPTION options as
+    supported.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_CV_CREATE_VIEW = 0x00000001
+    SQL_CV_CHECK_OPTION = 0x00000002
+    SQL_CV_CASCADED = 0x00000004
+    SQL_CV_LOCAL = 0x00000008
 
 
 class SQLCursorCommitBehavior(IntEnum):
