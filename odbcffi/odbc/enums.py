@@ -44,6 +44,7 @@ __all__ = [
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
     "SQLDropAssertion",
+    "SQLDropCharacterSet",
     "SQLFileUsage",
     "SQLGetDataExtensions",
     "SQLGroupBy",
@@ -1098,6 +1099,7 @@ class InfoType(IntEnum):
     SQL_DROP_ASSERTION = 136
     """Bitmask of the clauses in the DROP ASSERTION statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_CHARACTER_SET = 137
+    """Bitmask for clauses in the DROP CHARACTER SET statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_COLLATION = 138
     SQL_DROP_DOMAIN = 139
     SQL_DROP_SCHEMA = 140
@@ -1864,6 +1866,15 @@ class SQLDropAssertion(IntFlag):
     """
 
     SQL_DA_DROP_ASSERTION = 0x00000001
+
+
+class SQLDropCharacterSet(IntFlag):
+    """Bitmask for the clauses in the DROP CHARACTER SET statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported.
+    """
+
+    SQL_DCS_DROP_CHARACTER_SET = 0x00000001
 
 
 class SQLFileUsage(IntEnum):

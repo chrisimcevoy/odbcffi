@@ -764,6 +764,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLDropAssertion)
 
+    def test_sql_drop_character_set(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropCharacterSet = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_CHARACTER_SET,
+        )
+
+        assert isinstance(actual, SQLDropCharacterSet)
+
     def test_sql_expressions_in_order_by(
         self,
         driver_manager: DriverManager,

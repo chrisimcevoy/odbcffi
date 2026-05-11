@@ -210,6 +210,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_DATETIME_LITERALS,
         InfoType.SQL_DEFAULT_TXN_ISOLATION,
         InfoType.SQL_DROP_ASSERTION,
+        InfoType.SQL_DROP_CHARACTER_SET,
         InfoType.SQL_FILE_USAGE,
         InfoType.SQL_GETDATA_EXTENSIONS,
         InfoType.SQL_GROUP_BY,
@@ -306,6 +307,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_DATETIME_LITERALS: SQLDatetimeLiterals,
     InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption,
     InfoType.SQL_DROP_ASSERTION: SQLDropAssertion,
+    InfoType.SQL_DROP_CHARACTER_SET: SQLDropCharacterSet,
     InfoType.SQL_FILE_USAGE: SQLFileUsage,
     InfoType.SQL_GETDATA_EXTENSIONS: SQLGetDataExtensions,
     InfoType.SQL_GROUP_BY: SQLGroupBy,
@@ -1258,6 +1260,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_DROP_ASSERTION],
     ) -> SQLDropAssertion: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_CHARACTER_SET],
+    ) -> SQLDropCharacterSet: ...
 
     @overload
     def sql_get_info_w(
