@@ -1025,10 +1025,49 @@ class InfoType(IntEnum):
     SQL_BATCH_SUPPORT = 121
     """An SQLUINTEGER bitmask enumerating the driver's support for batches."""
     SQL_CONVERT_WCHAR = 122
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for SQL_WCHAR.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CONVERT_INTERVAL_DAY_TIME = 123
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for day-time
+    intervals.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CONVERT_INTERVAL_YEAR_MONTH = 124
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for year-month
+    intervals.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CONVERT_WLONGVARCHAR = 125
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for
+    SQL_WLONGVARCHAR.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CONVERT_WVARCHAR = 126
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for
+    SQL_WVARCHAR.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CREATE_ASSERTION = 127
     SQL_CREATE_CHARACTER_SET = 128
     SQL_CREATE_COLLATION = 129

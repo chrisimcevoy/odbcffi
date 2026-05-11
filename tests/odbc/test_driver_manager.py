@@ -437,6 +437,45 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLConvert)
 
+    def test_sql_convert_wchar(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver == "PostgreSQL ANSI" else nullcontext()
+
+        with ctx:
+            actual: SQLConvert = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle, info_type=InfoType.SQL_CONVERT_WCHAR
+            )
+
+            assert isinstance(actual, SQLConvert)
+
+    def test_sql_convert_wlongvarchar(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver == "PostgreSQL ANSI" else nullcontext()
+
+        with ctx:
+            actual: SQLConvert = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle, info_type=InfoType.SQL_CONVERT_WLONGVARCHAR
+            )
+
+            assert isinstance(actual, SQLConvert)
+
+    def test_sql_convert_wvarchar(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver == "PostgreSQL ANSI" else nullcontext()
+
+        with ctx:
+            actual: SQLConvert = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle, info_type=InfoType.SQL_CONVERT_WVARCHAR
+            )
+
+            assert isinstance(actual, SQLConvert)
+
     def test_sql_cursor_commit_behavior(
         self,
         driver_manager: DriverManager,
