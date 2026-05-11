@@ -217,6 +217,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_DROP_SCHEMA,
         InfoType.SQL_DROP_TABLE,
         InfoType.SQL_DROP_TRANSLATION,
+        InfoType.SQL_DROP_VIEW,
         InfoType.SQL_FILE_USAGE,
         InfoType.SQL_GETDATA_EXTENSIONS,
         InfoType.SQL_GROUP_BY,
@@ -319,6 +320,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_DROP_SCHEMA: SQLDropSchema,
     InfoType.SQL_DROP_TABLE: SQLDropTable,
     InfoType.SQL_DROP_TRANSLATION: SQLDropTranslation,
+    InfoType.SQL_DROP_VIEW: SQLDropView,
     InfoType.SQL_FILE_USAGE: SQLFileUsage,
     InfoType.SQL_GETDATA_EXTENSIONS: SQLGetDataExtensions,
     InfoType.SQL_GROUP_BY: SQLGroupBy,
@@ -1313,6 +1315,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_DROP_TRANSLATION],
     ) -> SQLDropTranslation: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_VIEW],
+    ) -> SQLDropView: ...
 
     @overload
     def sql_get_info_w(

@@ -49,6 +49,7 @@ __all__ = [
     "SQLDropDomain",
     "SQLDropSchema",
     "SQLDropTranslation",
+    "SQLDropView",
     "SQLFileUsage",
     "SQLGetDataExtensions",
     "SQLGroupBy",
@@ -1115,6 +1116,7 @@ class InfoType(IntEnum):
     SQL_DROP_TRANSLATION = 142
     """Bitmask for the clauses in the DROP TRANSLATION statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_VIEW = 143
+    """Bitmask of the clauses in the DROP VIEW statement, as defined in SQL-92, supported by the data source."""
     SQL_DYNAMIC_CURSOR_ATTRIBUTES1 = 144
     SQL_DYNAMIC_CURSOR_ATTRIBUTES2 = 145
     SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1 = 146
@@ -1935,6 +1937,17 @@ class SQLDropTranslation(IntFlag):
     """
 
     SQL_DTR_DROP_TRANSLATION = 0x00000001
+
+
+class SQLDropView(IntFlag):
+    """Bitmask of the clauses in the DROP VIEW statement, as defined in SQL-92, supported by the data source.
+
+    An FIPS Transitional level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_DV_DROP_VIEW = 0x00000001
+    SQL_DV_RESTRICT = 0x00000002
+    SQL_DV_CASCADE = 0x00000004
 
 
 class SQLFileUsage(IntEnum):

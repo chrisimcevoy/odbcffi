@@ -843,6 +843,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLDropTranslation)
 
+    def test_sql_drop_view(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropView = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_VIEW,
+        )
+
+        assert isinstance(actual, SQLDropView)
+
     def test_sql_expressions_in_order_by(
         self,
         driver_manager: DriverManager,
