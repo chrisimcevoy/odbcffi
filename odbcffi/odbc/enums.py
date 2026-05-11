@@ -38,6 +38,7 @@ __all__ = [
     "SQLCreateDomain",
     "SQLCreateSchema",
     "SQLCreateTable",
+    "SQLCreateTranslation",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1087,6 +1088,8 @@ class InfoType(IntEnum):
     SQL_CREATE_TABLE = 132
     """Bitmask for the clauses in the CREATE TABLE statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_TRANSLATION = 133
+    """Bitmask of the clauses in the CREATE TRANSLATION statement, as defined in SQL-92, supported by the data
+    source."""
     SQL_CREATE_VIEW = 134
     SQL_DRIVER_HDESC = 135  # deliberately not implemented (exposes driver handles)
     SQL_DROP_ASSERTION = 136
@@ -1713,6 +1716,16 @@ class SQLCreateTable(IntFlag):
     SQL_CT_CONSTRAINT_NAME_DEFINITION = 0x00002000
     """The <constraint name definition> clause is supported for naming column and table constraints (Intermediate
     level)"""
+
+
+class SQLCreateTranslation(IntFlag):
+    """Bitmask of the clauses in the CREATE TRANSLATION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return these options as supported. A return value of "0" means
+    that the CREATE TRANSLATION statement is not supported.
+    """
+
+    SQL_CTR_CREATE_TRANSLATION = 0x00000001
 
 
 class SQLCursorCommitBehavior(IntEnum):

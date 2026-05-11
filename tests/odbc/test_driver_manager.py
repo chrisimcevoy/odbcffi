@@ -563,6 +563,17 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLCreateTable)
 
+    def test_sql_create_translation(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCreateTranslation = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_TRANSLATION,
+        )
+
+        assert isinstance(actual, SQLCreateTranslation)
+
     def test_sql_cursor_rollback_behavior(
         self,
         driver_manager: DriverManager,
