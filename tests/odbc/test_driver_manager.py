@@ -489,7 +489,7 @@ class TestSQLGetInfoW:
 
         assert actual in list(SQLCursorCommitBehavior)
 
-    def test_correlation_name(
+    def test_sql_correlation_name(
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
@@ -502,6 +502,17 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLCorrelationName)
         assert actual in list(SQLCorrelationName)
+
+    def test_sql_create_assertion(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCreateAssertion = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_ASSERTION,
+        )
+
+        assert isinstance(actual, SQLCreateAssertion)
 
     def test_sql_cursor_rollback_behavior(
         self,

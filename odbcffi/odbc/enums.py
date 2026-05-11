@@ -32,6 +32,7 @@ __all__ = [
     "SQLConvert",
     "SQLConvertFunctions",
     "SQLCorrelationName",
+    "SQLCreateAssertion",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1069,6 +1070,7 @@ class InfoType(IntEnum):
     conversion to the same data type.
     """
     SQL_CREATE_ASSERTION = 127
+    """Bitmask for the clauses in the CREATE ASSERTION statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_CHARACTER_SET = 128
     SQL_CREATE_COLLATION = 129
     SQL_CREATE_DOMAIN = 130
@@ -1559,6 +1561,20 @@ class SQLCorrelationName(IntEnum):
 
     SQL_CN_ANY = 0x0002
     """Correlation names are supported and can be any valid user-defined name."""
+
+
+class SQLCreateAssertion(IntFlag):
+    """The clauses in the CREATE ASSERTION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported. A return value of "0"
+    means that the CREATE ASSERTION statement is not supported.
+    """
+
+    SQL_CA_CREATE_ASSERTION = 0x00000001
+    SQL_CA_CONSTRAINT_INITIALLY_DEFERRED = 0x00000010
+    SQL_CA_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000020
+    SQL_CA_CONSTRAINT_DEFERRABLE = 0x00000040
+    SQL_CA_CONSTRAINT_NON_DEFERRABLE = 0x00000080
 
 
 class SQLCursorCommitBehavior(IntEnum):
