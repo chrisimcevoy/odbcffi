@@ -830,6 +830,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLDropTable)
 
+    def test_sql_drop_translation(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropTranslation = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_TRANSLATION,
+        )
+
+        assert isinstance(actual, SQLDropTranslation)
+
     def test_sql_expressions_in_order_by(
         self,
         driver_manager: DriverManager,

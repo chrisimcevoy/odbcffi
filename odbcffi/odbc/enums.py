@@ -48,6 +48,7 @@ __all__ = [
     "SQLDropCollation",
     "SQLDropDomain",
     "SQLDropSchema",
+    "SQLDropTranslation",
     "SQLFileUsage",
     "SQLGetDataExtensions",
     "SQLGroupBy",
@@ -1112,6 +1113,7 @@ class InfoType(IntEnum):
     SQL_DROP_TABLE = 141
     """Bitmask of the clauses in the DROP TABLE statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_TRANSLATION = 142
+    """Bitmask for the clauses in the DROP TRANSLATION statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_VIEW = 143
     SQL_DYNAMIC_CURSOR_ATTRIBUTES1 = 144
     SQL_DYNAMIC_CURSOR_ATTRIBUTES2 = 145
@@ -1924,6 +1926,15 @@ class SQLDropTable(IntFlag):
     SQL_DT_DROP_TABLE = 0x00000001
     SQL_DT_RESTRICT = 0x00000002
     SQL_DT_CASCADE = 0x00000004
+
+
+class SQLDropTranslation(IntFlag):
+    """Bitmask for the clauses in the DROP TRANSLATION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported.
+    """
+
+    SQL_DTR_DROP_TRANSLATION = 0x00000001
 
 
 class SQLFileUsage(IntEnum):
