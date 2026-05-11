@@ -37,6 +37,7 @@ __all__ = [
     "SQLCreateCollation",
     "SQLCreateDomain",
     "SQLCreateSchema",
+    "SQLCreateTable",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1084,6 +1085,7 @@ class InfoType(IntEnum):
     SQL_CREATE_SCHEMA = 131
     """Bitmask of the clauses in the CREATE SCHEMA statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_TABLE = 132
+    """Bitmask for the clauses in the CREATE TABLE statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_TRANSLATION = 133
     SQL_CREATE_VIEW = 134
     SQL_DRIVER_HDESC = 135  # deliberately not implemented (exposes driver handles)
@@ -1657,6 +1659,60 @@ class SQLCreateSchema(IntFlag):
     SQL_CS_CREATE_SCHEMA = 0x00000001
     SQL_CS_AUTHORIZATION = 0x00000002
     SQL_CS_DEFAULT_CHARACTER_SET = 0x00000004
+
+
+class SQLCreateTable(IntFlag):
+    """Bitmask for the clauses in the CREATE TABLE statement, as defined in SQL-92, supported by the data source.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_CT_CREATE_TABLE = 0x00000001
+    """The CREATE TABLE statement is supported (Entry level)."""
+    SQL_CT_COMMIT_PRESERVE = 0x00000002
+    """Deleted rows are preserved on commit (Full level)."""
+    SQL_CT_COMMIT_DELETE = 0x00000004
+    """Deleted rows are deleted on commit (Full level)."""
+    SQL_CT_GLOBAL_TEMPORARY = 0x00000008
+    """Global temporary tables can be created (Full level)."""
+    SQL_CT_LOCAL_TEMPORARY = 0x00000010
+    """Local temporary tables can be created (Full level)."""
+    SQL_CT_CONSTRAINT_INITIALLY_DEFERRED = 0x00000020
+    """The INITIALLY DEFERRED constraint attribute is supported (Full level).
+
+    Only meaningful if specifying column or table constraints is supported, i.e. if the SQL_CT_COLUMN_CONSTRAINT or the
+    SQL_CT_TABLE_CONSTRAINT bit is set.
+    """
+    SQL_CT_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000040
+    """The INITIALLY IMMEDIATE constraint attribute is supported (Full level).
+
+    Only meaningful if specifying column or table constraints is supported, i.e. if the SQL_CT_COLUMN_CONSTRAINT or the
+    SQL_CT_TABLE_CONSTRAINT bit is set.
+    """
+    SQL_CT_CONSTRAINT_DEFERRABLE = 0x00000080
+    """The DEFERRABLE constraint attribute is supported (Full level).
+
+    Only meaningful if specifying column or table constraints is supported, i.e. if the SQL_CT_COLUMN_CONSTRAINT or the
+    SQL_CT_TABLE_CONSTRAINT bit is set.
+    """
+    SQL_CT_CONSTRAINT_NON_DEFERRABLE = 0x00000100
+    """The NON DEFERRABLE constraint attribute is supported (Full level).
+
+    Only meaningful if specifying column or table constraints is supported, i.e. if the SQL_CT_COLUMN_CONSTRAINT or the
+    SQL_CT_TABLE_CONSTRAINT bit is set.
+    """
+    SQL_CT_COLUMN_CONSTRAINT = 0x00000200
+    """Specifying column constraints is supported (FIPS Transitional level)."""
+    SQL_CT_COLUMN_DEFAULT = 0x00000400
+    """Specifying column defaults is supported (FIPS Transitional level)."""
+    SQL_CT_COLUMN_COLLATION = 0x00000800
+    """Specifying column collation is supported (Full level)."""
+    SQL_CT_TABLE_CONSTRAINT = 0x00001000
+    """Specifying table constraints is supported (FIPS Transitional level)"""
+    SQL_CT_CONSTRAINT_NAME_DEFINITION = 0x00002000
+    """The <constraint name definition> clause is supported for naming column and table constraints (Intermediate
+    level)"""
 
 
 class SQLCursorCommitBehavior(IntEnum):
