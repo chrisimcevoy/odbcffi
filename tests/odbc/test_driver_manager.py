@@ -790,6 +790,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLDropCollation)
 
+    def test_sql_drop_domain(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropDomain = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_DOMAIN,
+        )
+
+        assert isinstance(actual, SQLDropDomain)
+
     def test_sql_expressions_in_order_by(
         self,
         driver_manager: DriverManager,
