@@ -47,6 +47,7 @@ __all__ = [
     "SQLDropCharacterSet",
     "SQLDropCollation",
     "SQLDropDomain",
+    "SQLDropSchema",
     "SQLFileUsage",
     "SQLGetDataExtensions",
     "SQLGroupBy",
@@ -1107,6 +1108,7 @@ class InfoType(IntEnum):
     SQL_DROP_DOMAIN = 139
     """Bitmask for the clauses in the DROP DOMAIN statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_SCHEMA = 140
+    """Bitmask of the clauses in the DROP SCHEMA statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_TABLE = 141
     SQL_DROP_TRANSLATION = 142
     SQL_DROP_VIEW = 143
@@ -1899,6 +1901,17 @@ class SQLDropDomain(IntFlag):
     SQL_DD_DROP_DOMAIN = 0x00000001
     SQL_DD_RESTRICT = 0x00000002
     SQL_DD_CASCADE = 0x00000004
+
+
+class SQLDropSchema(IntFlag):
+    """Bitmask for the clauses in the DROP SCHEMA statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Intermediate level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_DS_DROP_SCHEMA = 0x00000001
+    SQL_DS_RESTRICT = 0x00000002
+    SQL_DS_CASCADE = 0x00000004
 
 
 class SQLFileUsage(IntEnum):
