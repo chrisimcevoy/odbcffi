@@ -6,6 +6,7 @@ import pytest
 from odbcffi.odbc.connection_handle import ConnectionHandle
 from odbcffi.odbc.driver_manager import DriverManager
 from odbcffi.odbc.enums import *
+from odbcffi.odbc.enums import SQLDropTable
 from odbcffi.odbc.environment_handle import EnvironmentHandle
 from odbcffi.odbc.errors import ODBCError
 from tests.conftest import ConnectionInfo
@@ -815,6 +816,19 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, SQLDropSchema)
+
+    def test_sql_drop_table(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropTable = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_TABLE,
+        )
+
+        assert isinstance(actual, SQLDropTable)
 
     def test_sql_expressions_in_order_by(
         self,

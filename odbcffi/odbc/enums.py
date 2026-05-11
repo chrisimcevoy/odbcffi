@@ -1110,6 +1110,7 @@ class InfoType(IntEnum):
     SQL_DROP_SCHEMA = 140
     """Bitmask of the clauses in the DROP SCHEMA statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_TABLE = 141
+    """Bitmask of the clauses in the DROP TABLE statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_TRANSLATION = 142
     SQL_DROP_VIEW = 143
     SQL_DYNAMIC_CURSOR_ATTRIBUTES1 = 144
@@ -1912,6 +1913,17 @@ class SQLDropSchema(IntFlag):
     SQL_DS_DROP_SCHEMA = 0x00000001
     SQL_DS_RESTRICT = 0x00000002
     SQL_DS_CASCADE = 0x00000004
+
+
+class SQLDropTable(IntFlag):
+    """Bitmask for the clauses in the DROP TABLE statement, as defined in SQL-92, supported by the data source.
+
+    An FIPS Transitional level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_DT_DROP_TABLE = 0x00000001
+    SQL_DT_RESTRICT = 0x00000002
+    SQL_DT_CASCADE = 0x00000004
 
 
 class SQLFileUsage(IntEnum):
