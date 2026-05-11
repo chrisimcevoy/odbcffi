@@ -34,6 +34,7 @@ __all__ = [
     "SQLCorrelationName",
     "SQLCreateAssertion",
     "SQLCreateCharacterSet",
+    "SQLCreateCollation",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1075,6 +1076,7 @@ class InfoType(IntEnum):
     SQL_CREATE_CHARACTER_SET = 128
     """Bitmask of clauses in the CREATE CHARACTER SET statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_COLLATION = 129
+    """Bitmask for the clauses in the CREATE COLLATION statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_DOMAIN = 130
     SQL_CREATE_SCHEMA = 131
     SQL_CREATE_TABLE = 132
@@ -1589,6 +1591,16 @@ class SQLCreateCharacterSet(IntFlag):
     SQL_CCS_CREATE_CHARACTER_SET = 0x00000001
     SQL_CCS_COLLATE_CLAUSE = 0x00000002
     SQL_CCS_LIMITED_COLLATION = 0x00000004
+
+
+class SQLCreateCollation(IntFlag):
+    """Bitmask for the clauses in the CREATE COLLATION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported. A return value of "0" means that
+    the CREATE COLLATION statement is not supported.
+    """
+
+    SQL_CCOL_CREATE_COLLATION = 0x00000001
 
 
 class SQLCursorCommitBehavior(IntEnum):
