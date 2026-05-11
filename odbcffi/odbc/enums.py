@@ -35,6 +35,7 @@ __all__ = [
     "SQLCreateAssertion",
     "SQLCreateCharacterSet",
     "SQLCreateCollation",
+    "SQLCreateDomain",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1078,6 +1079,7 @@ class InfoType(IntEnum):
     SQL_CREATE_COLLATION = 129
     """Bitmask for the clauses in the CREATE COLLATION statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_DOMAIN = 130
+    """Bitmask of the clauses in the CREATE DOMAIN statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_SCHEMA = 131
     SQL_CREATE_TABLE = 132
     SQL_CREATE_TRANSLATION = 133
@@ -1601,6 +1603,44 @@ class SQLCreateCollation(IntFlag):
     """
 
     SQL_CCOL_CREATE_COLLATION = 0x00000001
+
+
+class SQLCreateDomain(IntFlag):
+    """Bitmask of the clauses in the CREATE DOMAIN statement, as defined in SQL-92, supported by the data source.
+
+    A return value of "0" means that the CREATE DOMAIN statement is not supported.
+    """
+
+    SQL_CDO_CREATE_DOMAIN = 0x00000001
+    """The CREATE DOMAIN statement is supported (Intermediate level)."""
+    SQL_CDO_DEFAULT = 0x00000002
+    """Specifying domain constraints is supported (Intermediate level)."""
+    SQL_CDO_CONSTRAINT = 0x00000004
+    """Specifying domain defaults is supported (Intermediate level)."""
+    SQL_CDO_COLLATION = 0x00000008
+    """Specifying domain collation is supported (Full level)."""
+    SQL_CDO_CONSTRAINT_NAME_DEFINITION = 0x00000010
+    """<constraint name definition> is supported for naming domain constraints (Intermediate level)."""
+    SQL_CDO_CONSTRAINT_INITIALLY_DEFERRED = 0x00000020
+    """Supports the INITIALLY DEFERRED domain constraint attribute. (Full level).
+
+    Only meaningful if the SQL_CDO_DEFAULT bit is set.
+    """
+    SQL_CDO_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000040
+    """Supports the INITIALLY IMMEDIATE domain constraint attribute. (Full level).
+
+    Only meaningful if the SQL_CDO_DEFAULT bit is set.
+    """
+    SQL_CDO_CONSTRAINT_DEFERRABLE = 0x00000080
+    """Supports the DEFERRABLE domain constraint attribute. (Full level).
+
+    Only meaningful if the SQL_CDO_DEFAULT bit is set.
+    """
+    SQL_CDO_CONSTRAINT_NON_DEFERRABLE = 0x00000100
+    """Supports the NON DEFERRABLE domain constraint attribute. (Full level).
+
+    Only meaningful if the SQL_CDO_DEFAULT bit is set.
+    """
 
 
 class SQLCursorCommitBehavior(IntEnum):
