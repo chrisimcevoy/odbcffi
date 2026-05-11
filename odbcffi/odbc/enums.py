@@ -33,6 +33,7 @@ __all__ = [
     "SQLConvertFunctions",
     "SQLCorrelationName",
     "SQLCreateAssertion",
+    "SQLCreateCharacterSet",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1072,6 +1073,7 @@ class InfoType(IntEnum):
     SQL_CREATE_ASSERTION = 127
     """Bitmask for the clauses in the CREATE ASSERTION statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_CHARACTER_SET = 128
+    """Bitmask of clauses in the CREATE CHARACTER SET statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_COLLATION = 129
     SQL_CREATE_DOMAIN = 130
     SQL_CREATE_SCHEMA = 131
@@ -1575,6 +1577,18 @@ class SQLCreateAssertion(IntFlag):
     SQL_CA_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000020
     SQL_CA_CONSTRAINT_DEFERRABLE = 0x00000040
     SQL_CA_CONSTRAINT_NON_DEFERRABLE = 0x00000080
+
+
+class SQLCreateCharacterSet(IntFlag):
+    """Bitmask of clauses in the CREATE CHARACTER SET statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported. A return value of "0"
+    means that the CREATE CHARACTER SET statement is not supported.
+    """
+
+    SQL_CCS_CREATE_CHARACTER_SET = 0x00000001
+    SQL_CCS_COLLATE_CLAUSE = 0x00000002
+    SQL_CCS_LIMITED_COLLATION = 0x00000004
 
 
 class SQLCursorCommitBehavior(IntEnum):

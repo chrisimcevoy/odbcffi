@@ -514,6 +514,17 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLCreateAssertion)
 
+    def test_sql_create_character_set(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCreateCharacterSet = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_CHARACTER_SET,
+        )
+
+        assert isinstance(actual, SQLCreateCharacterSet)
+
     def test_sql_cursor_rollback_behavior(
         self,
         driver_manager: DriverManager,
