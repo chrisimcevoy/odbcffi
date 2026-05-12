@@ -856,6 +856,28 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLDropView)
 
+    def test_sql_dynamic_cursor_attributes_1(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes1 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes1)
+
+    def test_sql_dynamic_cursor_attributes_2(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes2 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes2)
+
     def test_sql_expressions_in_order_by(
         self,
         driver_manager: DriverManager,
@@ -878,6 +900,28 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLFileUsage)
         assert actual in list(SQLFileUsage)
+
+    def test_sql_forward_only_cursor_attributes_1(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes1 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes1)
+
+    def test_sql_forward_only_cursor_attributes_2(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes2 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes2)
 
     def test_sql_getdata_extensions(
         self,
@@ -942,6 +986,28 @@ class TestSQLGetInfoW:
         )
 
         assert actual in ("Y", "N")
+
+    def test_sql_keyset_cursor_attributes_1(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes1 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes1)
+
+    def test_sql_keyset_cursor_attributes_2(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes2 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes2)
 
     def test_sql_keywords(
         self,
@@ -1555,6 +1621,28 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, SQLSqlConformance)
+
+    def test_sql_static_cursor_attributes_1(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes1 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes1)
+
+    def test_sql_static_cursor_attributes_2(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes2 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes2)
 
     def test_sql_string_functions(
         self,

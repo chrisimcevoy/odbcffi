@@ -40,6 +40,8 @@ __all__ = [
     "SQLCreateTable",
     "SQLCreateTranslation",
     "SQLCreateView",
+    "SQLCursorAttributes1",
+    "SQLCursorAttributes2",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
@@ -1118,13 +1120,39 @@ class InfoType(IntEnum):
     SQL_DROP_VIEW = 143
     """Bitmask of the clauses in the DROP VIEW statement, as defined in SQL-92, supported by the data source."""
     SQL_DYNAMIC_CURSOR_ATTRIBUTES1 = 144
+    """An SQLUINTEGER bitmask that describes the attributes of a dynamic cursor that are supported by the driver.
+
+    This bitmask contains the first subset of attributes; for the second subset, see SQL_DYNAMIC_CURSOR_ATTRIBUTES2.
+    """
     SQL_DYNAMIC_CURSOR_ATTRIBUTES2 = 145
+    """An SQLUINTEGER bitmask that describes the attributes of a dynamic cursor that are supported by the driver.
+
+    This bitmask contains the second subset of attributes; for the first subset, see SQL_DYNAMIC_CURSOR_ATTRIBUTES1.
+    """
     SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1 = 146
+    """An SQLUINTEGER bitmask that describes the attributes of a forward only cursor that are supported by the driver.
+
+    This bitmask contains the first subset of attributes; for the second subset, see
+    SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2.
+    """
     SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2 = 147
+    """An SQLUINTEGER bitmask that describes the attributes of a forward only cursor that are supported by the driver.
+
+    This bitmask contains the second subset of attributes; for the first subset, see
+    SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1.
+    """
     SQL_INDEX_KEYWORDS = 148
     SQL_INFO_SCHEMA_VIEWS = 149
     SQL_KEYSET_CURSOR_ATTRIBUTES1 = 150
+    """An SQLUINTEGER bitmask that describes the attributes of a keyset cursor that are supported by the driver.
+
+    This bitmask contains the first subset of attributes; for the second subset, see SQL_KEYSET_CURSOR_ATTRIBUTES2.
+    """
     SQL_KEYSET_CURSOR_ATTRIBUTES2 = 151
+    """An SQLUINTEGER bitmask that describes the attributes of a keyset cursor that are supported by the driver.
+
+    This bitmask contains the second subset of attributes; for the first subset, see SQL_KEYSET_CURSOR_ATTRIBUTES1.
+    """
     SQL_ODBC_INTERFACE_CONFORMANCE = 152
     SQL_PARAM_ARRAY_ROW_COUNTS = 153
     SQL_PARAM_ARRAY_SELECTS = 154
@@ -1141,7 +1169,15 @@ class InfoType(IntEnum):
     SQL_SQL92_VALUE_EXPRESSIONS = 165
     SQL_STANDARD_CLI_CONFORMANCE = 166
     SQL_STATIC_CURSOR_ATTRIBUTES1 = 167
+    """An SQLUINTEGER bitmask that describes the attributes of a static cursor that are supported by the driver.
+
+    This bitmask contains the first subset of attributes; for the second subset, see SQL_STATIC_CURSOR_ATTRIBUTES2.
+    """
     SQL_STATIC_CURSOR_ATTRIBUTES2 = 168
+    """An SQLUINTEGER bitmask that describes the attributes of a static cursor that are supported by the driver.
+
+    This bitmask contains the second subset of attributes; for the first subset, see SQL_STATIC_CURSOR_ATTRIBUTES1.
+    """
     SQL_AGGREGATE_FUNCTIONS = 169
     SQL_DDL_INDEX = 170
     SQL_DM_VER = 171
@@ -1786,6 +1822,175 @@ class SQLCreateView(IntFlag):
     SQL_CV_CHECK_OPTION = 0x00000002
     SQL_CV_CASCADED = 0x00000004
     SQL_CV_LOCAL = 0x00000008
+
+
+class SQLCursorAttributes1(IntFlag):
+    """An SQLUINTEGER bitmask that describes the attributes of a cursor that are supported by the driver.
+
+    This is the return value of calling ``DriverManager.sql_get_info_w`` with an InfoType of
+    SQL_DYNAMIC_CURSOR_ATTRIBUTES1, SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1, SQL_KEYSET_CURSOR_ATTRIBUTES1, or
+    SQL_STATIC_CURSOR_ATTRIBUTES1.
+
+    This bitmask contains the first subset of attributes; for the second subset, see SQLCursorAttributes2.
+
+    A SQL-92 Intermediate level-conformant driver will usually return the SQL_CA1_NEXT, SQL_CA1_ABSOLUTE, and
+    SQL_CA1_RELATIVE options as supported, because it supports scrollable cursors through the embedded SQL FETCH
+    statement. Because this does not directly determine the underlying SQL support, however, scrollable cursors may not
+    be supported, even for a SQL-92 Intermediate level-conformant driver.
+    """
+
+    SQL_CA1_NEXT = 0x00000001
+    """A FetchOrientation argument of SQL_FETCH_NEXT is supported in a call to SQLFetchScroll for this cursor type."""
+    SQL_CA1_ABSOLUTE = 0x00000002
+    """FetchOrientation arguments of SQL_FETCH_FIRST, SQL_FETCH_LAST, and SQL_FETCH_ABSOLUTE are supported in a call to
+    SQLFetchScroll for this cursor type.
+
+    The rowset that will be fetched is independent of the current cursor position.
+    """
+    SQL_CA1_RELATIVE = 0x00000004
+    """FetchOrientation arguments of SQL_FETCH_PRIOR and SQL_FETCH_RELATIVE are supported in a call to SQLFetchScroll
+    for this cursor type.
+
+    The rowset that will be fetched depends on the current cursor position. Note that this is separated from
+    SQL_FETCH_NEXT because in a forward-only cursor, only SQL_FETCH_NEXT is supported.
+    """
+    SQL_CA1_BOOKMARK = 0x00000008
+    """A FetchOrientation argument of SQL_FETCH_BOOKMARK is supported in a call to SQLFetchScroll for this cursor
+    type."""
+    SQL_CA1_LOCK_NO_CHANGE = 0x00000040
+    """A LockType argument of SQL_LOCK_NO_CHANGE is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_LOCK_EXCLUSIVE = 0x00000080
+    """A LockType argument of SQL_LOCK_EXCLUSIVE is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_LOCK_UNLOCK = 0x00000100
+    """A LockType argument of SQL_LOCK_UNLOCK is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POS_POSITION = 0x00000200
+    """An Operation argument of SQL_POSITION is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POS_UPDATE = 0x00000400
+    """An Operation argument of SQL_UPDATE is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POS_DELETE = 0x00000800
+    """An Operation argument of SQL_DELETE is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POS_REFRESH = 0x00001000
+    """An Operation argument of SQL_REFRESH is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POSITIONED_UPDATE = 0x00002000
+    """An UPDATE WHERE CURRENT OF SQL statement is supported for this cursor type.
+
+    A SQL-92 Entry level-conformant driver will always return this option as supported.
+    """
+    SQL_CA1_POSITIONED_DELETE = 0x00004000
+    """A DELETE WHERE CURRENT OF SQL statement is supported for this cursor type.
+
+    A SQL-92 Entry level-conformant driver will always return this option as supported.
+    """
+    SQL_CA1_SELECT_FOR_UPDATE = 0x00008000
+    """A SELECT FOR UPDATE SQL statement is supported for this cursor type.
+
+    A SQL-92 Entry level-conformant driver will always return this option as supported.
+    """
+    SQL_CA1_BULK_ADD = 0x00010000
+    """An Operation argument of SQL_ADD is supported in a call to SQLBulkOperations for this cursor type."""
+    SQL_CA1_BULK_UPDATE_BY_BOOKMARK = 0x00020000
+    """An Operation argument of SQL_UPDATE_BY_BOOKMARK is supported in a call to SQLBulkOperations for this cursor
+    type."""
+    SQL_CA1_BULK_DELETE_BY_BOOKMARK = 0x00040000
+    """An Operation argument of SQL_DELETE_BY_BOOKMARK is supported in a call to SQLBulkOperations for this cursor
+    type."""
+    SQL_CA1_BULK_FETCH_BY_BOOKMARK = 0x00080000
+    """An Operation argument of SQL_FETCH_BY_BOOKMARK is supported in a call to SQLBulkOperations for this cursor
+    type."""
+
+
+class SQLCursorAttributes2(IntFlag):
+    """An SQLUINTEGER bitmask that describes the attributes of a cursor that are supported by the driver.
+
+    This is the return value of calling ``DriverManager.sql_get_info_w`` with an InfoType of
+    SQL_DYNAMIC_CURSOR_ATTRIBUTES2, SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2, SQL_KEYSET_CURSOR_ATTRIBUTES2, or
+    SQL_STATIC_CURSOR_ATTRIBUTES2.
+
+    This bitmask contains the second subset of attributes; for the first subset, see SQLCursorAttributes1.
+    """
+
+    SQL_CA2_READ_ONLY_CONCURRENCY = 0x00000001
+    """A read-only cursor, in which no updates are allowed, is supported.
+
+    (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_READ_ONLY for this cursor type).
+    """
+    SQL_CA2_LOCK_CONCURRENCY = 0x00000002
+    """A cursor that uses the lowest level of locking sufficient to ensure that the row can be updated is supported.
+
+    (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_LOCK for this cursor type.)
+
+    These locks must be consistent with the transaction isolation level set by the SQL_ATTR_TXN_ISOLATION connection
+    attribute.
+    """
+    SQL_CA2_OPT_ROWVER_CONCURRENCY = 0x00000004
+    """A cursor that uses the optimistic concurrency control comparing row versions is supported.
+
+    (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_ROWVER for this cursor type.)
+    """
+    SQL_CA2_OPT_VALUES_CONCURRENCY = 0x00000008
+    """A cursor that uses the optimistic concurrency control comparing values is supported.
+
+    (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_VALUES for this cursor type.)
+    """
+    SQL_CA2_SENSITIVITY_ADDITIONS = 0x00000010
+    """Added rows are visible to a cursor of this type; the cursor can scroll to those rows.
+
+    (Where these rows are added to the cursor is driver-dependent.)
+    """
+    SQL_CA2_SENSITIVITY_DELETIONS = 0x00000020
+    """Deleted rows are no longer available to a cursor of this type, and do not leave a "hole" in the result set; after
+    the cursor scrolls from a deleted row, it cannot return to that row."""
+    SQL_CA2_SENSITIVITY_UPDATES = 0x00000040
+    """Updates to rows are visible to a cursor of this type; if the cursor scrolls from and returns to an updated row,
+    the data returned by the cursor is the updated data, not the original data."""
+    SQL_CA2_MAX_ROWS_SELECT = 0x00000080
+    """The SQL_ATTR_MAX_ROWS statement attribute affects SELECT statements for this cursor type."""
+    SQL_CA2_MAX_ROWS_INSERT = 0x00000100
+    """The SQL_ATTR_MAX_ROWS statement attribute affects INSERT statements for this cursor type."""
+    SQL_CA2_MAX_ROWS_DELETE = 0x00000200
+    """The SQL_ATTR_MAX_ROWS statement attribute affects DELETE statements for this cursor type."""
+    SQL_CA2_MAX_ROWS_UPDATE = 0x00000400
+    """The SQL_ATTR_MAX_ROWS statement attribute affects UPDATE statements for this cursor type."""
+    SQL_CA2_MAX_ROWS_CATALOG = 0x00000800
+    """The SQL_ATTR_MAX_ROWS statement attribute affects CATALOG result sets for this cursor type."""
+    SQL_CA2_MAX_ROWS_AFFECTS_ALL = (
+        SQL_CA2_MAX_ROWS_SELECT
+        | SQL_CA2_MAX_ROWS_INSERT
+        | SQL_CA2_MAX_ROWS_DELETE
+        | SQL_CA2_MAX_ROWS_UPDATE
+        | SQL_CA2_MAX_ROWS_CATALOG
+    )
+    """The SQL_ATTR_MAX_ROWS statement attribute affects SELECT, INSERT, DELETE, and UPDATE statements, and CATALOG
+    result sets for this cursor type."""
+    SQL_CA2_CRC_EXACT = 0x00001000
+    """The exact row count is available in the SQL_DIAG_CURSOR_ROW_COUNT diagnostic field for this cursor type."""
+    SQL_CA2_CRC_APPROXIMATE = 0x00002000
+    """An approximate row count is available in the SQL_DIAG_CURSOR_ROW_COUNT diagnostic field for this cursor type."""
+    SQL_CA2_SIMULATE_NON_UNIQUE = 0x00004000
+    """The driver does not guarantee that simulated positioned update or delete statements will affect only one row for
+    this cursor type; it is the application's responsibility to guarantee this.
+
+    (If a statement affects more than one row, SQLExecute or SQLExecDirect returns SQLSTATE 01001 [Cursor operation
+    conflict].) To set this behavior, the application calls SQLSetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR attribute
+    set to SQL_SC_NON_UNIQUE.
+    """
+    SQL_CA2_SIMULATE_TRY_UNIQUE = 0x00008000
+    """The driver tries to guarantee that simulated positioned update or delete statements will affect only one row for
+    this cursor type.
+
+    The driver always executes such statements, even if they might affect more than one row, such as when there is no
+    unique key. (If a statement affects more than one row, SQLExecute or SQLExecDirect returns SQLSTATE 01001 [Cursor
+    operation conflict].) To set this behavior, the application calls SQLSetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR
+    attribute set to SQL_SC_TRY_UNIQUE.
+    """
+    SQL_CA2_SIMULATE_UNIQUE = 0x00010000
+    """The driver guarantees that simulated positioned update or delete statements will affect only one row for this
+    cursor type.
+
+    If the driver cannot guarantee this for a given statement, SQLExecDirect or SQLPrepare return SQLSTATE 01001 (Cursor
+    operation conflict). To set this behavior, the application calls SQLSetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR
+    attribute set to SQL_SC_UNIQUE.
+    """
 
 
 class SQLCursorCommitBehavior(IntEnum):

@@ -218,10 +218,16 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_DROP_TABLE,
         InfoType.SQL_DROP_TRANSLATION,
         InfoType.SQL_DROP_VIEW,
+        InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1,
+        InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2,
         InfoType.SQL_FILE_USAGE,
+        InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1,
+        InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2,
         InfoType.SQL_GETDATA_EXTENSIONS,
         InfoType.SQL_GROUP_BY,
         InfoType.SQL_IDENTIFIER_CASE,
+        InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1,
+        InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2,
         InfoType.SQL_MAX_BINARY_LITERAL_LEN,
         InfoType.SQL_MAX_CATALOG_NAME_LEN,
         InfoType.SQL_MAX_CHAR_LITERAL_LEN,
@@ -253,6 +259,8 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_SCROLL_CONCURRENCY,
         InfoType.SQL_SCROLL_OPTIONS,
         InfoType.SQL_SQL_CONFORMANCE,
+        InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1,
+        InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2,
         InfoType.SQL_STRING_FUNCTIONS,
         InfoType.SQL_SUBQUERIES,
         InfoType.SQL_SYSTEM_FUNCTIONS,
@@ -321,10 +329,16 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_DROP_TABLE: SQLDropTable,
     InfoType.SQL_DROP_TRANSLATION: SQLDropTranslation,
     InfoType.SQL_DROP_VIEW: SQLDropView,
+    InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
+    InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_FILE_USAGE: SQLFileUsage,
+    InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
+    InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_GETDATA_EXTENSIONS: SQLGetDataExtensions,
     InfoType.SQL_GROUP_BY: SQLGroupBy,
     InfoType.SQL_IDENTIFIER_CASE: SQLIdentifierCase,
+    InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
+    InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_NON_NULLABLE_COLUMNS: SQLNonNullableColumns,
     InfoType.SQL_NULL_COLLATION: SQLNullCollation,
     InfoType.SQL_NUMERIC_FUNCTIONS: SQLNumericFunctions,
@@ -337,6 +351,8 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_SCROLL_CONCURRENCY: SQLScrollConcurrency,
     InfoType.SQL_SCROLL_OPTIONS: SQLScrollOptions,
     InfoType.SQL_SQL_CONFORMANCE: SQLSqlConformance,
+    InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
+    InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_STRING_FUNCTIONS: SQLStringFunctions,
     InfoType.SQL_SUBQUERIES: SQLSubqueries,
     InfoType.SQL_SYSTEM_FUNCTIONS: SQLSystemFunctions,
@@ -1238,6 +1254,30 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_CREATE_VIEW],
     ) -> SQLCreateView: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[
+            InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1,
+            InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1,
+            InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1,
+            InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1,
+        ],
+    ) -> SQLCursorAttributes1: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[
+            InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2,
+            InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2,
+            InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2,
+            InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2,
+        ],
+    ) -> SQLCursorAttributes2: ...
 
     @overload
     def sql_get_info_w(
