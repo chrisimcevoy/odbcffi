@@ -72,6 +72,7 @@ __all__ = [
     "SQLSchemaUsage",
     "SQLScrollConcurrency",
     "SQLScrollOptions",
+    "SQLSql92DatetimeFunctions",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1176,6 +1177,8 @@ class InfoType(IntEnum):
     """An SQLUINTEGER enumerating the driver's properties regarding the availability of result sets in a parameterized
     execution."""
     SQL_SQL92_DATETIME_FUNCTIONS = 155
+    """An SQLUINTEGER bitmask enumerating the datetime scalar functions that are supported by the driver and data
+    source, as defined in SQL-92."""
     SQL_SQL92_FOREIGN_KEY_DELETE_RULE = 156
     SQL_SQL92_FOREIGN_KEY_UPDATE_RULE = 157
     SQL_SQL92_GRANT = 158
@@ -2686,6 +2689,14 @@ class SQLSchemaUsage(IntFlag):
     """Schemas are supported in all index definition statements: CREATE INDEX and DROP INDEX."""
     SQL_SU_PRIVILEGE_DEFINITION = 0x00000010
     """Schemas are supported in all privilege definition statements: GRANT and REVOKE."""
+
+
+class SQLSql92DatetimeFunctions(IntFlag):
+    """The datetime scalar functions that are supported by the driver and data source, as defined in SQL-92."""
+
+    SQL_SDF_CURRENT_DATE = 0x00000001
+    SQL_SDF_CURRENT_TIME = 0x00000002
+    SQL_SDF_CURRENT_TIMESTAMP = 0x00000004
 
 
 class SQLSqlConformance(IntEnum):

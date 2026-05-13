@@ -1679,6 +1679,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLSqlConformance)
 
+    def test_sql_sql92_datetime_functions(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92DatetimeFunctions = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_DATETIME_FUNCTIONS,
+        )
+
+        assert isinstance(actual, SQLSql92DatetimeFunctions)
+
     def test_sql_static_cursor_attributes_1(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:
