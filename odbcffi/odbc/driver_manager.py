@@ -271,6 +271,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_SQL92_NUMERIC_VALUE_FUNCTIONS,
         InfoType.SQL_SQL92_PREDICATES,
         InfoType.SQL_SQL92_RELATIONAL_JOIN_OPERATORS,
+        InfoType.SQL_SQL92_REVOKE,
         InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1,
         InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2,
         InfoType.SQL_STRING_FUNCTIONS,
@@ -375,6 +376,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_SQL92_NUMERIC_VALUE_FUNCTIONS: SQLSql92NumericValueFunctions,
     InfoType.SQL_SQL92_PREDICATES: SQLSql92Predicates,
     InfoType.SQL_SQL92_RELATIONAL_JOIN_OPERATORS: SQLSql92RelationalJoinOperators,
+    InfoType.SQL_SQL92_REVOKE: SQLSql92Revoke,
     InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
     InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_STRING_FUNCTIONS: SQLStringFunctions,
@@ -1582,6 +1584,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_SQL92_RELATIONAL_JOIN_OPERATORS],
     ) -> SQLSql92RelationalJoinOperators: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_REVOKE],
+    ) -> SQLSql92Revoke: ...
 
     @overload
     def sql_get_info_w(

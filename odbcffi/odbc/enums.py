@@ -79,6 +79,7 @@ __all__ = [
     "SQLSql92NumericValueFunctions",
     "SQLSql92Predicates",
     "SQLSql92RelationalJoinOperators",
+    "SQLSql92Revoke",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1202,6 +1203,8 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the relational join operators supported in a SELECT statement, as defined in
     SQL-92."""
     SQL_SQL92_REVOKE = 162
+    """An SQLUINTEGER bitmask enumerating the clauses supported in the REVOKE statement, as defined in SQL-92, supported
+    by the data source."""
     SQL_SQL92_ROW_VALUE_CONSTRUCTOR = 163
     SQL_SQL92_STRING_FUNCTIONS = 164
     SQL_SQL92_VALUE_EXPRESSIONS = 165
@@ -2883,6 +2886,59 @@ class SQLSql92RelationalJoinOperators(IntFlag):
 
     SQL_SRJO_UNION_JOIN = 0x00000200
     """The UNION JOIN operator is supported (Full level)."""
+
+
+class SQLSql92Revoke(IntFlag):
+    """A bitmask enumerating the clauses supported by the data source in the REVOKE statement, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SR_USAGE_ON_DOMAIN = 0x00000001
+    """The USAGE ON DOMAIN clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_USAGE_ON_CHARACTER_SET = 0x00000002
+    """The USAGE ON CHARACTER SET clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_USAGE_ON_COLLATION = 0x00000004
+    """The USAGE ON COLLATION clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_USAGE_ON_TRANSLATION = 0x00000008
+    """The USAGE ON TRANSLATION clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_GRANT_OPTION_FOR = 0x00000010
+    """The GRANT OPTION FOR clause is supported (Intermediate level)."""
+
+    SQL_SR_CASCADE = 0x00000020
+    """The CASCADE clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_RESTRICT = 0x00000040
+    """The RESTRICT clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_DELETE_TABLE = 0x00000080
+    """The DELETE privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_INSERT_TABLE = 0x00000100
+    """The INSERT privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_INSERT_COLUMN = 0x00000200
+    """The INSERT privilege on columns can be revoked (Intermediate level)."""
+
+    SQL_SR_REFERENCES_TABLE = 0x00000400
+    """The REFERENCES privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_REFERENCES_COLUMN = 0x00000800
+    """The REFERENCES privilege on columns can be revoked (Entry level)."""
+
+    SQL_SR_SELECT_TABLE = 0x00001000
+    """The SELECT privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_UPDATE_TABLE = 0x00002000
+    """The UPDATE privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_UPDATE_COLUMN = 0x00004000
+    """The UPDATE privilege on columns can be revoked (Entry level)."""
 
 
 class SQLSqlConformance(IntEnum):

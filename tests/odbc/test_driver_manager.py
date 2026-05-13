@@ -1770,6 +1770,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLSql92RelationalJoinOperators)
 
+    def test_sql_sql92_revoke(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92Revoke = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_REVOKE,
+        )
+
+        assert isinstance(actual, SQLSql92Revoke)
+
     def test_sql_static_cursor_attributes_1(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:
