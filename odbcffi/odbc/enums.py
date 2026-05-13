@@ -75,6 +75,7 @@ __all__ = [
     "SQLSql92DatetimeFunctions",
     "SQLSql92ForeignKeyDeleteRule",
     "SQLSql92ForeignKeyUpdateRule",
+    "SQLSql92Grant",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1188,6 +1189,7 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the rules supported for a foreign key in a DELETE statement, as defined in
     SQL-92."""
     SQL_SQL92_GRANT = 158
+    """An SQLUINTEGER bitmask enumerating the clauses supported in the GRANT statement, as defined in SQL-92."""
     SQL_SQL92_NUMERIC_VALUE_FUNCTIONS = 159
     SQL_SQL92_PREDICATES = 160
     SQL_SQL92_RELATIONAL_JOIN_OPERATORS = 161
@@ -2727,6 +2729,53 @@ class SQLSql92ForeignKeyUpdateRule(IntFlag):
     SQL_SFKD_NO_ACTION = 0x00000002
     SQL_SFKD_SET_DEFAULT = 0x00000004
     SQL_SFKD_SET_NULL = 0x00000008
+
+
+class SQLSql92Grant(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the clauses supported in the GRANT statement, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SG_USAGE_ON_DOMAIN = 0x00000001
+    """The USAGE ON DOMAIN clause is supported (FIPS Transitional level)."""
+
+    SQL_SG_USAGE_ON_CHARACTER_SET = 0x00000002
+    """The USAGE ON CHARACTER SET clause is supported (FIPS Transitional level)."""
+
+    SQL_SG_USAGE_ON_COLLATION = 0x00000004
+    """The USAGE ON COLLATION clause is supported (FIPS Transitional level)."""
+
+    SQL_SG_USAGE_ON_TRANSLATION = 0x00000008
+    """The USAGE ON TRANSLATION clause is supported (FIPS Transitional level)."""
+
+    SQL_SG_WITH_GRANT_OPTION = 0x00000010
+    """The WITH GRANT OPTION clause is supported (Entry level)."""
+
+    SQL_SG_DELETE_TABLE = 0x00000020
+    """The DELETE privilege on tables is supported (Entry level)."""
+
+    SQL_SG_INSERT_TABLE = 0x00000040
+    """The INSERT privilege on tables is supported (Entry level)."""
+
+    SQL_SG_INSERT_COLUMN = 0x00000080
+    """The INSERT privilege on columns is supported (Intermediate level)."""
+
+    SQL_SG_REFERENCES_TABLE = 0x00000100
+    """The REFERENCES privilege on tables is supported (Entry level)."""
+
+    SQL_SG_REFERENCES_COLUMN = 0x00000200
+    """The REFERENCES privilege on columns is supported (Entry level)."""
+
+    SQL_SG_SELECT_TABLE = 0x00000400
+    """The SELECT privilege on tables is supported (Entry level)."""
+
+    SQL_SG_UPDATE_TABLE = 0x00000800
+    """The UPDATE privilege on tables is supported (Entry level)."""
+
+    SQL_SG_UPDATE_COLUMN = 0x00001000
+    """The UPDATE privilege on columns is supported (Entry level)."""
 
 
 class SQLSqlConformance(IntEnum):
