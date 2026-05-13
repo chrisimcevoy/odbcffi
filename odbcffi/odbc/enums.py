@@ -76,6 +76,7 @@ __all__ = [
     "SQLSql92ForeignKeyDeleteRule",
     "SQLSql92ForeignKeyUpdateRule",
     "SQLSql92Grant",
+    "SQLSql92NumericValueFunctions",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1191,6 +1192,8 @@ class InfoType(IntEnum):
     SQL_SQL92_GRANT = 158
     """An SQLUINTEGER bitmask enumerating the clauses supported in the GRANT statement, as defined in SQL-92."""
     SQL_SQL92_NUMERIC_VALUE_FUNCTIONS = 159
+    """An SQLUINTEGER bitmask enumerating the numeric value scalar functions that are supported by the driver and the
+    associated data source, as defined in SQL-92."""
     SQL_SQL92_PREDICATES = 160
     SQL_SQL92_RELATIONAL_JOIN_OPERATORS = 161
     SQL_SQL92_REVOKE = 162
@@ -2776,6 +2779,17 @@ class SQLSql92Grant(IntFlag):
 
     SQL_SG_UPDATE_COLUMN = 0x00001000
     """The UPDATE privilege on columns is supported (Entry level)."""
+
+
+class SQLSql92NumericValueFunctions(IntFlag):
+    """The numeric value scalar functions that are supported by the driver and data source, as defined in SQL-92."""
+
+    SQL_SNVF_BIT_LENGTH = 0x00000001
+    SQL_SNVF_CHAR_LENGTH = 0x00000002
+    SQL_SNVF_CHARACTER_LENGTH = 0x00000004
+    SQL_SNVF_EXTRACT = 0x00000008
+    SQL_SNVF_OCTET_LENGTH = 0x00000010
+    SQL_SNVF_POSITION = 0x00000020
 
 
 class SQLSqlConformance(IntEnum):
