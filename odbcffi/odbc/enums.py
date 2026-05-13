@@ -56,6 +56,7 @@ __all__ = [
     "SQLGetDataExtensions",
     "SQLGroupBy",
     "SQLIdentifierCase",
+    "SQLIndexKeywords",
     "SQLNonNullableColumns",
     "SQLNullCollation",
     "SQLNumericFunctions",
@@ -1142,6 +1143,11 @@ class InfoType(IntEnum):
     SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1.
     """
     SQL_INDEX_KEYWORDS = 148
+    """An SQLUINTEGER bitmask that enumerates keywords in the CREATE INDEX statement that are supported by the driver.
+
+    To see whether the CREATE INDEX statement is supported, an application calls SQLGetInfo with the SQL_DLL_INDEX
+    information type.
+    """
     SQL_INFO_SCHEMA_VIEWS = 149
     SQL_KEYSET_CURSOR_ATTRIBUTES1 = 150
     """An SQLUINTEGER bitmask that describes the attributes of a keyset cursor that are supported by the driver.
@@ -2270,6 +2276,23 @@ class SQLIdentifierCase(IntEnum):
 
     SQL_IC_MIXED = 4
     """Identifiers are not case-sensitive and are stored in mixed case in system catalog."""
+
+
+class SQLIndexKeywords(IntFlag):
+    """An SQLUINTEGER bitmask that enumerates keywords in the CREATE INDEX statement that are supported by the driver.
+
+    To see whether the CREATE INDEX statement is supported, an application calls SQLGetInfo with the SQL_DLL_INDEX
+    information type.
+    """
+
+    SQL_IK_NONE = 0x00000000
+    """None of the keywords is supported."""
+    SQL_IK_ASC = 0x00000001
+    """ASC keyword is supported."""
+    SQL_IK_DESC = 0x00000002
+    """DESC keyword is supported."""
+    SQL_IK_ALL = SQL_IK_ASC | SQL_IK_DESC
+    """All keywords are supported."""
 
 
 class SQLNonNullableColumns(IntEnum):

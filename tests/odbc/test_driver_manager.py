@@ -974,6 +974,15 @@ class TestSQLGetInfoW:
 
         assert actual == expected
 
+    def test_sql_index_keywords(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLIndexKeywords = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_INDEX_KEYWORDS,
+        )
+
+        assert isinstance(actual, SQLIndexKeywords)
+
     def test_sql_integrity(
         self,
         driver_manager: DriverManager,

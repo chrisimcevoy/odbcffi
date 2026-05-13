@@ -226,6 +226,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_GETDATA_EXTENSIONS,
         InfoType.SQL_GROUP_BY,
         InfoType.SQL_IDENTIFIER_CASE,
+        InfoType.SQL_INDEX_KEYWORDS,
         InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1,
         InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2,
         InfoType.SQL_MAX_BINARY_LITERAL_LEN,
@@ -337,6 +338,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_GETDATA_EXTENSIONS: SQLGetDataExtensions,
     InfoType.SQL_GROUP_BY: SQLGroupBy,
     InfoType.SQL_IDENTIFIER_CASE: SQLIdentifierCase,
+    InfoType.SQL_INDEX_KEYWORDS: SQLIndexKeywords,
     InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
     InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_NON_NULLABLE_COLUMNS: SQLNonNullableColumns,
@@ -1390,6 +1392,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_IDENTIFIER_CASE],
     ) -> SQLIdentifierCase: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_INDEX_KEYWORDS],
+    ) -> SQLIndexKeywords: ...
 
     @overload
     def sql_get_info_w(
