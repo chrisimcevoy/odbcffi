@@ -77,6 +77,7 @@ __all__ = [
     "SQLSql92ForeignKeyUpdateRule",
     "SQLSql92Grant",
     "SQLSql92NumericValueFunctions",
+    "SQLSql92Predicates",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1195,6 +1196,7 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the numeric value scalar functions that are supported by the driver and the
     associated data source, as defined in SQL-92."""
     SQL_SQL92_PREDICATES = 160
+    """An SQLUINTEGER bitmask enumerating the predicates supported in a SELECT statement, as defined in SQL-92."""
     SQL_SQL92_RELATIONAL_JOIN_OPERATORS = 161
     SQL_SQL92_REVOKE = 162
     SQL_SQL92_ROW_VALUE_CONSTRUCTOR = 163
@@ -2790,6 +2792,56 @@ class SQLSql92NumericValueFunctions(IntFlag):
     SQL_SNVF_EXTRACT = 0x00000008
     SQL_SNVF_OCTET_LENGTH = 0x00000010
     SQL_SNVF_POSITION = 0x00000020
+
+
+class SQLSql92Predicates(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the predicates supported in a SELECT statement, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SP_EXISTS = 0x00000001
+    """The EXISTS predicate is supported (Entry level)."""
+
+    SQL_SP_ISNOTNULL = 0x00000002
+    """The IS NOT NULL predicate is supported (Entry level)."""
+
+    SQL_SP_ISNULL = 0x00000004
+    """The IS NULL predicate is supported (Entry level)."""
+
+    SQL_SP_MATCH_FULL = 0x00000008
+    """The MATCH FULL predicate is supported (Full level)."""
+
+    SQL_SP_MATCH_PARTIAL = 0x00000010
+    """The MATCH PARTIAL predicate is supported (Full level)."""
+
+    SQL_SP_MATCH_UNIQUE_FULL = 0x00000020
+    """The MATCH UNIQUE FULL predicate is supported (Full level)."""
+
+    SQL_SP_MATCH_UNIQUE_PARTIAL = 0x00000040
+    """The MATCH UNIQUE PARTIAL predicate is supported (Full level)."""
+
+    SQL_SP_OVERLAPS = 0x00000080
+    """The OVERLAPS predicate is supported (FIPS Transitional level)."""
+
+    SQL_SP_UNIQUE = 0x00000100
+    """The UNIQUE predicate is supported (Entry level)."""
+
+    SQL_SP_LIKE = 0x00000200
+    """The LIKE predicate is supported (Entry level)."""
+
+    SQL_SP_IN = 0x00000400
+    """The IN predicate is supported (Entry level)."""
+
+    SQL_SP_BETWEEN = 0x00000800
+    """The BETWEEN predicate is supported (Entry level)."""
+
+    SQL_SP_COMPARISON = 0x00001000
+    """Comparison predicates are supported (Entry level)."""
+
+    SQL_SP_QUANTIFIED_COMPARISON = 0x00002000
+    """Quantified comparison predicates are supported (Entry level)."""
 
 
 class SQLSqlConformance(IntEnum):

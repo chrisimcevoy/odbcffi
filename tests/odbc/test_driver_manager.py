@@ -1744,6 +1744,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLSql92NumericValueFunctions)
 
+    def test_sql_sql92_predicates(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92Predicates = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_PREDICATES,
+        )
+
+        assert isinstance(actual, SQLSql92Predicates)
+
     def test_sql_static_cursor_attributes_1(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:
