@@ -74,6 +74,7 @@ __all__ = [
     "SQLScrollOptions",
     "SQLSql92DatetimeFunctions",
     "SQLSql92ForeignKeyDeleteRule",
+    "SQLSql92ForeignKeyUpdateRule",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1184,6 +1185,8 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the rules supported for a foreign key in a DELETE statement, as defined in
     SQL-92."""
     SQL_SQL92_FOREIGN_KEY_UPDATE_RULE = 157
+    """An SQLUINTEGER bitmask enumerating the rules supported for a foreign key in a DELETE statement, as defined in
+    SQL-92."""
     SQL_SQL92_GRANT = 158
     SQL_SQL92_NUMERIC_VALUE_FUNCTIONS = 159
     SQL_SQL92_PREDICATES = 160
@@ -2706,6 +2709,18 @@ class SQLSql92ForeignKeyDeleteRule(IntFlag):
     """The rules supported for a foreign key in a DELETE statement, as defined in SQL-92.
 
     An FIPS Transitional level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_SFKD_CASCADE = 0x00000001
+    SQL_SFKD_NO_ACTION = 0x00000002
+    SQL_SFKD_SET_DEFAULT = 0x00000004
+    SQL_SFKD_SET_NULL = 0x00000008
+
+
+class SQLSql92ForeignKeyUpdateRule(IntFlag):
+    """A bitmask enumerating the rules supported for a foreign key in an UPDATE statement, as defined in SQL-92.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported.
     """
 
     SQL_SFKD_CASCADE = 0x00000001

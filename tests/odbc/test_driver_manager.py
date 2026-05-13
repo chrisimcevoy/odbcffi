@@ -1705,6 +1705,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLSql92ForeignKeyDeleteRule)
 
+    def test_sql_sql92_foreign_key_update_rule(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92ForeignKeyUpdateRule = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_FOREIGN_KEY_UPDATE_RULE,
+        )
+
+        assert isinstance(actual, SQLSql92ForeignKeyUpdateRule)
+
     def test_sql_static_cursor_attributes_1(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:
