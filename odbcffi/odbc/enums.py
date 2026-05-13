@@ -73,6 +73,7 @@ __all__ = [
     "SQLScrollConcurrency",
     "SQLScrollOptions",
     "SQLSql92DatetimeFunctions",
+    "SQLSql92ForeignKeyDeleteRule",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1180,6 +1181,8 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the datetime scalar functions that are supported by the driver and data
     source, as defined in SQL-92."""
     SQL_SQL92_FOREIGN_KEY_DELETE_RULE = 156
+    """An SQLUINTEGER bitmask enumerating the rules supported for a foreign key in a DELETE statement, as defined in
+    SQL-92."""
     SQL_SQL92_FOREIGN_KEY_UPDATE_RULE = 157
     SQL_SQL92_GRANT = 158
     SQL_SQL92_NUMERIC_VALUE_FUNCTIONS = 159
@@ -2697,6 +2700,18 @@ class SQLSql92DatetimeFunctions(IntFlag):
     SQL_SDF_CURRENT_DATE = 0x00000001
     SQL_SDF_CURRENT_TIME = 0x00000002
     SQL_SDF_CURRENT_TIMESTAMP = 0x00000004
+
+
+class SQLSql92ForeignKeyDeleteRule(IntFlag):
+    """The rules supported for a foreign key in a DELETE statement, as defined in SQL-92.
+
+    An FIPS Transitional level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_SFKD_CASCADE = 0x00000001
+    SQL_SFKD_NO_ACTION = 0x00000002
+    SQL_SFKD_SET_DEFAULT = 0x00000004
+    SQL_SFKD_SET_NULL = 0x00000008
 
 
 class SQLSqlConformance(IntEnum):
