@@ -67,6 +67,7 @@ __all__ = [
     "SQLOuterJoinCapabilities",
     "SQLOuterJoins",
     "SQLParamArrayRowCounts",
+    "SQLParamArraySelects",
     "SQLReturn",
     "SQLSchemaUsage",
     "SQLScrollConcurrency",
@@ -1172,6 +1173,8 @@ class InfoType(IntEnum):
     """An SQLUINTEGER enumerating the driver's properties regarding the availability of row counts in a parameterized
     execution."""
     SQL_PARAM_ARRAY_SELECTS = 154
+    """An SQLUINTEGER enumerating the driver's properties regarding the availability of result sets in a parameterized
+    execution."""
     SQL_SQL92_DATETIME_FUNCTIONS = 155
     SQL_SQL92_FOREIGN_KEY_DELETE_RULE = 156
     SQL_SQL92_FOREIGN_KEY_UPDATE_RULE = 157
@@ -2546,6 +2549,26 @@ class SQLParamArrayRowCounts(IntEnum):
     This is conceptually equivalent to treating the statement together with the complete parameter array as one atomic
     unit. Errors are handled the same as if one statement were executed.
     """
+
+
+class SQLParamArraySelects(IntEnum):
+    """An SQLUINTEGER enumerating the availability of result sets from the driver in a parameterized execution."""
+
+    SQL_PAS_BATCH = 1
+    """There is one result set available per set of parameters.
+
+    This is conceptually equivalent to the driver generating a batch of SQL statements, one for each parameter set in
+    the array.
+    """
+    SQL_PAS_NO_BATCH = 2
+    """There is only one result set available, which represents the cumulative result set resulting from the execution
+    of the statement for the complete array of parameters.
+
+    This is conceptually equivalent to treating the statement together with the complete parameter array as one atomic
+    unit.
+    """
+    SQL_PAS_NO_SELECT = 3
+    """A driver does not allow a result-set generating statement to be executed with an array of parameters."""
 
 
 class SQLReturn(IntEnum):
