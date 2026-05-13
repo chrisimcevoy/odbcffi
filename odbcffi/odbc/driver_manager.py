@@ -257,6 +257,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE,
         InfoType.SQL_ODBC_SQL_CONFORMANCE,
         InfoType.SQL_OJ_CAPABILITIES,
+        InfoType.SQL_PARAM_ARRAY_ROW_COUNTS,
         InfoType.SQL_QUOTED_IDENTIFIER_CASE,
         InfoType.SQL_SCHEMA_USAGE,
         InfoType.SQL_SCROLL_CONCURRENCY,
@@ -352,6 +353,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_ODBC_SQL_CONFORMANCE: SQLOdbcSqlConformance,
     InfoType.SQL_OJ_CAPABILITIES: SQLOuterJoinCapabilities,
     InfoType.SQL_OUTER_JOINS: SQLOuterJoins,
+    InfoType.SQL_PARAM_ARRAY_ROW_COUNTS: SQLParamArrayRowCounts,
     InfoType.SQL_QUOTED_IDENTIFIER_CASE: SQLIdentifierCase,
     InfoType.SQL_SCHEMA_USAGE: SQLSchemaUsage,
     InfoType.SQL_SCROLL_CONCURRENCY: SQLScrollConcurrency,
@@ -1466,6 +1468,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_OUTER_JOINS],
     ) -> SQLOuterJoins: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_PARAM_ARRAY_ROW_COUNTS],
+    ) -> SQLParamArrayRowCounts: ...
 
     @overload
     def sql_get_info_w(

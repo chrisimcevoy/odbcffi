@@ -1496,6 +1496,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLOuterJoins)
 
+    def test_sql_param_array_row_counts(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLParamArrayRowCounts = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_PARAM_ARRAY_ROW_COUNTS,
+        )
+
+        assert isinstance(actual, SQLParamArrayRowCounts)
+
     def test_sql_procedure_term(
         self,
         driver_manager: DriverManager,

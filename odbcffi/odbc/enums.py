@@ -66,6 +66,7 @@ __all__ = [
     "SQLOdbcSqlConformance",
     "SQLOuterJoinCapabilities",
     "SQLOuterJoins",
+    "SQLParamArrayRowCounts",
     "SQLReturn",
     "SQLSchemaUsage",
     "SQLScrollConcurrency",
@@ -1168,6 +1169,8 @@ class InfoType(IntEnum):
     SQL_ODBC_INTERFACE_CONFORMANCE = 152
     """An SQLUINTEGER value that indicates the level of the ODBC 3*.x* interface that the driver complies with."""
     SQL_PARAM_ARRAY_ROW_COUNTS = 153
+    """An SQLUINTEGER enumerating the driver's properties regarding the availability of row counts in a parameterized
+    execution."""
     SQL_PARAM_ARRAY_SELECTS = 154
     SQL_SQL92_DATETIME_FUNCTIONS = 155
     SQL_SQL92_FOREIGN_KEY_DELETE_RULE = 156
@@ -2525,6 +2528,24 @@ class SQLOuterJoins(Enum):
     """
     FULL = "F"
     """The data source fully supports nested outer joins, and the driver supports the ODBC outer join syntax."""
+
+
+class SQLParamArrayRowCounts(IntEnum):
+    """An SQLUINTEGER enumerating the row counts available from the driver in a parameterized execution."""
+
+    SQL_PARC_BATCH = 1
+    """Individual row counts are available for each set of parameters.
+
+    This is conceptually equivalent to the driver generating a batch of SQL statements, one for each parameter set in
+    the array. Extended error information can be retrieved by using the SQL_PARAM_STATUS_PTR descriptor field.
+    """
+    SQL_PARC_NO_BATCH = 2
+    """There is only one row count available, which is the cumulative row count resulting from the execution of the
+    statement for the entire array of parameters.
+
+    This is conceptually equivalent to treating the statement together with the complete parameter array as one atomic
+    unit. Errors are handled the same as if one statement were executed.
+    """
 
 
 class SQLReturn(IntEnum):
