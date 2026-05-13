@@ -61,6 +61,7 @@ __all__ = [
     "SQLNonNullableColumns",
     "SQLNullCollation",
     "SQLNumericFunctions",
+    "SQLOdbcInterfaceConformance",
     "SQLOdbcSagCliConformance",
     "SQLOdbcSqlConformance",
     "SQLOuterJoinCapabilities",
@@ -1165,6 +1166,7 @@ class InfoType(IntEnum):
     This bitmask contains the second subset of attributes; for the first subset, see SQL_KEYSET_CURSOR_ATTRIBUTES1.
     """
     SQL_ODBC_INTERFACE_CONFORMANCE = 152
+    """An SQLUINTEGER value that indicates the level of the ODBC 3*.x* interface that the driver complies with."""
     SQL_PARAM_ARRAY_ROW_COUNTS = 153
     SQL_PARAM_ARRAY_SELECTS = 154
     SQL_SQL92_DATETIME_FUNCTIONS = 155
@@ -2428,6 +2430,28 @@ class SQLNullCollation(IntEnum):
 
     SQL_NC_END = 0x0004
     """NULLs are sorted at the end of the result set, regardless of the ASC or DESC keywords."""
+
+
+class SQLOdbcInterfaceConformance(IntEnum):
+    """An SQLUINTEGER value that indicates the level of the ODBC 3*.x* interface that the driver complies with.
+
+    For more information, see
+    https://learn.microsoft.com/en-us/sql/odbc/reference/develop-app/interface-conformance-levels
+    """
+
+    SQL_OIC_CORE = 1
+    """The minimum level that all ODBC drivers are expected to comply with.
+
+    This level includes basic interface elements such as connection functions, functions for preparing and executing a
+    SQL statement, basic result set metadata functions, basic catalog functions, and so on.
+    """
+    SQL_OIC_LEVEL1 = 2
+    """A level including the core standards compliance level functionality, plus scrollable cursors, bookmarks,
+    positioned updates and deletes, and so on."""
+    SQL_OIC_LEVEL2 = 3
+    """A level including level 1 standards compliance level functionality, plus advanced features such as sensitive
+    cursors; update, delete, and refresh by bookmarks; stored procedure support; catalog functions for primary and
+    foreign keys; multi-catalog support; and so on."""
 
 
 class SQLOdbcSqlConformance(IntEnum):

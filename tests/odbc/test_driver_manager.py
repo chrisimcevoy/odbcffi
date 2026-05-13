@@ -1401,6 +1401,17 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLNumericFunctions)
 
+    def test_sql_odbc_interface_conformance(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLOdbcInterfaceConformance = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ODBC_INTERFACE_CONFORMANCE,
+        )
+
+        assert isinstance(actual, SQLOdbcInterfaceConformance)
+
     def test_sql_odbc_sag_cli_conformance(
         self,
         driver_manager: DriverManager,

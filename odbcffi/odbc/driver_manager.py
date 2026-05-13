@@ -253,6 +253,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_NON_NULLABLE_COLUMNS,
         InfoType.SQL_NULL_COLLATION,
         InfoType.SQL_NUMERIC_FUNCTIONS,
+        InfoType.SQL_ODBC_INTERFACE_CONFORMANCE,
         InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE,
         InfoType.SQL_ODBC_SQL_CONFORMANCE,
         InfoType.SQL_OJ_CAPABILITIES,
@@ -346,8 +347,9 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_NON_NULLABLE_COLUMNS: SQLNonNullableColumns,
     InfoType.SQL_NULL_COLLATION: SQLNullCollation,
     InfoType.SQL_NUMERIC_FUNCTIONS: SQLNumericFunctions,
-    InfoType.SQL_ODBC_SQL_CONFORMANCE: SQLOdbcSqlConformance,
+    InfoType.SQL_ODBC_INTERFACE_CONFORMANCE: SQLOdbcInterfaceConformance,
     InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE: SQLOdbcSagCliConformance,
+    InfoType.SQL_ODBC_SQL_CONFORMANCE: SQLOdbcSqlConformance,
     InfoType.SQL_OJ_CAPABILITIES: SQLOuterJoinCapabilities,
     InfoType.SQL_OUTER_JOINS: SQLOuterJoins,
     InfoType.SQL_QUOTED_IDENTIFIER_CASE: SQLIdentifierCase,
@@ -1429,6 +1431,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_NUMERIC_FUNCTIONS],
     ) -> SQLNumericFunctions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_ODBC_INTERFACE_CONFORMANCE],
+    ) -> SQLOdbcInterfaceConformance: ...
 
     @overload
     def sql_get_info_w(
