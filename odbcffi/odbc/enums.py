@@ -78,6 +78,7 @@ __all__ = [
     "SQLSql92Grant",
     "SQLSql92NumericValueFunctions",
     "SQLSql92Predicates",
+    "SQLSql92RelationalJoinOperators",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1198,6 +1199,8 @@ class InfoType(IntEnum):
     SQL_SQL92_PREDICATES = 160
     """An SQLUINTEGER bitmask enumerating the predicates supported in a SELECT statement, as defined in SQL-92."""
     SQL_SQL92_RELATIONAL_JOIN_OPERATORS = 161
+    """An SQLUINTEGER bitmask enumerating the relational join operators supported in a SELECT statement, as defined in
+    SQL-92."""
     SQL_SQL92_REVOKE = 162
     SQL_SQL92_ROW_VALUE_CONSTRUCTOR = 163
     SQL_SQL92_STRING_FUNCTIONS = 164
@@ -2842,6 +2845,44 @@ class SQLSql92Predicates(IntFlag):
 
     SQL_SP_QUANTIFIED_COMPARISON = 0x00002000
     """Quantified comparison predicates are supported (Entry level)."""
+
+
+class SQLSql92RelationalJoinOperators(IntFlag):
+    """A bitmask enumerating the relational join operators supported in a SELECT statement, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SRJO_CORRESPONDING_CLAUSE = 0x00000001
+    """The CORRESPONDING clause is supported (Intermediate level)."""
+
+    SQL_SRJO_CROSS_JOIN = 0x00000002
+    """The CROSS JOIN operator is supported (Full level)."""
+
+    SQL_SRJO_EXCEPT_JOIN = 0x00000004
+    """The EXCEPT JOIN operator is supported (Intermediate level)."""
+
+    SQL_SRJO_FULL_OUTER_JOIN = 0x00000008
+    """The FULL OUTER JOIN operator is supported (Intermediate level)."""
+
+    SQL_SRJO_INNER_JOIN = 0x00000010
+    """The INNER JOIN syntax is supported (FIPS Transitional level)."""
+
+    SQL_SRJO_INTERSECT_JOIN = 0x00000020
+    """The INTERSECT JOIN operator is supported (Intermediate level)."""
+
+    SQL_SRJO_LEFT_OUTER_JOIN = 0x00000040
+    """The LEFT OUTER JOIN operator is supported (FIPS Transitional level)."""
+
+    SQL_SRJO_NATURAL_JOIN = 0x00000080
+    """The NATURAL JOIN operator is supported (FIPS Transitional level)."""
+
+    SQL_SRJO_RIGHT_OUTER_JOIN = 0x00000100
+    """The RIGHT OUTER JOIN operator is supported (FIPS Transitional level)."""
+
+    SQL_SRJO_UNION_JOIN = 0x00000200
+    """The UNION JOIN operator is supported (Full level)."""
 
 
 class SQLSqlConformance(IntEnum):
