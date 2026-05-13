@@ -983,6 +983,17 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLIndexKeywords)
 
+    def test_sql_info_schema_views(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLInfoSchemaViews = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_INFO_SCHEMA_VIEWS,
+        )
+
+        assert isinstance(actual, SQLInfoSchemaViews)
+
     def test_sql_integrity(
         self,
         driver_manager: DriverManager,

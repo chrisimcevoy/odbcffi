@@ -57,6 +57,7 @@ __all__ = [
     "SQLGroupBy",
     "SQLIdentifierCase",
     "SQLIndexKeywords",
+    "SQLInfoSchemaViews",
     "SQLNonNullableColumns",
     "SQLNullCollation",
     "SQLNumericFunctions",
@@ -1149,6 +1150,10 @@ class InfoType(IntEnum):
     information type.
     """
     SQL_INFO_SCHEMA_VIEWS = 149
+    """An SQLUINTEGER bitmask enumerating the views in the INFORMATION_SCHEMA that are supported by the driver.
+
+    The views in, and the contents of, INFORMATION_SCHEMA are as defined in SQL-92.
+    """
     SQL_KEYSET_CURSOR_ATTRIBUTES1 = 150
     """An SQLUINTEGER bitmask that describes the attributes of a keyset cursor that are supported by the driver.
 
@@ -2293,6 +2298,75 @@ class SQLIndexKeywords(IntFlag):
     """DESC keyword is supported."""
     SQL_IK_ALL = SQL_IK_ASC | SQL_IK_DESC
     """All keywords are supported."""
+
+
+class SQLInfoSchemaViews(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the views in the INFORMATION_SCHEMA that are supported by the driver.
+
+    The views in, and the contents of, INFORMATION_SCHEMA are as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_ISV_ASSERTIONS = 0x00000001
+    """Identifies the catalog's assertions that are owned by a given user (Full level)."""
+    SQL_ISV_CHARACTER_SETS = 0x00000002
+    """Identifies the catalog's character sets that can be accessed by a given user (Intermediate level)."""
+    SQL_ISV_CHECK_CONSTRAINTS = 0x00000004
+    """Identifies the CHECK constraints that are owned by a given user (Intermediate level)."""
+    SQL_ISV_COLLATIONS = 0x00000008
+    """Identifies the character collations for the catalog that can be accessed by a given user (Full level)."""
+    SQL_ISV_COLUMN_DOMAIN_USAGE = 0x00000010
+    """Identifies columns for the catalog that depend on domains defined in the catalog and are owned by a given user
+    (Intermediate level)."""
+    SQL_ISV_COLUMN_PRIVILEGES = 0x00000020
+    """Identifies the privileges on columns of persistent tables that are available to or granted by a given user (FIPS
+    Transitional level)."""
+    SQL_ISV_COLUMNS = 0x00000040
+    """Identifies the columns of persistent tables that can be accessed by a given user (FIPS Transitional level)."""
+    SQL_ISV_CONSTRAINT_COLUMN_USAGE = 0x00000080
+    """Similar to CONSTRAINT_TABLE_USAGE view, columns are identified for the various constraints that are owned by a
+    given user (Intermediate level)."""
+    SQL_ISV_CONSTRAINT_TABLE_USAGE = 0x00000100
+    """Identifies the tables that are used by constraints (referential, unique, and assertions), and are owned by a
+    given user (Intermediate level)."""
+    SQL_ISV_DOMAIN_CONSTRAINTS = 0x00000200
+    """Identifies the domain constraints (of the domains in the catalog) that can be accessed by a given user
+    (Intermediate level)."""
+    SQL_ISV_DOMAINS = 0x00000400
+    """Identifies the domains defined in a catalog that can be accessed by the user (Intermediate level)."""
+    SQL_ISV_KEY_COLUMN_USAGE = 0x00000800
+    """Identifies columns defined in the catalog that are constrained as keys by a given user (Intermediate level)."""
+    SQL_ISV_REFERENTIAL_CONSTRAINTS = 0x00001000
+    """Identifies the referential constraints that are owned by a given user (Intermediate level)."""
+    SQL_ISV_SCHEMATA = 0x00002000
+    """Identifies the schemas that are owned by a given user (Intermediate level)."""
+    SQL_ISV_SQL_LANGUAGES = 0x00004000
+    """Identifies the SQL conformance levels, options, and dialects supported by the SQL implementation (Intermediate
+    level)."""
+    SQL_ISV_TABLE_CONSTRAINTS = 0x00008000
+    """Identifies the table constraints that are owned by a given user (Intermediate level)."""
+    SQL_ISV_TABLE_PRIVILEGES = 0x00010000
+    """Identifies the privileges on persistent tables that are available to or granted by a given user (FIPS
+    Transitional level)."""
+    SQL_ISV_TABLES = 0x00020000
+    """Identifies the persistent tables defined in a catalog that can be accessed by a given user (FIPS Transitional
+    level)."""
+    SQL_ISV_TRANSLATIONS = 0x00040000
+    """Identifies character translations for the catalog that can be accessed by a given user (Full level)."""
+    SQL_ISV_USAGE_PRIVILEGES = 0x00080000
+    """Identifies the USAGE privileges on catalog objects that are available to or owned by a given user (FIPS
+    Transitional level)."""
+    SQL_ISV_VIEW_COLUMN_USAGE = 0x00100000
+    """Identifies the columns on which the catalog's views that are owned by a given user are dependent (Intermediate
+    level)."""
+    SQL_ISV_VIEW_TABLE_USAGE = 0x00200000
+    """Identifies the tables on which the catalog's views that are owned by a given user are dependent (Intermediate
+    level)."""
+    SQL_ISV_VIEWS = 0x00400000
+    """Identifies the viewed tables defined in this catalog that can be accessed by a given user (FIPS Transitional
+    level)."""
 
 
 class SQLNonNullableColumns(IntEnum):
