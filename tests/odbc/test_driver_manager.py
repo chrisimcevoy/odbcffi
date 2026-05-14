@@ -731,6 +731,16 @@ class TestSQLGetInfoW:
 
         assert actual == expected
 
+    def test_sql_dm_ver(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: str = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DM_VER,
+        )
+
+        assert isinstance(actual, str)
+        assert actual
+
     def test_sql_driver_name(
         self,
         driver_manager: DriverManager,

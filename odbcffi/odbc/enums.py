@@ -1239,6 +1239,16 @@ class InfoType(IntEnum):
     SQL_DDL_INDEX = 170
     """An SQLUINTEGER value that indicates support for creation and dropping of indexes."""
     SQL_DM_VER = 171
+    """A character string with the version of the Driver Manager.
+
+    - The version is of the form ##.##.####.####, where:
+    - The first set of two digits is the major ODBC version, as given by the constant SQL_SPEC_MAJOR.
+    - The second set of two digits is the minor ODBC version, as given by the constant SQL_SPEC_MINOR.
+    - The third set of four digits is the Driver Manager major build number.
+    - The last set of four digits is the Driver Manager minor build number.
+
+    The Windows 7 Driver Manager version is 03.80. The Windows 8 Driver Manager version is 03.81.
+    """
     SQL_INSERT_STATEMENT = 172
     SQL_CONVERT_GUID = 173
     """An SQLUINTEGER bitmask.
