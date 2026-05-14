@@ -174,6 +174,22 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLCatalogUsage)
 
+    def test_sql_collation_seq(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        # Not implemented in FreeTDS
+        # https://github.com/FreeTDS/freetds/blob/217ffa7674ae3462c5d663ae2df579a98f44c348/src/odbc/odbc.c#L5551-L5554
+        ctx = pytest.raises(ODBCError) if connection_info.driver == "FreeTDS" else nullcontext()
+
+        with ctx:
+            actual: str = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_COLLATION_SEQ,
+            )
+
+            assert isinstance(actual, str)
+
     def test_sql_column_alias(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
 
         actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(

@@ -128,6 +128,7 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_CATALOG_NAME_SEPARATOR,
         InfoType.SQL_CATALOG_NAME,
         InfoType.SQL_CATALOG_TERM,
+        InfoType.SQL_COLLATION_SEQ,
         InfoType.SQL_COLUMN_ALIAS,
         InfoType.SQL_DATA_SOURCE_NAME,
         InfoType.SQL_DATA_SOURCE_READ_ONLY,
@@ -1095,6 +1096,7 @@ class DriverManager:
         info_type: Literal[
             InfoType.SQL_CATALOG_NAME_SEPARATOR,
             InfoType.SQL_CATALOG_TERM,
+            InfoType.SQL_COLLATION_SEQ,
             InfoType.SQL_DATA_SOURCE_NAME,
             InfoType.SQL_DATABASE_NAME,
             InfoType.SQL_DBMS_NAME,

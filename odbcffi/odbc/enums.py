@@ -1288,6 +1288,12 @@ class InfoType(IntEnum):
     A SQL-92 Full level-conformant driver will always return "Y".
     """
     SQL_COLLATION_SEQ = 10004
+    """The name of the collation sequence.
+
+    This is a character string that indicates the name of the default collation for the default character set for this
+    server (for example, 'ISO 8859-1' or EBCDIC). If this is unknown, an empty string will be returned. A SQL-92 Full
+    level-conformant driver will always return a non-empty string.
+    """
     SQL_MAX_IDENTIFIER_LEN = 10005
     SQL_ASYNC_MODE = 10021
     SQL_MAX_ASYNC_CONCURRENT_STATEMENTS = 10022
