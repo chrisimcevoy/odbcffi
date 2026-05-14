@@ -15,6 +15,7 @@ __all__ = [
     "EnvironmentAttribute",
     "HandleType",
     "InfoType",
+    "SQLAggregateFunctions",
     "SQLAlterDomain",
     "SQLAlterTable",
     "SQLAttrAccessMode",
@@ -1230,6 +1231,10 @@ class InfoType(IntEnum):
     This bitmask contains the second subset of attributes; for the first subset, see SQL_STATIC_CURSOR_ATTRIBUTES1.
     """
     SQL_AGGREGATE_FUNCTIONS = 169
+    """An SQLUINTEGER bitmask enumerating support for aggregation functions.
+
+    A SQL-92 Entry level-conformant driver will always return all of these options as supported.
+    """
     SQL_DDL_INDEX = 170
     SQL_DM_VER = 171
     SQL_INSERT_STATEMENT = 172
@@ -1253,6 +1258,34 @@ class InfoType(IntEnum):
     SQL_ASYNC_DBC_FUNCTIONS = 10023
     SQL_DRIVER_AWARE_POOLING_SUPPORTED = 10024
     SQL_ASYNC_NOTIFICATION = 10025
+
+
+class SQLAggregateFunctions(IntFlag):
+    """An SQLUINTEGER bitmask enumerating support for aggregation functions.
+
+    A SQL-92 Entry level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_AF_AVG = 0x00000001
+    """The AVG aggregate function is supported."""
+
+    SQL_AF_COUNT = 0x00000002
+    """The COUNT aggregate function is supported."""
+
+    SQL_AF_MAX = 0x00000004
+    """The MAX aggregate function is supported."""
+
+    SQL_AF_MIN = 0x00000008
+    """The MIN aggregate function is supported."""
+
+    SQL_AF_SUM = 0x00000010
+    """The SUM aggregate function is supported."""
+
+    SQL_AF_DISTINCT = 0x00000020
+    """Aggregate functions with the DISTINCT keyword are supported."""
+
+    SQL_AF_ALL = 0x00000040
+    """Aggregate functions with the ALL keyword are supported."""
 
 
 class SQLAlterDomain(IntFlag):

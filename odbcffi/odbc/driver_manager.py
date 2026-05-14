@@ -163,6 +163,7 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
 SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
     {
         InfoType.SQL_ACTIVE_ENVIRONMENTS,
+        InfoType.SQL_AGGREGATE_FUNCTIONS,
         InfoType.SQL_ALTER_DOMAIN,
         InfoType.SQL_ALTER_TABLE,
         InfoType.SQL_BATCH_ROW_COUNT,
@@ -291,6 +292,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
 )
 
 SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
+    InfoType.SQL_AGGREGATE_FUNCTIONS: SQLAggregateFunctions,
     InfoType.SQL_ALTER_DOMAIN: SQLAlterDomain,
     InfoType.SQL_ALTER_TABLE: SQLAlterTable,
     InfoType.SQL_BATCH_ROW_COUNT: SQLBatchRowCount,
@@ -1129,6 +1131,13 @@ class DriverManager:
             InfoType.SQL_MAX_USER_NAME_LEN,
         ],
     ) -> int: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_AGGREGATE_FUNCTIONS],
+    ) -> SQLAggregateFunctions: ...
 
     @overload
     def sql_get_info_w(
