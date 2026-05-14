@@ -173,6 +173,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_ALTER_TABLE,
         InfoType.SQL_ASYNC_DBC_FUNCTIONS,
         InfoType.SQL_ASYNC_MODE,
+        InfoType.SQL_ASYNC_NOTIFICATION,
         InfoType.SQL_BATCH_ROW_COUNT,
         InfoType.SQL_BATCH_SUPPORT,
         InfoType.SQL_BOOKMARK_PERSISTENCE,
@@ -310,6 +311,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_ALTER_TABLE: SQLAlterTable,
     InfoType.SQL_ASYNC_DBC_FUNCTIONS: SQLAsyncDbcFunctions,
     InfoType.SQL_ASYNC_MODE: SQLAsyncMode,
+    InfoType.SQL_ASYNC_NOTIFICATION: SQLAsyncNotification,
     InfoType.SQL_BATCH_ROW_COUNT: SQLBatchRowCount,
     InfoType.SQL_BATCH_SUPPORT: SQLBatchSupport,
     InfoType.SQL_BOOKMARK_PERSISTENCE: SQLBookmarkPersistence,
@@ -1192,6 +1194,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_ASYNC_MODE],
     ) -> SQLAsyncMode: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_ASYNC_NOTIFICATION],
+    ) -> SQLAsyncNotification: ...
 
     @overload
     def sql_get_info_w(

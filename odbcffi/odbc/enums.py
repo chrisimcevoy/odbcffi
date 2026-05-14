@@ -20,6 +20,7 @@ __all__ = [
     "SQLAlterTable",
     "SQLAsyncDbcFunctions",
     "SQLAsyncMode",
+    "SQLAsyncNotification",
     "SQLAttrAccessMode",
     "SQLAttrAutocommit",
     "SQLAttrCPMatch",
@@ -1322,6 +1323,7 @@ class InfoType(IntEnum):
     driver's return value.
     """
     SQL_ASYNC_NOTIFICATION = 10025
+    """A SQLUINTEGER value that indicates if the driver supports asynchronous notification."""
 
 
 class SQLAggregateFunctions(IntFlag):
@@ -1525,6 +1527,21 @@ class SQLAsyncMode(IntEnum):
     Some statement handles associated with a connection handle can be in asynchronous mode, while other statement
     handles on the same connection are in synchronous mode.
     """
+
+
+class SQLAsyncNotification(IntEnum):
+    """A SQLUINTEGER value that indicates if the driver supports asynchronous notification.
+
+    There are two categories of ODBC asynchronous operations: connection level asynchronous operations and statement
+    level asynchronous operations. If a driver returns SQL_ASYNC_NOTIFICATION_CAPABLE, it must support notification for
+    all APIs that it can execute asynchronously.
+    """
+
+    SQL_ASYNC_NOTIFICATION_NOT_CAPABLE = 0x00000000
+    """Asynchronous execution notification is not supported by the driver."""
+
+    SQL_ASYNC_NOTIFICATION_CAPABLE = 0x00000001
+    """Asynchronous execution notification is supported by the driver."""
 
 
 class SQLAttrAccessMode(IntEnum):
