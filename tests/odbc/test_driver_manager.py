@@ -1822,6 +1822,26 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLSql92ValueExpressions)
 
+    def test_sql_standard_cli_conformance(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        # Not implemented in psqlodbc
+        # https://github.com/postgresql-interfaces/psqlodbc/blob/863a0e938dd50c7b68208484bdc3ef8b00735a92/info.c#L1065
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver.startswith("PostgreSQL") else nullcontext()
+
+        with ctx:
+            actual: SQLStandardCliConformance = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_STANDARD_CLI_CONFORMANCE,
+            )
+
+            assert isinstance(actual, SQLStandardCliConformance)
+
     def test_sql_static_cursor_attributes_1(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:

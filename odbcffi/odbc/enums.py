@@ -84,6 +84,7 @@ __all__ = [
     "SQLSql92StringFunctions",
     "SQLSql92ValueExpressions",
     "SQLSqlConformance",
+    "SQLStandardCliConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
     "SQLSystemFunctions",
@@ -1217,6 +1218,7 @@ class InfoType(IntEnum):
     SQL_SQL92_VALUE_EXPRESSIONS = 165
     """An SQLUINTEGER bitmask enumerating the value expressions supported, as defined in SQL-92."""
     SQL_STANDARD_CLI_CONFORMANCE = 166
+    """An SQLUINTEGER bitmask enumerating the CLI standard or standards to which the driver conforms."""
     SQL_STATIC_CURSOR_ATTRIBUTES1 = 167
     """An SQLUINTEGER bitmask that describes the attributes of a static cursor that are supported by the driver.
 
@@ -3024,6 +3026,16 @@ class SQLSqlConformance(IntEnum):
     """Intermediate level SQL-92 compliant."""
     SQL_SC_SQL92_FULL = 0x00000008
     """Full level SQL-92 compliant."""
+
+
+class SQLStandardCliConformance(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the CLI standard or standards to which the driver conforms."""
+
+    SQL_SCC_XOPEN_CLI_VERSION1 = 0x00000001
+    """The driver complies with the Open Group CLI version 1."""
+
+    SQL_SCC_ISO92_CLI = 0x00000002
+    """The driver complies with the ISO 92 CLI."""
 
 
 class SQLStringFunctions(IntFlag):
