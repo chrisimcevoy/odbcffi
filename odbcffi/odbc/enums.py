@@ -1265,6 +1265,8 @@ class InfoType(IntEnum):
     """
 
     SQL_XOPEN_CLI_YEAR = 10000
+    """A character string that indicates the year of publication of the Open Group specification with which the version
+    of the ODBC Driver Manager fully complies."""
     SQL_CURSOR_SENSITIVITY = 10001
     SQL_DESCRIBE_PARAMETER = 10002
     SQL_CATALOG_NAME = 10003

@@ -158,6 +158,7 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_SPECIAL_CHARACTERS,
         InfoType.SQL_TABLE_TERM,
         InfoType.SQL_USER_NAME,
+        InfoType.SQL_XOPEN_CLI_YEAR,
     }
 )
 
@@ -1106,6 +1107,7 @@ class DriverManager:
             InfoType.SQL_SPECIAL_CHARACTERS,
             InfoType.SQL_TABLE_TERM,
             InfoType.SQL_USER_NAME,
+            InfoType.SQL_XOPEN_CLI_YEAR,
         ],
     ) -> str: ...
 

@@ -2042,6 +2042,20 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, str)
 
+    def test_xopen_cli_year(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: str = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_XOPEN_CLI_YEAR,
+        )
+
+        assert isinstance(actual, str)
+        assert actual
+
 
 class TestSQLGetSetConnectAttr:
     @pytest.mark.parametrize("expected", list(SQLAttrAutocommit))
