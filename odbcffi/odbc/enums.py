@@ -46,6 +46,7 @@ __all__ = [
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLDatetimeLiterals",
+    "SQLDdlIndex",
     "SQLDropAssertion",
     "SQLDropCharacterSet",
     "SQLDropCollation",
@@ -1236,6 +1237,7 @@ class InfoType(IntEnum):
     A SQL-92 Entry level-conformant driver will always return all of these options as supported.
     """
     SQL_DDL_INDEX = 170
+    """An SQLUINTEGER value that indicates support for creation and dropping of indexes."""
     SQL_DM_VER = 171
     SQL_INSERT_STATEMENT = 172
     SQL_CONVERT_GUID = 173
@@ -2157,6 +2159,16 @@ class SQLDatetimeLiterals(IntFlag):
     SQL_DL_SQL92_INTERVAL_HOUR_TO_MINUTE = 0x00002000
     SQL_DL_SQL92_INTERVAL_HOUR_TO_SECOND = 0x00004000
     SQL_DL_SQL92_INTERVAL_MINUTE_TO_SECOND = 0x00008000
+
+
+class SQLDdlIndex(IntFlag):
+    """An SQLUINTEGER value that indicates support for creation and dropping of indexes."""
+
+    SQL_DI_CREATE_INDEX = 0x00000001
+    """The CREATE INDEX statement is supported."""
+
+    SQL_DI_DROP_INDEX = 0x00000002
+    """The DROP INDEX statement is supported."""
 
 
 class SQLDropAssertion(IntFlag):

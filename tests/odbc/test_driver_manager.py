@@ -701,6 +701,15 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_ddl_index(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLDdlIndex = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DDL_INDEX,
+        )
+
+        assert isinstance(actual, SQLDdlIndex)
+
     def test_sql_default_txn_isolation(
         self,
         driver_manager: DriverManager,
