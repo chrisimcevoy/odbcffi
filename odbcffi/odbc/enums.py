@@ -50,6 +50,7 @@ __all__ = [
     "SQLCursorSensitivity",
     "SQLDatetimeLiterals",
     "SQLDdlIndex",
+    "SQLDriverAwarePoolingSupported",
     "SQLDropAssertion",
     "SQLDropCharacterSet",
     "SQLDropCollation",
@@ -1315,6 +1316,11 @@ class InfoType(IntEnum):
     """A SQLUINTEGER value that indicates if the driver can execute functions asynchronously on the connection
     handle."""
     SQL_DRIVER_AWARE_POOLING_SUPPORTED = 10024
+    """A SQLUINTEGER value that indicates if the driver support driver-aware pooling.
+
+    A driver does not need to implement SQL_DRIVER_AWARE_POOLING_SUPPORTED and the Driver Manager will not honor to the
+    driver's return value.
+    """
     SQL_ASYNC_NOTIFICATION = 10025
 
 
@@ -2280,6 +2286,20 @@ class SQLDdlIndex(IntFlag):
 
     SQL_DI_DROP_INDEX = 0x00000002
     """The DROP INDEX statement is supported."""
+
+
+class SQLDriverAwarePoolingSupported(IntEnum):
+    """A SQLUINTEGER value that indicates if the driver support driver-aware pooling.
+
+    A driver does not need to implement SQL_DRIVER_AWARE_POOLING_SUPPORTED and the Driver Manager will not honor to the
+    driver's return value.
+    """
+
+    SQL_DRIVER_AWARE_POOLING_NOT_CAPABLE = 0x00000000
+    """The driver cannot support driver-aware pooling mechanism."""
+
+    SQL_DRIVER_AWARE_POOLING_CAPABLE = 0x00000001
+    """The driver can support driver-aware pooling mechanism."""
 
 
 class SQLDropAssertion(IntFlag):

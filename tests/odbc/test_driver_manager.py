@@ -807,6 +807,19 @@ class TestSQLGetInfoW:
 
         assert actual == expected
 
+    def test_sql_driver_aware_pooling_supported(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        # Not implemented by any driver, seemingly...
+        with pytest.raises(ODBCError):
+            driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_DRIVER_AWARE_POOLING_SUPPORTED,
+            )
+
     def test_sql_describe_parameter(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
     ) -> None:
