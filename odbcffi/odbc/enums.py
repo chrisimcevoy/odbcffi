@@ -1283,6 +1283,10 @@ class InfoType(IntEnum):
     supported, even in a SQL-92 Full level-conformant driver.
     """
     SQL_CATALOG_NAME = 10003
+    """A character string: "Y" if the server supports catalog names, or "N" if it does not.
+
+    A SQL-92 Full level-conformant driver will always return "Y".
+    """
     SQL_COLLATION_SEQ = 10004
     SQL_MAX_IDENTIFIER_LEN = 10005
     SQL_ASYNC_MODE = 10021

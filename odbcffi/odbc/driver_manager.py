@@ -126,6 +126,7 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_ACCESSIBLE_PROCEDURES,
         InfoType.SQL_ACCESSIBLE_TABLES,
         InfoType.SQL_CATALOG_NAME_SEPARATOR,
+        InfoType.SQL_CATALOG_NAME,
         InfoType.SQL_CATALOG_TERM,
         InfoType.SQL_COLUMN_ALIAS,
         InfoType.SQL_DATA_SOURCE_NAME,
@@ -1070,6 +1071,7 @@ class DriverManager:
         info_type: Literal[
             InfoType.SQL_ACCESSIBLE_PROCEDURES,
             InfoType.SQL_ACCESSIBLE_TABLES,
+            InfoType.SQL_CATALOG_NAME,
             InfoType.SQL_COLUMN_ALIAS,
             InfoType.SQL_DATA_SOURCE_READ_ONLY,
             InfoType.SQL_DESCRIBE_PARAMETER,

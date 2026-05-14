@@ -120,6 +120,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLCatalogLocation)
 
+    def test_sql_catalog_name(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CATALOG_NAME,
+        )
+
+        assert actual in ("Y", "N")
+
     def test_sql_catalog_name_separator(
         self,
         driver_manager: DriverManager,
