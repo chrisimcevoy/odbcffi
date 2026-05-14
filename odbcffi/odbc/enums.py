@@ -1276,6 +1276,12 @@ class InfoType(IntEnum):
     A SQL-92 Full level-conformant driver will always return the SQL_INSENSITIVE option as supported.
     """
     SQL_DESCRIBE_PARAMETER = 10002
+    """A character string: "Y" if parameters can be described; "N", if not.
+
+    A SQL-92 Full level-conformant driver will usually return "Y" because it will support the DESCRIBE INPUT statement.
+    Because this does not directly specify the underlying SQL support, however, describing parameters might not be
+    supported, even in a SQL-92 Full level-conformant driver.
+    """
     SQL_CATALOG_NAME = 10003
     SQL_COLLATION_SEQ = 10004
     SQL_MAX_IDENTIFIER_LEN = 10005
