@@ -1783,6 +1783,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLSql92Revoke)
 
+    def test_sql_sql92_string_functions(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92StringFunctions = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_STRING_FUNCTIONS,
+        )
+
+        assert isinstance(actual, SQLSql92StringFunctions)
+
     def test_sql_sql92_row_value_constructor(
         self,
         driver_manager: DriverManager,

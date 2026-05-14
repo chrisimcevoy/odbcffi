@@ -81,6 +81,7 @@ __all__ = [
     "SQLSql92RelationalJoinOperators",
     "SQLSql92Revoke",
     "SQLSql92RowValueConstructor",
+    "SQLSql92StringFunctions",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1210,6 +1211,8 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the row value constructor expressions supported in a SELECT statement, as
     defined in SQL-92."""
     SQL_SQL92_STRING_FUNCTIONS = 164
+    """An SQLUINTEGER bitmask enumerating the string scalar functions that are supported by the driver and the
+    associated data source, as defined in SQL-92."""
     SQL_SQL92_VALUE_EXPRESSIONS = 165
     SQL_STANDARD_CLI_CONFORMANCE = 166
     SQL_STATIC_CURSOR_ATTRIBUTES1 = 167
@@ -2951,6 +2954,19 @@ class SQLSql92RowValueConstructor(IntFlag):
     SQL_SRVC_NULL = 0x00000002
     SQL_SRVC_DEFAULT = 0x00000004
     SQL_SRVC_ROW_SUBQUERY = 0x00000008
+
+
+class SQLSql92StringFunctions(IntFlag):
+    """Bitmask for the string scalar functions that the driver and data source support, as defined in SQL-92."""
+
+    SQL_SSF_CONVERT = 0x00000001
+    SQL_SSF_LOWER = 0x00000002
+    SQL_SSF_UPPER = 0x00000004
+    SQL_SSF_SUBSTRING = 0x00000008
+    SQL_SSF_TRANSLATE = 0x00000010
+    SQL_SSF_TRIM_BOTH = 0x00000020
+    SQL_SSF_TRIM_LEADING = 0x00000040
+    SQL_SSF_TRIM_TRAILING = 0x00000080
 
 
 class SQLSqlConformance(IntEnum):
