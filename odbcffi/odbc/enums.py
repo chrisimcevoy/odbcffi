@@ -82,6 +82,7 @@ __all__ = [
     "SQLSql92Revoke",
     "SQLSql92RowValueConstructor",
     "SQLSql92StringFunctions",
+    "SQLSql92ValueExpressions",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1214,6 +1215,7 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the string scalar functions that are supported by the driver and the
     associated data source, as defined in SQL-92."""
     SQL_SQL92_VALUE_EXPRESSIONS = 165
+    """An SQLUINTEGER bitmask enumerating the value expressions supported, as defined in SQL-92."""
     SQL_STANDARD_CLI_CONFORMANCE = 166
     SQL_STATIC_CURSOR_ATTRIBUTES1 = 167
     """An SQLUINTEGER bitmask that describes the attributes of a static cursor that are supported by the driver.
@@ -2951,22 +2953,64 @@ class SQLSql92RowValueConstructor(IntFlag):
     """Bitmask for the row value constructor expressions supported in a SELECT statement, as defined in SQL-92."""
 
     SQL_SRVC_VALUE_EXPRESSION = 0x00000001
+    """Row value constructors containing value expressions are supported."""
+
     SQL_SRVC_NULL = 0x00000002
+    """Row value constructors containing NULL are supported."""
+
     SQL_SRVC_DEFAULT = 0x00000004
+    """Row value constructors containing DEFAULT are supported."""
+
     SQL_SRVC_ROW_SUBQUERY = 0x00000008
+    """Row value constructors containing row subqueries are supported."""
 
 
 class SQLSql92StringFunctions(IntFlag):
     """Bitmask for the string scalar functions that the driver and data source support, as defined in SQL-92."""
 
     SQL_SSF_CONVERT = 0x00000001
+    """The CONVERT string function is supported."""
+
     SQL_SSF_LOWER = 0x00000002
+    """The LOWER string function is supported."""
+
     SQL_SSF_UPPER = 0x00000004
+    """The UPPER string function is supported."""
+
     SQL_SSF_SUBSTRING = 0x00000008
+    """The SUBSTRING string function is supported."""
+
     SQL_SSF_TRANSLATE = 0x00000010
+    """The TRANSLATE string function is supported."""
+
     SQL_SSF_TRIM_BOTH = 0x00000020
+    """The TRIM function with BOTH trim specification is supported."""
+
     SQL_SSF_TRIM_LEADING = 0x00000040
+    """The TRIM function with LEADING trim specification is supported."""
+
     SQL_SSF_TRIM_TRAILING = 0x00000080
+    """The TRIM function with TRAILING trim specification is supported."""
+
+
+class SQLSql92ValueExpressions(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the value expressions supported, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SVE_CASE = 0x00000001
+    """The CASE expression is supported (Intermediate level)."""
+
+    SQL_SVE_CAST = 0x00000002
+    """The CAST expression is supported (FIPS Transitional level)."""
+
+    SQL_SVE_COALESCE = 0x00000004
+    """The COALESCE expression is supported (Intermediate level)."""
+
+    SQL_SVE_NULLIF = 0x00000008
+    """The NULLIF expression is supported (Intermediate level)."""
 
 
 class SQLSqlConformance(IntEnum):

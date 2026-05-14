@@ -1783,6 +1783,19 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLSql92Revoke)
 
+    def test_sql_sql92_row_value_constructor(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92RowValueConstructor = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_ROW_VALUE_CONSTRUCTOR,
+        )
+
+        assert isinstance(actual, SQLSql92RowValueConstructor)
+
     def test_sql_sql92_string_functions(
         self,
         driver_manager: DriverManager,
@@ -1796,18 +1809,18 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLSql92StringFunctions)
 
-    def test_sql_sql92_row_value_constructor(
+    def test_sql_sql92_value_expressions(
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
     ) -> None:
 
-        actual: SQLSql92RowValueConstructor = driver_manager.sql_get_info_w(
+        actual: SQLSql92ValueExpressions = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
-            info_type=InfoType.SQL_SQL92_ROW_VALUE_CONSTRUCTOR,
+            info_type=InfoType.SQL_SQL92_VALUE_EXPRESSIONS,
         )
 
-        assert isinstance(actual, SQLSql92RowValueConstructor)
+        assert isinstance(actual, SQLSql92ValueExpressions)
 
     def test_sql_static_cursor_attributes_1(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
