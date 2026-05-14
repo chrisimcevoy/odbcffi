@@ -240,6 +240,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_INSERT_STATEMENT,
         InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1,
         InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2,
+        InfoType.SQL_MAX_ASYNC_CONCURRENT_STATEMENTS,
         InfoType.SQL_MAX_BINARY_LITERAL_LEN,
         InfoType.SQL_MAX_CATALOG_NAME_LEN,
         InfoType.SQL_MAX_CHAR_LITERAL_LEN,
@@ -1128,6 +1129,7 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[
             InfoType.SQL_ACTIVE_ENVIRONMENTS,
+            InfoType.SQL_MAX_ASYNC_CONCURRENT_STATEMENTS,
             InfoType.SQL_MAX_BINARY_LITERAL_LEN,
             InfoType.SQL_MAX_CATALOG_NAME_LEN,
             InfoType.SQL_MAX_CHAR_LITERAL_LEN,

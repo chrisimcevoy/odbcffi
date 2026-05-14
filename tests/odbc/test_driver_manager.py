@@ -1163,6 +1163,25 @@ class TestSQLGetInfoW:
 
         assert actual in ("Y", "N")
 
+    def test_sql_max_async_concurrent_statements(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        # Not implemented in psqlodbc
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver.startswith("PostgreSQL") else nullcontext()
+
+        with ctx:
+            actual: int = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_MAX_ASYNC_CONCURRENT_STATEMENTS,
+            )
+
+            assert actual >= 0
+
     def test_sql_max_binary_literal_len(
         self,
         driver_manager: DriverManager,

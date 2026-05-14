@@ -1305,6 +1305,11 @@ class InfoType(IntEnum):
     SQL_ASYNC_MODE = 10021
     """A SQLUINTEGER value that indicates the level of asynchronous support in the driver."""
     SQL_MAX_ASYNC_CONCURRENT_STATEMENTS = 10022
+    """An SQLUINTEGER value that specifies the maximum number of active concurrent statements in asynchronous mode that
+    the driver can support on a given connection.
+
+    If there is no specific limit or the limit is unknown, this value is zero.
+    """
     SQL_ASYNC_DBC_FUNCTIONS = 10023
     SQL_DRIVER_AWARE_POOLING_SUPPORTED = 10024
     SQL_ASYNC_NOTIFICATION = 10025
