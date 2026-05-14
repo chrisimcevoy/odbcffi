@@ -18,6 +18,7 @@ __all__ = [
     "SQLAggregateFunctions",
     "SQLAlterDomain",
     "SQLAlterTable",
+    "SQLAsyncDbcFunctions",
     "SQLAsyncMode",
     "SQLAttrAccessMode",
     "SQLAttrAutocommit",
@@ -1311,6 +1312,8 @@ class InfoType(IntEnum):
     If there is no specific limit or the limit is unknown, this value is zero.
     """
     SQL_ASYNC_DBC_FUNCTIONS = 10023
+    """A SQLUINTEGER value that indicates if the driver can execute functions asynchronously on the connection
+    handle."""
     SQL_DRIVER_AWARE_POOLING_SUPPORTED = 10024
     SQL_ASYNC_NOTIFICATION = 10025
 
@@ -1484,6 +1487,16 @@ class SQLAlterTable(IntFlag):
     This bit is meaningful when support for adding column constraints or table constraints is reported by
     SQL_AT_ADD_CONSTRAINT or SQL_AT_ADD_TABLE_CONSTRAINT. (Full level) (ODBC 3.0)
     """
+
+
+class SQLAsyncDbcFunctions(IntEnum):
+    """A SQLUINTEGER that indicates if the driver can execute functions asynchronously on the connection handle."""
+
+    SQL_ASYNC_DBC_CAPABLE = 0x00000001
+    """The driver can execute connection functions asynchronously."""
+
+    SQL_ASYNC_DBC_NOT_CAPABLE = 0x00000000
+    """The driver cannot execute connection functions asynchronously."""
 
 
 class SQLAsyncMode(IntEnum):

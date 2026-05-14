@@ -80,6 +80,27 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLAlterTable)
 
+    def test_sql_async_dbc_functions(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        ctx = (
+            pytest.raises(ODBCError)
+            if connection_info.driver == "FreeTDS" or connection_info.driver.startswith("PostgreSQL")
+            else nullcontext()
+        )
+
+        with ctx:
+            actual: SQLAsyncDbcFunctions = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_ASYNC_DBC_FUNCTIONS,
+            )
+
+            assert isinstance(actual, SQLAsyncDbcFunctions)
+
     def test_sql_async_mode(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
 
         actual: SQLAsyncMode = driver_manager.sql_get_info_w(
