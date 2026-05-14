@@ -211,6 +211,7 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_CREATE_VIEW,
         InfoType.SQL_CURSOR_COMMIT_BEHAVIOR,
         InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR,
+        InfoType.SQL_CURSOR_SENSITIVITY,
         InfoType.SQL_DATETIME_LITERALS,
         InfoType.SQL_DDL_INDEX,
         InfoType.SQL_DEFAULT_TXN_ISOLATION,
@@ -342,6 +343,7 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_CREATE_VIEW: SQLCreateView,
     InfoType.SQL_CURSOR_COMMIT_BEHAVIOR: SQLCursorCommitBehavior,
     InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR: SQLCursorRollbackBehavior,
+    InfoType.SQL_CURSOR_SENSITIVITY: SQLCursorSensitivity,
     InfoType.SQL_DATETIME_LITERALS: SQLDatetimeLiterals,
     InfoType.SQL_DDL_INDEX: SQLDdlIndex,
     InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption,
@@ -1343,6 +1345,13 @@ class DriverManager:
         connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR],
     ) -> SQLCursorRollbackBehavior: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CURSOR_SENSITIVITY],
+    ) -> SQLCursorSensitivity: ...
 
     @overload
     def sql_get_info_w(

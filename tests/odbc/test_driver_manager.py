@@ -608,6 +608,23 @@ class TestSQLGetInfoW:
 
         assert actual in list(SQLCursorRollbackBehavior)
 
+    def test_sql_cursor_sensitivity(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver.startswith("PostgreSQL") else nullcontext()
+
+        with ctx:
+            actual: SQLCursorSensitivity = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_CURSOR_SENSITIVITY,
+            )
+
+            assert actual in list(SQLCursorSensitivity)
+
     def test_sql_data_source_name(
         self,
         driver_manager: DriverManager,

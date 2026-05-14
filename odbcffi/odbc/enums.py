@@ -45,6 +45,7 @@ __all__ = [
     "SQLCursorAttributes2",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
+    "SQLCursorSensitivity",
     "SQLDatetimeLiterals",
     "SQLDdlIndex",
     "SQLDropAssertion",
@@ -1268,6 +1269,12 @@ class InfoType(IntEnum):
     """A character string that indicates the year of publication of the Open Group specification with which the version
     of the ODBC Driver Manager fully complies."""
     SQL_CURSOR_SENSITIVITY = 10001
+    """An SQLUINTEGER value that indicates the support for cursor sensitivity.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_UNSPECIFIED option as supported.
+
+    A SQL-92 Full level-conformant driver will always return the SQL_INSENSITIVE option as supported.
+    """
     SQL_DESCRIBE_PARAMETER = 10002
     SQL_CATALOG_NAME = 10003
     SQL_COLLATION_SEQ = 10004
@@ -2147,6 +2154,29 @@ class SQLCursorRollbackBehavior(IntEnum):
     The application can continue to fetch data, or it can close the cursor and re-execute the statement without
     repreparing it.
     """
+
+
+class SQLCursorSensitivity(IntEnum):
+    """An SQLUINTEGER value that indicates the support for cursor sensitivity.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_UNSPECIFIED option as supported.
+
+    A SQL-92 Full level-conformant driver will always return the SQL_INSENSITIVE option as supported.
+    """
+
+    SQL_UNSPECIFIED = 0
+    """It is unspecified whether cursors on the statement handle make visible the changes that were made to a result set
+    by another cursor within the same transaction.
+
+    Cursors on the statement handle may make visible none, some, or all such changes.
+    """
+
+    SQL_INSENSITIVE = 1
+    """All cursors on the statement handle show the result set without reflecting any changes that were made to it by
+    any other cursor within the same transaction."""
+
+    SQL_SENSITIVE = 2
+    """Cursors are sensitive to changes that were made by other cursors within the same transaction."""
 
 
 class SQLDatetimeLiterals(IntFlag):
