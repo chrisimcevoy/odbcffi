@@ -80,6 +80,15 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLAlterTable)
 
+    def test_sql_async_mode(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLAsyncMode = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ASYNC_MODE,
+        )
+
+        assert isinstance(actual, SQLAsyncMode)
+
     def test_sql_batch_row_count(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
 
         actual: SQLBatchRowCount = driver_manager.sql_get_info_w(

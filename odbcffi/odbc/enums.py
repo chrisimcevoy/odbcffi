@@ -18,6 +18,7 @@ __all__ = [
     "SQLAggregateFunctions",
     "SQLAlterDomain",
     "SQLAlterTable",
+    "SQLAsyncMode",
     "SQLAttrAccessMode",
     "SQLAttrAutocommit",
     "SQLAttrCPMatch",
@@ -1302,6 +1303,7 @@ class InfoType(IntEnum):
     return at least 128.
     """
     SQL_ASYNC_MODE = 10021
+    """A SQLUINTEGER value that indicates the level of asynchronous support in the driver."""
     SQL_MAX_ASYNC_CONCURRENT_STATEMENTS = 10022
     SQL_ASYNC_DBC_FUNCTIONS = 10023
     SQL_DRIVER_AWARE_POOLING_SUPPORTED = 10024
@@ -1476,6 +1478,28 @@ class SQLAlterTable(IntFlag):
 
     This bit is meaningful when support for adding column constraints or table constraints is reported by
     SQL_AT_ADD_CONSTRAINT or SQL_AT_ADD_TABLE_CONSTRAINT. (Full level) (ODBC 3.0)
+    """
+
+
+class SQLAsyncMode(IntEnum):
+    """A SQLUINTEGER value that indicates the level of asynchronous support in the driver."""
+
+    SQL_AM_NONE = 0
+    """Asynchronous mode is not supported."""
+
+    SQL_AM_CONNECTION = 1
+    """Connection level asynchronous execution is supported.
+
+    Either all statement handles associated with a given connection handle are in asynchronous mode or all are in
+    synchronous mode. A statement handle on a connection cannot be in asynchronous mode while another statement handle
+    on the same connection is in synchronous mode, and vice versa.
+    """
+
+    SQL_AM_STATEMENT = 2
+    """Statement level asynchronous execution is supported.
+
+    Some statement handles associated with a connection handle can be in asynchronous mode, while other statement
+    handles on the same connection are in synchronous mode.
     """
 
 
