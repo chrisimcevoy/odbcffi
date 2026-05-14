@@ -1295,6 +1295,12 @@ class InfoType(IntEnum):
     level-conformant driver will always return a non-empty string.
     """
     SQL_MAX_IDENTIFIER_LEN = 10005
+    """An SQLUSMALLINT that indicates the maximum size in characters that the data source supports for user-defined
+    names.
+
+    An FIPS Entry level-conformant driver will return at least 18. An FIPS Intermediate level-conformant driver will
+    return at least 128.
+    """
     SQL_ASYNC_MODE = 10021
     SQL_MAX_ASYNC_CONCURRENT_STATEMENTS = 10022
     SQL_ASYNC_DBC_FUNCTIONS = 10023
