@@ -80,6 +80,7 @@ __all__ = [
     "SQLSql92Predicates",
     "SQLSql92RelationalJoinOperators",
     "SQLSql92Revoke",
+    "SQLSql92RowValueConstructor",
     "SQLSqlConformance",
     "SQLStringFunctions",
     "SQLSubqueries",
@@ -1206,6 +1207,8 @@ class InfoType(IntEnum):
     """An SQLUINTEGER bitmask enumerating the clauses supported in the REVOKE statement, as defined in SQL-92, supported
     by the data source."""
     SQL_SQL92_ROW_VALUE_CONSTRUCTOR = 163
+    """An SQLUINTEGER bitmask enumerating the row value constructor expressions supported in a SELECT statement, as
+    defined in SQL-92."""
     SQL_SQL92_STRING_FUNCTIONS = 164
     SQL_SQL92_VALUE_EXPRESSIONS = 165
     SQL_STANDARD_CLI_CONFORMANCE = 166
@@ -2939,6 +2942,15 @@ class SQLSql92Revoke(IntFlag):
 
     SQL_SR_UPDATE_COLUMN = 0x00004000
     """The UPDATE privilege on columns can be revoked (Entry level)."""
+
+
+class SQLSql92RowValueConstructor(IntFlag):
+    """Bitmask for the row value constructor expressions supported in a SELECT statement, as defined in SQL-92."""
+
+    SQL_SRVC_VALUE_EXPRESSION = 0x00000001
+    SQL_SRVC_NULL = 0x00000002
+    SQL_SRVC_DEFAULT = 0x00000004
+    SQL_SRVC_ROW_SUBQUERY = 0x00000008
 
 
 class SQLSqlConformance(IntEnum):
