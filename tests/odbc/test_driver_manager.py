@@ -1024,6 +1024,17 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLInfoSchemaViews)
 
+    def test_sql_insert_statement(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLInsertStatement = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_INSERT_STATEMENT,
+        )
+
+        assert isinstance(actual, SQLInsertStatement)
+
     def test_sql_integrity(
         self,
         driver_manager: DriverManager,

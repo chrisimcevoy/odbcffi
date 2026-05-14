@@ -60,6 +60,7 @@ __all__ = [
     "SQLIdentifierCase",
     "SQLIndexKeywords",
     "SQLInfoSchemaViews",
+    "SQLInsertStatement",
     "SQLNonNullableColumns",
     "SQLNullCollation",
     "SQLNumericFunctions",
@@ -1250,6 +1251,10 @@ class InfoType(IntEnum):
     The Windows 7 Driver Manager version is 03.80. The Windows 8 Driver Manager version is 03.81.
     """
     SQL_INSERT_STATEMENT = 172
+    """An SQLUINTEGER bitmask that indicates support for INSERT statements.
+
+    A SQL-92 Entry level-conformant driver will always return all of the options as supported.
+    """
     SQL_CONVERT_GUID = 173
     """An SQLUINTEGER bitmask.
 
@@ -2462,6 +2467,22 @@ class SQLInfoSchemaViews(IntFlag):
     SQL_ISV_VIEWS = 0x00400000
     """Identifies the viewed tables defined in this catalog that can be accessed by a given user (FIPS Transitional
     level)."""
+
+
+class SQLInsertStatement(IntFlag):
+    """An SQLUINTEGER bitmask that indicates support for INSERT statements.
+
+    A SQL-92 Entry level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_IS_INSERT_LITERALS = 0x00000001
+    """INSERT statements using literal VALUES clauses are supported."""
+
+    SQL_IS_INSERT_SEARCHED = 0x00000002
+    """INSERT statements using the result of a query are supported."""
+
+    SQL_IS_SELECT_INTO = 0x00000004
+    """The SELECT INTO statement is supported."""
 
 
 class SQLNonNullableColumns(IntEnum):
