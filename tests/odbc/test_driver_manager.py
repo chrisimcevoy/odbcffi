@@ -89,7 +89,9 @@ class TestSQLGetInfoW:
 
         ctx = (
             pytest.raises(ODBCError)
-            if connection_info.driver == "FreeTDS" or connection_info.driver.startswith("PostgreSQL")
+            if connection_info.driver == "FreeTDS"
+            or connection_info.driver.startswith("PostgreSQL")
+            or connection_info.driver == "SQL Server"
             else nullcontext()
         )
 
@@ -811,14 +813,19 @@ class TestSQLGetInfoW:
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
     ) -> None:
 
-        # Not implemented by any driver, seemingly...
-        with pytest.raises(ODBCError):
-            driver_manager.sql_get_info_w(
+        # Only implemented by windows driver managers, seemingly...
+        ctx = pytest.raises(ODBCError) if not driver_manager.is_windows_dm else nullcontext()
+
+        with ctx:
+            actual: SQLDriverAwarePoolingSupported = driver_manager.sql_get_info_w(
                 connection_handle=open_connection_handle,
                 info_type=InfoType.SQL_DRIVER_AWARE_POOLING_SUPPORTED,
             )
+
+            assert isinstance(actual, SQLDriverAwarePoolingSupported)
 
     def test_sql_describe_parameter(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
