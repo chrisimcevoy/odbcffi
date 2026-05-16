@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+__all__ = ["DriverInfo"]
+
 
 @dataclass(frozen=True)
 class DriverInfo:
