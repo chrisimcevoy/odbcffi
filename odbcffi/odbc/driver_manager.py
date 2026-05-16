@@ -28,12 +28,11 @@ __all__ = ["DriverManager"]
 
 logger = logging.getLogger(__name__)
 
-ffi = FFI()
-SQL_NTS = -3
-SQL_NULL_HANDLE = ffi.NULL
 
-ffi.cdef(
-    r"""
+SQL_NTS = -3
+
+
+FFI_CDEF: Final[str] = r"""
 typedef unsigned char       SQLCHAR;
 typedef void*               SQLHANDLE;
 typedef SQLHANDLE           SQLHENV;
@@ -132,7 +131,6 @@ SQLRETURN SQLSetEnvAttr(
      SQLPOINTER   ValuePtr,
      SQLINTEGER   StringLength);
 """
-)
 
 SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
     {
@@ -434,99 +432,6 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_UNION: SQLUnion,
 }
 
-SQLWCHAR_SIZE: Final[int] = ffi.sizeof("SQLWCHAR")
-"""The size of SQLWCHAR in bytes."""
-
-
-def get_sqlwchar_encoding() -> str:
-    """Return the Python codec name matching the runtime SQLWCHAR ABI."""
-    if SQLWCHAR_SIZE == 2:
-        return "utf-16-le" if sys.byteorder == "little" else "utf-16-be"
-
-    if SQLWCHAR_SIZE == 4:
-        return "utf-32-le" if sys.byteorder == "little" else "utf-32-be"
-
-    raise RuntimeError(f"Unsupported SQLWCHAR size: {SQLWCHAR_SIZE}")
-
-
-@overload
-def decode_sqlwchar_buffer(buffer: Any, *, num_bytes: int) -> str: ...
-
-
-@overload
-def decode_sqlwchar_buffer(buffer: Any, *, num_chars: int) -> str: ...
-
-
-def decode_sqlwchar_buffer(buffer: Any, *, num_bytes: int | None = None, num_chars: int | None = None) -> str:
-    """Decode a wide-character ODBC buffer into a Python string.
-
-    ODBC functions variously provide buffer lengths in either bytes (for example SQLGetInfoW) or characters (for example
-    SQLGetDiagRecW).
-
-    Exactly one of ``num_bytes`` or ``num_chars`` must be provided.
-
-    :param buffer: The SQLWCHAR buffer to decode.
-    :param num_bytes: The number of bytes to read from the buffer.
-    :param num_chars: The number of characters to read from the buffer.
-    :return: The decoded Python string.
-    """
-    if num_bytes is None and num_chars is None:
-        raise ValueError("One of num_bytes or num_chars must be provided.")
-
-    if num_bytes is not None and num_chars is not None:
-        raise ValueError("Only one of num_bytes and num_chars can be provided.")
-
-    if num_chars is not None:
-        if num_chars < 0:
-            raise ValueError("num_chars cannot be negative")
-
-        if num_chars == 0:
-            return ""
-
-        num_bytes = num_chars * SQLWCHAR_SIZE
-
-    elif num_bytes is not None:
-        if num_bytes < 0:
-            raise ValueError("num_bytes cannot be negative")
-
-        if num_bytes == 0:
-            return ""
-
-        if num_bytes % SQLWCHAR_SIZE != 0:
-            raise ValueError(f"num_bytes ({num_bytes}) must be a multiple of sizeof(SQLWCHAR) ({SQLWCHAR_SIZE})")
-
-    raw: bytes = ffi.buffer(buffer, num_bytes)[:]
-    return raw.decode(get_sqlwchar_encoding())
-
-
-def encode_sqlwchar_buffer(s: str) -> Any:
-    """Convert a Python string into a NUL-terminated SQLWCHAR buffer.
-
-    Encodes using the runtime SQLWCHAR ABI (2-byte or 4-byte code units),
-    appends a single wide-character NUL terminator, and returns a
-    ``SQLWCHAR[]`` buffer suitable for passing to ODBC W APIs.
-    """
-    encoding = get_sqlwchar_encoding()
-
-    # Encode string
-    payload = s.encode(encoding)
-
-    # Append a single wide NUL (size depends on SQLWCHAR)
-    terminator = b"\x00" * SQLWCHAR_SIZE
-    b = payload + terminator
-
-    # Sanity check
-    if len(b) % SQLWCHAR_SIZE != 0:
-        raise ValueError(f"Encoded buffer length ({len(b)}) is not a multiple of SQLWCHAR size ({SQLWCHAR_SIZE})")
-
-    # Number of SQLWCHAR elements
-    n_wchars = len(b) // SQLWCHAR_SIZE
-
-    buf = ffi.new(f"SQLWCHAR[{n_wchars}]")
-    ffi.memmove(buf, b, len(b))
-
-    return buf
-
 
 DM_LIB_NAMES_MACOS_UNIXODBC = ["libodbc.dylib"]
 DM_LIB_NAMES_MACOS_IODBC = ["libiodbc.dylib"]
@@ -569,7 +474,9 @@ class DriverManager:
         """
         # TODO: Allow pathlib.Path arg, and handle driver_manager_type detection where there are path separators.
         self.driver_manager_lib_name: Final[str] = driver_manager_lib_name
-        self._lib = ffi.dlopen(driver_manager_lib_name)
+        self._ffi = FFI()
+        self._ffi.cdef(FFI_CDEF)
+        self._lib = self._ffi.dlopen(driver_manager_lib_name)
 
     @cached_property
     def driver_manager_type(self) -> DriverManagerType:
@@ -597,37 +504,102 @@ class DriverManager:
         """True if this driver manager appears to be the Windows ODBC Driver Manager (based on library name)."""
         return self.driver_manager_type == DriverManagerType.ODBC32
 
-    @classmethod
-    def autoload(cls) -> Self:
-        """Create an instance of DriverManager using the first ODBC driver manager detected on the host.
+    @cached_property
+    def _sqlwchar_encoding(self) -> str:
+        """The Python codec name matching the runtime SQLWCHAR ABI."""
+        if self._sqlwchar_size == 2:
+            return "utf-16-le" if sys.byteorder == "little" else "utf-16-be"
 
-        :return: An instance of DriverManager.
-        :raise FileNotFoundError: No driver manager library was auto-detected on the host system.
+        if self._sqlwchar_size == 4:
+            return "utf-32-le" if sys.byteorder == "little" else "utf-32-be"
+
+        raise RuntimeError(f"Unsupported SQLWCHAR size: {self._sqlwchar_size}")
+
+    @cached_property
+    def _sqlwchar_size(self) -> int:
+        """The size of SQLWCHAR in bytes."""
+        return int(self._ffi.sizeof("SQLWCHAR"))
+
+    @overload
+    def _decode_sqlwchar_buffer(self, buffer: Any, *, num_bytes: int) -> str: ...
+
+    @overload
+    def _decode_sqlwchar_buffer(self, buffer: Any, *, num_chars: int) -> str: ...
+
+    def _decode_sqlwchar_buffer(
+        self, buffer: Any, *, num_bytes: int | None = None, num_chars: int | None = None
+    ) -> str:
+        """Decode a wide-character ODBC buffer into a Python string.
+
+        ODBC functions variously provide buffer lengths in either bytes (for example SQLGetInfoW) or characters (for
+        example SQLGetDiagRecW).
+
+        Exactly one of ``num_bytes`` or ``num_chars`` must be provided.
+
+        :param buffer: The SQLWCHAR buffer to decode.
+        :param num_bytes: The number of bytes to read from the buffer.
+        :param num_chars: The number of characters to read from the buffer.
+        :return: The decoded Python string.
         """
-        last_err: OSError | None = None
+        if num_bytes is None and num_chars is None:
+            raise ValueError("One of num_bytes or num_chars must be provided.")
 
-        os_family = platform.system()
+        if num_bytes is not None and num_chars is not None:
+            raise ValueError("Only one of num_bytes and num_chars can be provided.")
 
-        if os_family == "Darwin":
-            names = DM_LIB_NAMES_MACOS
-        elif os_family == "Windows":
-            names = DM_LIB_NAMES_WIN
-        elif os_family == "Linux":
-            names = DM_LIB_NAMES_NIX
-        else:
-            names = DM_LIB_NAMES
+        if num_chars is not None:
+            if num_chars < 0:
+                raise ValueError("num_chars cannot be negative")
 
-        for name in names:
-            try:
-                dm = cls(driver_manager_lib_name=name)
-                return dm
-            except OSError as e:  # noqa: PERF203
-                last_err = e
-        raise FileNotFoundError(
-            "Could not load an ODBC driver manager library. Tried: "
-            + ", ".join(names)
-            + (f"\nLast error: {last_err}" if last_err else "")
-        )
+            if num_chars == 0:
+                return ""
+
+            num_bytes = num_chars * self._sqlwchar_size
+
+        elif num_bytes is not None:
+            if num_bytes < 0:
+                raise ValueError("num_bytes cannot be negative")
+
+            if num_bytes == 0:
+                return ""
+
+            if num_bytes % self._sqlwchar_size != 0:
+                raise ValueError(
+                    f"num_bytes ({num_bytes}) must be a multiple of sizeof(SQLWCHAR) ({self._sqlwchar_size})"
+                )
+
+        raw: bytes = self._ffi.buffer(buffer, num_bytes)[:]
+        return raw.decode(self._sqlwchar_encoding)
+
+    def _encode_sqlwchar_buffer(self, s: str) -> Any:
+        """Convert a Python string into a NUL-terminated SQLWCHAR buffer.
+
+        Encodes using the runtime SQLWCHAR ABI (2-byte or 4-byte code units),
+        appends a single wide-character NUL terminator, and returns a
+        ``SQLWCHAR[]`` buffer suitable for passing to ODBC W APIs.
+        """
+        encoding = self._sqlwchar_encoding
+
+        # Encode string
+        payload = s.encode(encoding)
+
+        # Append a single wide NUL (size depends on SQLWCHAR)
+        terminator = b"\x00" * self._sqlwchar_size
+        b = payload + terminator
+
+        # Sanity check
+        if len(b) % self._sqlwchar_size != 0:
+            raise ValueError(
+                f"Encoded buffer length ({len(b)}) is not a multiple of SQLWCHAR size ({self._sqlwchar_size})"
+            )
+
+        # Number of SQLWCHAR elements
+        n_wchars = len(b) // self._sqlwchar_size
+
+        buf = self._ffi.new(f"SQLWCHAR[{n_wchars}]")
+        self._ffi.memmove(buf, b, len(b))
+
+        return buf
 
     def _raise_for_fatal_return_code(
         self,
@@ -683,210 +655,37 @@ class DriverManager:
             return_code=rc_enum,
         )
 
-    def sql_get_diag_rec_a(
-        self,
-        handle: Handle,
-    ) -> list[tuple[str, int, str]]:
-        """Get diagnostic information by calling SQLGetDiagRecA.
+    @classmethod
+    def autoload(cls) -> Self:
+        """Create an instance of DriverManager using the first ODBC driver manager detected on the host.
 
-        SQLGetDiagRecA returns the current values of multiple fields of a diagnostic record that contains error,
-        warning, and status information. Unlike SQLGetDiagField, which returns one diagnostic field per call,
-        SQLGetDiagRecA returns several commonly used fields of a diagnostic record, including the SQLSTATE, the native
-        error code, and the diagnostic message text.
-
-        :param handle: A handle for the diagnostic data structure, of the type indicated by HandleType. If HandleType is
-            SQL_HANDLE_ENV, Handle can be either a shared or an unshared environment handle.
-        :return: A list of 3-tuples where each tuple contains (i) a five-character SQLSTATE code for the diagnostic
-            record, (ii) a native error code which is specific to the data source, and (iii) the diagnostic message
-            text.
+        :return: An instance of DriverManager.
+        :raise FileNotFoundError: No driver manager library was auto-detected on the host system.
         """
-        diags = []
+        last_err: OSError | None = None
 
-        buffer_length = default_buffer_length = 1024
-        rec_number = 1
+        os_family = platform.system()
 
-        while True:
-            sql_state = ffi.new("SQLCHAR[6]")  # 5 chars + NUL
-            native_error_ptr = ffi.new("SQLINTEGER *")
-            message_text = ffi.new(f"SQLCHAR[{buffer_length}]")
-            text_length_ptr = ffi.new("SQLSMALLINT *")
+        if os_family == "Darwin":
+            names = DM_LIB_NAMES_MACOS
+        elif os_family == "Windows":
+            names = DM_LIB_NAMES_WIN
+        elif os_family == "Linux":
+            names = DM_LIB_NAMES_NIX
+        else:
+            names = DM_LIB_NAMES
 
-            rc = SQLReturn(
-                self._lib.SQLGetDiagRecA(
-                    int(handle.handle_type),
-                    handle.handle,
-                    rec_number,
-                    sql_state,
-                    native_error_ptr,
-                    message_text,
-                    buffer_length,
-                    text_length_ptr,
-                )
-            )
-
-            # Dereference the pointers.
-            native_error: int = native_error_ptr[0]
-            text_length: int = text_length_ptr[0]
-
-            if rc == SQLReturn.SQL_NO_DATA:
-                # RecNumber was greater than the number of diagnostic records that existed for the handle specified in
-                # Handle. The function also returns SQL_NO_DATA for any positive RecNumber if there are no diagnostic
-                # records for Handle.
-                break
-
-            if rc == SQLReturn.SQL_INVALID_HANDLE:
-                raise ODBCError(
-                    what="SQLGetDiagRecA",
-                    message_text="SQLGetDiagRecA failed with SQL_INVALID_HANDLE",
-                    return_code=rc,
-                )
-
-            if rc == SQLReturn.SQL_SUCCESS_WITH_INFO:
-                # SQLGetDiagRec documents SQL_SUCCESS_WITH_INFO as message truncation.
-                # If TextLength does not indicate truncation, treat that as an unexpected state.
-                if text_length >= buffer_length:
-                    # Retry for the same rec_number with a right-sized buffer.
-                    buffer_length = text_length + 1  # NUL terminator
-                    continue
-                raise ODBCError(
-                    what="SQLGetDiagRecA",
-                    message_text=(
-                        "SQLGetDiagRecA returned SQL_SUCCESS_WITH_INFO with an unexpected "
-                        f"TextLength ({text_length}) for BufferLength ({buffer_length})"
-                    ),
-                    return_code=rc,
-                )
-
-            # Any remaining SQLRETURN here is unexpected for SQLGetDiagRec.
-            if rc != SQLReturn.SQL_SUCCESS:
-                raise ODBCError(
-                    what="SQLGetDiagRecA",
-                    message_text=f"SQLGetDiagRecA returned unexpected SQLRETURN {rc.name}",
-                    return_code=rc,
-                )
-
-            diags.append(
-                (
-                    ffi.string(sql_state).decode("ascii"),
-                    native_error,
-                    # TODO: SQLGetDiagRecA returns data in the driver's "ANSI" encoding
-                    #  (Windows code page or driver-defined on Unix), not guaranteed UTF-8.
-                    #  We currently assume UTF-8 and replace invalid sequences as a pragmatic default.
-                    #  Alternatives:
-                    #    - use locale.getpreferredencoding()
-                    #    - make encoding configurable
-                    #    - rely on W APIs for correct Unicode handling
-                    ffi.string(message_text, text_length).decode("utf-8", errors="replace"),
-                )
-            )
-
-            # We successfully retrieved the diagnostics for this rec_number.
-            # Move on to the next one.
-            rec_number += 1
-            # In case we needed to grow the buffer to retrieve a particularly large message_text, reset the
-            # buffer_length for the next rec_number.
-            buffer_length = default_buffer_length
-
-        return diags
-
-    def sql_get_diag_rec_w(
-        self,
-        handle: Handle,
-    ) -> list[tuple[str, int, str]]:
-        """Get diagnostic information by calling SQLGetDiagRecW.
-
-        SQLGetDiagRecW returns the current values of multiple fields of a diagnostic record that contains error,
-        warning, and status information. Unlike SQLGetDiagField, which returns one diagnostic field per call,
-        SQLGetDiagRecW returns several commonly used fields of a diagnostic record, including the SQLSTATE, the native
-        error code, and the diagnostic message text.
-
-        :param handle: A handle for the diagnostic data structure, of the type indicated by HandleType. If HandleType is
-            SQL_HANDLE_ENV, Handle can be either a shared or an unshared environment handle.
-        :return: A list of 3-tuples where each tuple contains (i) a five-character SQLSTATE code for the diagnostic
-            record, (ii) a native error code which is specific to the data source, and (iii) the diagnostic message
-            text.
-        """
-        diags = []
-
-        buffer_length = default_buffer_length = 1024
-        rec_number = 1
-
-        while True:
-            sql_state = ffi.new("SQLWCHAR[6]")  # 5 chars + NUL
-            native_error_ptr = ffi.new("SQLINTEGER *")
-            message_text = ffi.new(f"SQLWCHAR[{buffer_length}]")
-            text_length_ptr = ffi.new("SQLSMALLINT *")
-
-            rc = SQLReturn(
-                self._lib.SQLGetDiagRecW(
-                    int(handle.handle_type),
-                    handle.handle,
-                    rec_number,
-                    sql_state,
-                    native_error_ptr,
-                    message_text,
-                    buffer_length,
-                    text_length_ptr,
-                )
-            )
-
-            # Dereference the pointers.
-            native_error: int = native_error_ptr[0]
-            text_length: int = text_length_ptr[0]
-
-            if rc == SQLReturn.SQL_NO_DATA:
-                # RecNumber was greater than the number of diagnostic records that existed for the handle specified in
-                # Handle. The function also returns SQL_NO_DATA for any positive RecNumber if there are no diagnostic
-                # records for Handle.
-                break
-
-            if rc == SQLReturn.SQL_INVALID_HANDLE:
-                raise ODBCError(
-                    what="SQLGetDiagRecW",
-                    message_text="SQLGetDiagRecW failed with SQL_INVALID_HANDLE",
-                    return_code=rc,
-                )
-
-            if rc == SQLReturn.SQL_SUCCESS_WITH_INFO:
-                # SQLGetDiagRec documents SQL_SUCCESS_WITH_INFO as message truncation.
-                # If TextLength does not indicate truncation, treat that as an unexpected state.
-                if text_length >= buffer_length:
-                    # Retry for the same rec_number with a right-sized buffer.
-                    buffer_length = text_length + 1  # NUL terminator
-                    continue
-                raise ODBCError(
-                    what="SQLGetDiagRecW",
-                    message_text=(
-                        "SQLGetDiagRecW returned SQL_SUCCESS_WITH_INFO with an unexpected "
-                        f"TextLength ({text_length}) for BufferLength ({buffer_length})"
-                    ),
-                    return_code=rc,
-                )
-
-            # Any remaining SQLRETURN here is unexpected for SQLGetDiagRec.
-            if rc != SQLReturn.SQL_SUCCESS:
-                raise ODBCError(
-                    what="SQLGetDiagRecW",
-                    message_text=f"SQLGetDiagRecW returned unexpected SQLRETURN {rc.name}",
-                    return_code=rc,
-                )
-
-            diags.append(
-                (
-                    decode_sqlwchar_buffer(buffer=sql_state, num_chars=5),
-                    native_error,
-                    decode_sqlwchar_buffer(buffer=message_text, num_chars=text_length),
-                )
-            )
-
-            # We successfully retrieved the diagnostics for this rec_number.
-            # Move on to the next one.
-            rec_number += 1
-            # In case we needed to grow the buffer to retrieve a particularly large message_text, reset the
-            # buffer_length for the next rec_number.
-            buffer_length = default_buffer_length
-
-        return diags
+        for name in names:
+            try:
+                dm = cls(driver_manager_lib_name=name)
+                return dm
+            except OSError as e:  # noqa: PERF203
+                last_err = e
+        raise FileNotFoundError(
+            "Could not load an ODBC driver manager library. Tried: "
+            + ", ".join(names)
+            + (f"\nLast error: {last_err}" if last_err else "")
+        )
 
     def sql_alloc_handle(
         self,
@@ -904,10 +703,10 @@ class DriverManager:
         :param parent_handle: The parent handle, if applicable.
         :return: The allocated handle.
         """
-        output_handle_ptr = ffi.new("SQLHANDLE *")
+        output_handle_ptr = self._ffi.new("SQLHANDLE *")
         rc = self._lib.SQLAllocHandle(
             int(handle.handle_type),
-            parent_handle.handle if parent_handle is not None else SQL_NULL_HANDLE,
+            parent_handle.handle if parent_handle is not None else self._ffi.NULL,
             output_handle_ptr,
         )
         self._raise_for_fatal_return_code(
@@ -944,15 +743,15 @@ class DriverManager:
         :param connection_str: An ODBC connection string. For syntax details, see https://learn.microsoft.com/en-
             us/sql/odbc/reference/syntax/sqldriverconnect-function#comments
         """
-        connection_str_buffer = encode_sqlwchar_buffer(connection_str)
+        connection_str_buffer = self._encode_sqlwchar_buffer(connection_str)
         rc = self._lib.SQLDriverConnectW(
             connection_handle.handle,
-            ffi.NULL,  # WindowHandle
+            self._ffi.NULL,  # WindowHandle
             connection_str_buffer,
             SQL_NTS,  # StringLength1: null-terminated
-            ffi.NULL,  # OutConnectionString
+            self._ffi.NULL,  # OutConnectionString
             0,  # BufferLength (for OutConnectionString)
-            ffi.NULL,  # StringLength2Ptr
+            self._ffi.NULL,  # StringLength2Ptr
             int(DriverCompletion.SQL_DRIVER_NOPROMPT),
         )
         self._raise_for_fatal_return_code(
@@ -997,11 +796,11 @@ class DriverManager:
         driver_infos: list[DriverInfo] = []
 
         while True:
-            driver_description = ffi.new("SQLWCHAR[]", buffer_length_hint)
-            driver_attributes = ffi.new("SQLWCHAR[]", buffer_length_hint)
+            driver_description = self._ffi.new("SQLWCHAR[]", buffer_length_hint)
+            driver_attributes = self._ffi.new("SQLWCHAR[]", buffer_length_hint)
 
-            description_length_ptr = ffi.new("SQLSMALLINT *")
-            attributes_length_ptr = ffi.new("SQLSMALLINT *")
+            description_length_ptr = self._ffi.new("SQLSMALLINT *")
+            attributes_length_ptr = self._ffi.new("SQLSMALLINT *")
 
             rc = self._lib.SQLDriversW(
                 environment_handle.handle,  # EnvironmentHandle
@@ -1064,8 +863,12 @@ class DriverManager:
                             message,
                         )
 
-            driver_description_value = decode_sqlwchar_buffer(driver_description, num_chars=description_length_ptr[0])
-            driver_attributes_value = decode_sqlwchar_buffer(driver_attributes, num_chars=attributes_length_ptr[0])
+            driver_description_value = self._decode_sqlwchar_buffer(
+                driver_description, num_chars=description_length_ptr[0]
+            )
+            driver_attributes_value = self._decode_sqlwchar_buffer(
+                driver_attributes, num_chars=attributes_length_ptr[0]
+            )
 
             attributes = {}
 
@@ -1140,15 +943,15 @@ class DriverManager:
         # 32-bit or 16-bit of a buffer and leave the higher-order bit unchanged.
         # Therefore, applications should use a buffer of SQLULEN and initialize
         # the value to 0 before calling this function."
-        value = ffi.new("SQLULEN *", 0)
+        value = self._ffi.new("SQLULEN *", 0)
 
-        string_length_ptr = ffi.new("SQLINTEGER *")
+        string_length_ptr = self._ffi.new("SQLINTEGER *")
 
         rc = self._lib.SQLGetConnectAttrW(
-            ffi.cast("SQLHDBC", connection_handle.handle),
+            self._ffi.cast("SQLHDBC", connection_handle.handle),
             int(attribute),
             value,
-            ffi.sizeof("SQLINTEGER"),
+            self._ffi.sizeof("SQLINTEGER"),
             string_length_ptr,
         )
         self._raise_for_fatal_return_code(
@@ -1164,6 +967,211 @@ class DriverManager:
         if attribute == ConnectionAttribute.SQL_ATTR_TRACE:
             return SQLAttrTrace(ret)
         raise RuntimeError(f"Unsupported connection attribute: {attribute}")
+
+    def sql_get_diag_rec_a(
+        self,
+        handle: Handle,
+    ) -> list[tuple[str, int, str]]:
+        """Get diagnostic information by calling SQLGetDiagRecA.
+
+        SQLGetDiagRecA returns the current values of multiple fields of a diagnostic record that contains error,
+        warning, and status information. Unlike SQLGetDiagField, which returns one diagnostic field per call,
+        SQLGetDiagRecA returns several commonly used fields of a diagnostic record, including the SQLSTATE, the native
+        error code, and the diagnostic message text.
+
+        :param handle: A handle for the diagnostic data structure, of the type indicated by HandleType. If HandleType is
+            SQL_HANDLE_ENV, Handle can be either a shared or an unshared environment handle.
+        :return: A list of 3-tuples where each tuple contains (i) a five-character SQLSTATE code for the diagnostic
+            record, (ii) a native error code which is specific to the data source, and (iii) the diagnostic message
+            text.
+        """
+        diags = []
+
+        buffer_length = default_buffer_length = 1024
+        rec_number = 1
+
+        while True:
+            sql_state = self._ffi.new("SQLCHAR[6]")  # 5 chars + NUL
+            native_error_ptr = self._ffi.new("SQLINTEGER *")
+            message_text = self._ffi.new(f"SQLCHAR[{buffer_length}]")
+            text_length_ptr = self._ffi.new("SQLSMALLINT *")
+
+            rc = SQLReturn(
+                self._lib.SQLGetDiagRecA(
+                    int(handle.handle_type),
+                    handle.handle,
+                    rec_number,
+                    sql_state,
+                    native_error_ptr,
+                    message_text,
+                    buffer_length,
+                    text_length_ptr,
+                )
+            )
+
+            # Dereference the pointers.
+            native_error: int = native_error_ptr[0]
+            text_length: int = text_length_ptr[0]
+
+            if rc == SQLReturn.SQL_NO_DATA:
+                # RecNumber was greater than the number of diagnostic records that existed for the handle specified in
+                # Handle. The function also returns SQL_NO_DATA for any positive RecNumber if there are no diagnostic
+                # records for Handle.
+                break
+
+            if rc == SQLReturn.SQL_INVALID_HANDLE:
+                raise ODBCError(
+                    what="SQLGetDiagRecA",
+                    message_text="SQLGetDiagRecA failed with SQL_INVALID_HANDLE",
+                    return_code=rc,
+                )
+
+            if rc == SQLReturn.SQL_SUCCESS_WITH_INFO:
+                # SQLGetDiagRec documents SQL_SUCCESS_WITH_INFO as message truncation.
+                # If TextLength does not indicate truncation, treat that as an unexpected state.
+                if text_length >= buffer_length:
+                    # Retry for the same rec_number with a right-sized buffer.
+                    buffer_length = text_length + 1  # NUL terminator
+                    continue
+                raise ODBCError(
+                    what="SQLGetDiagRecA",
+                    message_text=(
+                        "SQLGetDiagRecA returned SQL_SUCCESS_WITH_INFO with an unexpected "
+                        f"TextLength ({text_length}) for BufferLength ({buffer_length})"
+                    ),
+                    return_code=rc,
+                )
+
+            # Any remaining SQLRETURN here is unexpected for SQLGetDiagRec.
+            if rc != SQLReturn.SQL_SUCCESS:
+                raise ODBCError(
+                    what="SQLGetDiagRecA",
+                    message_text=f"SQLGetDiagRecA returned unexpected SQLRETURN {rc.name}",
+                    return_code=rc,
+                )
+
+            diags.append(
+                (
+                    self._ffi.string(sql_state).decode("ascii"),
+                    native_error,
+                    # TODO: SQLGetDiagRecA returns data in the driver's "ANSI" encoding
+                    #  (Windows code page or driver-defined on Unix), not guaranteed UTF-8.
+                    #  We currently assume UTF-8 and replace invalid sequences as a pragmatic default.
+                    #  Alternatives:
+                    #    - use locale.getpreferredencoding()
+                    #    - make encoding configurable
+                    #    - rely on W APIs for correct Unicode handling
+                    self._ffi.string(message_text, text_length).decode("utf-8", errors="replace"),
+                )
+            )
+
+            # We successfully retrieved the diagnostics for this rec_number.
+            # Move on to the next one.
+            rec_number += 1
+            # In case we needed to grow the buffer to retrieve a particularly large message_text, reset the
+            # buffer_length for the next rec_number.
+            buffer_length = default_buffer_length
+
+        return diags
+
+    def sql_get_diag_rec_w(
+        self,
+        handle: Handle,
+    ) -> list[tuple[str, int, str]]:
+        """Get diagnostic information by calling SQLGetDiagRecW.
+
+        SQLGetDiagRecW returns the current values of multiple fields of a diagnostic record that contains error,
+        warning, and status information. Unlike SQLGetDiagField, which returns one diagnostic field per call,
+        SQLGetDiagRecW returns several commonly used fields of a diagnostic record, including the SQLSTATE, the native
+        error code, and the diagnostic message text.
+
+        :param handle: A handle for the diagnostic data structure, of the type indicated by HandleType. If HandleType is
+            SQL_HANDLE_ENV, Handle can be either a shared or an unshared environment handle.
+        :return: A list of 3-tuples where each tuple contains (i) a five-character SQLSTATE code for the diagnostic
+            record, (ii) a native error code which is specific to the data source, and (iii) the diagnostic message
+            text.
+        """
+        diags = []
+
+        buffer_length = default_buffer_length = 1024
+        rec_number = 1
+
+        while True:
+            sql_state = self._ffi.new("SQLWCHAR[6]")  # 5 chars + NUL
+            native_error_ptr = self._ffi.new("SQLINTEGER *")
+            message_text = self._ffi.new(f"SQLWCHAR[{buffer_length}]")
+            text_length_ptr = self._ffi.new("SQLSMALLINT *")
+
+            rc = SQLReturn(
+                self._lib.SQLGetDiagRecW(
+                    int(handle.handle_type),
+                    handle.handle,
+                    rec_number,
+                    sql_state,
+                    native_error_ptr,
+                    message_text,
+                    buffer_length,
+                    text_length_ptr,
+                )
+            )
+
+            # Dereference the pointers.
+            native_error: int = native_error_ptr[0]
+            text_length: int = text_length_ptr[0]
+
+            if rc == SQLReturn.SQL_NO_DATA:
+                # RecNumber was greater than the number of diagnostic records that existed for the handle specified in
+                # Handle. The function also returns SQL_NO_DATA for any positive RecNumber if there are no diagnostic
+                # records for Handle.
+                break
+
+            if rc == SQLReturn.SQL_INVALID_HANDLE:
+                raise ODBCError(
+                    what="SQLGetDiagRecW",
+                    message_text="SQLGetDiagRecW failed with SQL_INVALID_HANDLE",
+                    return_code=rc,
+                )
+
+            if rc == SQLReturn.SQL_SUCCESS_WITH_INFO:
+                # SQLGetDiagRec documents SQL_SUCCESS_WITH_INFO as message truncation.
+                # If TextLength does not indicate truncation, treat that as an unexpected state.
+                if text_length >= buffer_length:
+                    # Retry for the same rec_number with a right-sized buffer.
+                    buffer_length = text_length + 1  # NUL terminator
+                    continue
+                raise ODBCError(
+                    what="SQLGetDiagRecW",
+                    message_text=(
+                        "SQLGetDiagRecW returned SQL_SUCCESS_WITH_INFO with an unexpected "
+                        f"TextLength ({text_length}) for BufferLength ({buffer_length})"
+                    ),
+                    return_code=rc,
+                )
+
+            # Any remaining SQLRETURN here is unexpected for SQLGetDiagRec.
+            if rc != SQLReturn.SQL_SUCCESS:
+                raise ODBCError(
+                    what="SQLGetDiagRecW",
+                    message_text=f"SQLGetDiagRecW returned unexpected SQLRETURN {rc.name}",
+                    return_code=rc,
+                )
+
+            diags.append(
+                (
+                    self._decode_sqlwchar_buffer(buffer=sql_state, num_chars=5),
+                    native_error,
+                    self._decode_sqlwchar_buffer(buffer=message_text, num_chars=text_length),
+                )
+            )
+
+            # We successfully retrieved the diagnostics for this rec_number.
+            # Move on to the next one.
+            rec_number += 1
+            # In case we needed to grow the buffer to retrieve a particularly large message_text, reset the
+            # buffer_length for the next rec_number.
+            buffer_length = default_buffer_length
+
+        return diags
 
     @overload
     def sql_get_env_attr(
@@ -1200,13 +1208,13 @@ class DriverManager:
         :param attribute: The attribute to retrieve the value of.
         :return: The value of the environment attribute.
         """
-        value = ffi.new("SQLINTEGER *")
-        string_length_ptr = ffi.new("SQLINTEGER *")
+        value = self._ffi.new("SQLINTEGER *")
+        string_length_ptr = self._ffi.new("SQLINTEGER *")
         rc = self._lib.SQLGetEnvAttr(
-            ffi.cast("SQLHENV", environment_handle.handle),
+            self._ffi.cast("SQLHENV", environment_handle.handle),
             int(attribute),
             value,
-            ffi.sizeof("SQLINTEGER"),
+            self._ffi.sizeof("SQLINTEGER"),
             string_length_ptr,
         )
         self._raise_for_fatal_return_code(
@@ -1931,14 +1939,14 @@ class DriverManager:
         :raise ODBCError: An error occurred.
         """
         hdbc = connection_handle.handle
-        string_length_ptr = ffi.new("SQLSMALLINT *")
+        string_length_ptr = self._ffi.new("SQLSMALLINT *")
 
         if info_type in SQL_GET_INFO_STRING_INFO_TYPES:
-            buffer = ffi.new("SQLWCHAR[]", 2056)
-            buffer_nbytes = ffi.sizeof(buffer)
+            buffer = self._ffi.new("SQLWCHAR[]", 2056)
+            buffer_nbytes = self._ffi.sizeof(buffer)
 
             rc = self._lib.SQLGetInfoW(
-                ffi.cast("SQLHDBC", hdbc),
+                self._ffi.cast("SQLHDBC", hdbc),
                 int(info_type),
                 buffer,
                 buffer_nbytes,
@@ -1951,7 +1959,7 @@ class DriverManager:
             )
             # TODO: Grow buffer & retry if payload_nbytes >= buffer_nbytes,
             #  or call with a null buffer and read the StrLenPtr before calling again
-            ret = decode_sqlwchar_buffer(buffer, num_bytes=string_length_ptr[0])
+            ret = self._decode_sqlwchar_buffer(buffer, num_bytes=string_length_ptr[0])
 
             if enum_type := SQL_GET_INFO_ENUM_MAP.get(info_type):
                 return enum_type(ret)
@@ -1959,9 +1967,9 @@ class DriverManager:
             return ret
 
         if info_type in SQL_GET_INFO_USMALLINT_INFO_TYPES:
-            value = ffi.new("SQLUSMALLINT *")
+            value = self._ffi.new("SQLUSMALLINT *")
             rc = self._lib.SQLGetInfoW(
-                ffi.cast("SQLHDBC", hdbc),
+                self._ffi.cast("SQLHDBC", hdbc),
                 int(info_type),
                 value,
                 0,  # ignored for non-strings
@@ -2019,9 +2027,9 @@ class DriverManager:
         """
         hdbc = connection_handle.handle
         rc = self._lib.SQLSetConnectAttrW(
-            ffi.cast("SQLHDBC", hdbc),
+            self._ffi.cast("SQLHDBC", hdbc),
             int(attribute),
-            ffi.cast("SQLPOINTER", int(value)),
+            self._ffi.cast("SQLPOINTER", int(value)),
             0,
         )
         self._raise_for_fatal_return_code(
@@ -2072,9 +2080,9 @@ class DriverManager:
         """
         henv = environment_handle.handle
         rc = self._lib.SQLSetEnvAttr(
-            ffi.cast("SQLHENV", henv),
+            self._ffi.cast("SQLHENV", henv),
             int(attribute),
-            ffi.cast("SQLPOINTER", int(value)),
+            self._ffi.cast("SQLPOINTER", int(value)),
             0,
         )
         self._raise_for_fatal_return_code(
