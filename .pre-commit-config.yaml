@@ -12,7 +12,7 @@ default_language_version:
 repos:
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.15.1
+    rev: v4.16.2
     hooks:
       - id: commitizen
         stages:
@@ -41,7 +41,7 @@ repos:
         args: ["--in-place", "--config", "./pyproject.toml"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.0.0
+    rev: v2.1.0
     hooks:
     -   id: mypy
         additional_dependencies: [
@@ -50,7 +50,7 @@ repos:
         ]
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.24.1
+    rev: v1.25.2
     hooks:
       - id: zizmor
 
