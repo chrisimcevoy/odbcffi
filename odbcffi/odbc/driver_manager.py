@@ -1780,6 +1780,7 @@ class DriverManager:
         :param connection_handle: Connection handle (HDBC).
         :param info_type: Type of information.
         :return: The info for the requested info_type.
+        :raise ODBCError: An error occurred.
         """
         hdbc = connection_handle.handle
         string_length_ptr = ffi.new("SQLSMALLINT *")
