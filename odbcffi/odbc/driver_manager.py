@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal, overload
 from cffi import FFI
 
 from .enums import *
-from .enums import SQLGroupBy
+from .enums import SQLDropTable
 from .errors import ODBCError
 
 if TYPE_CHECKING:
@@ -126,13 +126,17 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_ACCESSIBLE_PROCEDURES,
         InfoType.SQL_ACCESSIBLE_TABLES,
         InfoType.SQL_CATALOG_NAME_SEPARATOR,
+        InfoType.SQL_CATALOG_NAME,
         InfoType.SQL_CATALOG_TERM,
+        InfoType.SQL_COLLATION_SEQ,
         InfoType.SQL_COLUMN_ALIAS,
         InfoType.SQL_DATA_SOURCE_NAME,
         InfoType.SQL_DATA_SOURCE_READ_ONLY,
         InfoType.SQL_DATABASE_NAME,
         InfoType.SQL_DBMS_NAME,
         InfoType.SQL_DBMS_VER,
+        InfoType.SQL_DESCRIBE_PARAMETER,
+        InfoType.SQL_DM_VER,
         InfoType.SQL_DRIVER_NAME,
         InfoType.SQL_DRIVER_ODBC_VER,
         InfoType.SQL_DRIVER_VER,
@@ -140,9 +144,13 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_IDENTIFIER_QUOTE_CHAR,
         InfoType.SQL_INTEGRITY,
         InfoType.SQL_KEYWORDS,
+        InfoType.SQL_LIKE_ESCAPE_CLAUSE,
+        InfoType.SQL_MAX_ROW_SIZE_INCLUDES_LONG,
         InfoType.SQL_MULT_RESULT_SETS,
         InfoType.SQL_MULTIPLE_ACTIVE_TXN,
+        InfoType.SQL_NEED_LONG_DATA_LEN,
         InfoType.SQL_ODBC_VER,
+        InfoType.SQL_ORDER_BY_COLUMNS_IN_SELECT,
         InfoType.SQL_OUTER_JOINS,
         InfoType.SQL_PROCEDURE_TERM,
         InfoType.SQL_PROCEDURES,
@@ -150,15 +158,27 @@ SQL_GET_INFO_STRING_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_SCHEMA_TERM,
         InfoType.SQL_SEARCH_PATTERN_ESCAPE,
         InfoType.SQL_SERVER_NAME,
+        InfoType.SQL_SPECIAL_CHARACTERS,
         InfoType.SQL_TABLE_TERM,
         InfoType.SQL_USER_NAME,
+        InfoType.SQL_XOPEN_CLI_YEAR,
     }
 )
 
 SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
     {
+        InfoType.SQL_ACTIVE_ENVIRONMENTS,
+        InfoType.SQL_AGGREGATE_FUNCTIONS,
+        InfoType.SQL_ALTER_DOMAIN,
         InfoType.SQL_ALTER_TABLE,
+        InfoType.SQL_ASYNC_DBC_FUNCTIONS,
+        InfoType.SQL_ASYNC_MODE,
+        InfoType.SQL_ASYNC_NOTIFICATION,
+        InfoType.SQL_BATCH_ROW_COUNT,
+        InfoType.SQL_BATCH_SUPPORT,
         InfoType.SQL_BOOKMARK_PERSISTENCE,
+        InfoType.SQL_CATALOG_LOCATION,
+        InfoType.SQL_CATALOG_USAGE,
         InfoType.SQL_CONCAT_NULL_BEHAVIOR,
         InfoType.SQL_CONVERT_BIGINT,
         InfoType.SQL_CONVERT_BINARY,
@@ -183,40 +203,120 @@ SQL_GET_INFO_USMALLINT_INFO_TYPES: Final[Collection[InfoType]] = frozenset(
         InfoType.SQL_CONVERT_TINYINT,
         InfoType.SQL_CONVERT_VARBINARY,
         InfoType.SQL_CONVERT_VARCHAR,
+        InfoType.SQL_CONVERT_WCHAR,
+        InfoType.SQL_CONVERT_WVARCHAR,
+        InfoType.SQL_CONVERT_WLONGVARCHAR,
         InfoType.SQL_CORRELATION_NAME,
+        InfoType.SQL_CREATE_ASSERTION,
+        InfoType.SQL_CREATE_CHARACTER_SET,
+        InfoType.SQL_CREATE_COLLATION,
+        InfoType.SQL_CREATE_DOMAIN,
+        InfoType.SQL_CREATE_SCHEMA,
+        InfoType.SQL_CREATE_TABLE,
+        InfoType.SQL_CREATE_TRANSLATION,
+        InfoType.SQL_CREATE_VIEW,
         InfoType.SQL_CURSOR_COMMIT_BEHAVIOR,
         InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR,
+        InfoType.SQL_CURSOR_SENSITIVITY,
+        InfoType.SQL_DATETIME_LITERALS,
+        InfoType.SQL_DDL_INDEX,
         InfoType.SQL_DEFAULT_TXN_ISOLATION,
+        InfoType.SQL_DRIVER_AWARE_POOLING_SUPPORTED,
+        InfoType.SQL_DROP_ASSERTION,
+        InfoType.SQL_DROP_CHARACTER_SET,
+        InfoType.SQL_DROP_COLLATION,
+        InfoType.SQL_DROP_DOMAIN,
+        InfoType.SQL_DROP_SCHEMA,
+        InfoType.SQL_DROP_TABLE,
+        InfoType.SQL_DROP_TRANSLATION,
+        InfoType.SQL_DROP_VIEW,
+        InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1,
+        InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2,
         InfoType.SQL_FILE_USAGE,
+        InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1,
+        InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2,
         InfoType.SQL_GETDATA_EXTENSIONS,
         InfoType.SQL_GROUP_BY,
         InfoType.SQL_IDENTIFIER_CASE,
+        InfoType.SQL_INDEX_KEYWORDS,
+        InfoType.SQL_INFO_SCHEMA_VIEWS,
+        InfoType.SQL_INSERT_STATEMENT,
+        InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1,
+        InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2,
+        InfoType.SQL_MAX_ASYNC_CONCURRENT_STATEMENTS,
+        InfoType.SQL_MAX_BINARY_LITERAL_LEN,
         InfoType.SQL_MAX_CATALOG_NAME_LEN,
+        InfoType.SQL_MAX_CHAR_LITERAL_LEN,
         InfoType.SQL_MAX_COLUMN_NAME_LEN,
-        InfoType.SQL_MAX_TABLE_NAME_LEN,
+        InfoType.SQL_MAX_COLUMNS_IN_GROUP_BY,
+        InfoType.SQL_MAX_COLUMNS_IN_INDEX,
+        InfoType.SQL_MAX_COLUMNS_IN_ORDER_BY,
+        InfoType.SQL_MAX_COLUMNS_IN_SELECT,
+        InfoType.SQL_MAX_COLUMNS_IN_TABLE,
         InfoType.SQL_MAX_CONCURRENT_ACTIVITIES,
         InfoType.SQL_MAX_CURSOR_NAME_LEN,
         InfoType.SQL_MAX_DRIVER_CONNECTIONS,
+        InfoType.SQL_MAX_IDENTIFIER_LEN,
+        InfoType.SQL_MAX_INDEX_SIZE,
         InfoType.SQL_MAX_PROCEDURE_NAME_LEN,
+        InfoType.SQL_MAX_ROW_SIZE,
         InfoType.SQL_MAX_SCHEMA_NAME_LEN,
+        InfoType.SQL_MAX_STATEMENT_LEN,
+        InfoType.SQL_MAX_TABLE_NAME_LEN,
+        InfoType.SQL_MAX_TABLES_IN_SELECT,
+        InfoType.SQL_MAX_USER_NAME_LEN,
         InfoType.SQL_NON_NULLABLE_COLUMNS,
         InfoType.SQL_NULL_COLLATION,
         InfoType.SQL_NUMERIC_FUNCTIONS,
+        InfoType.SQL_ODBC_INTERFACE_CONFORMANCE,
         InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE,
         InfoType.SQL_ODBC_SQL_CONFORMANCE,
+        InfoType.SQL_OJ_CAPABILITIES,
+        InfoType.SQL_PARAM_ARRAY_ROW_COUNTS,
+        InfoType.SQL_PARAM_ARRAY_SELECTS,
+        InfoType.SQL_QUOTED_IDENTIFIER_CASE,
+        InfoType.SQL_SCHEMA_USAGE,
         InfoType.SQL_SCROLL_CONCURRENCY,
         InfoType.SQL_SCROLL_OPTIONS,
+        InfoType.SQL_SQL_CONFORMANCE,
+        InfoType.SQL_SQL92_DATETIME_FUNCTIONS,
+        InfoType.SQL_SQL92_FOREIGN_KEY_DELETE_RULE,
+        InfoType.SQL_SQL92_FOREIGN_KEY_UPDATE_RULE,
+        InfoType.SQL_SQL92_GRANT,
+        InfoType.SQL_SQL92_NUMERIC_VALUE_FUNCTIONS,
+        InfoType.SQL_SQL92_PREDICATES,
+        InfoType.SQL_SQL92_RELATIONAL_JOIN_OPERATORS,
+        InfoType.SQL_SQL92_REVOKE,
+        InfoType.SQL_SQL92_ROW_VALUE_CONSTRUCTOR,
+        InfoType.SQL_SQL92_STRING_FUNCTIONS,
+        InfoType.SQL_SQL92_VALUE_EXPRESSIONS,
+        InfoType.SQL_STANDARD_CLI_CONFORMANCE,
+        InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1,
+        InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2,
         InfoType.SQL_STRING_FUNCTIONS,
+        InfoType.SQL_SUBQUERIES,
         InfoType.SQL_SYSTEM_FUNCTIONS,
+        InfoType.SQL_TIMEDATE_ADD_INTERVALS,
+        InfoType.SQL_TIMEDATE_DIFF_INTERVALS,
         InfoType.SQL_TIMEDATE_FUNCTIONS,
         InfoType.SQL_TXN_CAPABLE,
         InfoType.SQL_TXN_ISOLATION_OPTION,
+        InfoType.SQL_UNION,
     }
 )
 
 SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
+    InfoType.SQL_AGGREGATE_FUNCTIONS: SQLAggregateFunctions,
+    InfoType.SQL_ALTER_DOMAIN: SQLAlterDomain,
     InfoType.SQL_ALTER_TABLE: SQLAlterTable,
+    InfoType.SQL_ASYNC_DBC_FUNCTIONS: SQLAsyncDbcFunctions,
+    InfoType.SQL_ASYNC_MODE: SQLAsyncMode,
+    InfoType.SQL_ASYNC_NOTIFICATION: SQLAsyncNotification,
+    InfoType.SQL_BATCH_ROW_COUNT: SQLBatchRowCount,
+    InfoType.SQL_BATCH_SUPPORT: SQLBatchSupport,
     InfoType.SQL_BOOKMARK_PERSISTENCE: SQLBookmarkPersistence,
+    InfoType.SQL_CATALOG_LOCATION: SQLCatalogLocation,
+    InfoType.SQL_CATALOG_USAGE: SQLCatalogUsage,
     InfoType.SQL_CONCAT_NULL_BEHAVIOR: SQLConcatNullBehavior,
     InfoType.SQL_CONVERT_BIGINT: SQLConvert,
     InfoType.SQL_CONVERT_BINARY: SQLConvert,
@@ -241,27 +341,84 @@ SQL_GET_INFO_ENUM_MAP: Mapping[InfoType, type[Enum]] = {
     InfoType.SQL_CONVERT_TINYINT: SQLConvert,
     InfoType.SQL_CONVERT_VARBINARY: SQLConvert,
     InfoType.SQL_CONVERT_VARCHAR: SQLConvert,
+    InfoType.SQL_CONVERT_WCHAR: SQLConvert,
+    InfoType.SQL_CONVERT_WLONGVARCHAR: SQLConvert,
+    InfoType.SQL_CONVERT_WVARCHAR: SQLConvert,
     InfoType.SQL_CORRELATION_NAME: SQLCorrelationName,
+    InfoType.SQL_CREATE_ASSERTION: SQLCreateAssertion,
+    InfoType.SQL_CREATE_CHARACTER_SET: SQLCreateCharacterSet,
+    InfoType.SQL_CREATE_COLLATION: SQLCreateCollation,
+    InfoType.SQL_CREATE_DOMAIN: SQLCreateDomain,
+    InfoType.SQL_CREATE_SCHEMA: SQLCreateSchema,
+    InfoType.SQL_CREATE_TABLE: SQLCreateTable,
+    InfoType.SQL_CREATE_TRANSLATION: SQLCreateTranslation,
+    InfoType.SQL_CREATE_VIEW: SQLCreateView,
     InfoType.SQL_CURSOR_COMMIT_BEHAVIOR: SQLCursorCommitBehavior,
     InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR: SQLCursorRollbackBehavior,
+    InfoType.SQL_CURSOR_SENSITIVITY: SQLCursorSensitivity,
+    InfoType.SQL_DATETIME_LITERALS: SQLDatetimeLiterals,
+    InfoType.SQL_DDL_INDEX: SQLDdlIndex,
     InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption,
+    InfoType.SQL_DRIVER_AWARE_POOLING_SUPPORTED: SQLDriverAwarePoolingSupported,
+    InfoType.SQL_DROP_ASSERTION: SQLDropAssertion,
+    InfoType.SQL_DROP_CHARACTER_SET: SQLDropCharacterSet,
+    InfoType.SQL_DROP_COLLATION: SQLDropCollation,
+    InfoType.SQL_DROP_DOMAIN: SQLDropDomain,
+    InfoType.SQL_DROP_SCHEMA: SQLDropSchema,
+    InfoType.SQL_DROP_TABLE: SQLDropTable,
+    InfoType.SQL_DROP_TRANSLATION: SQLDropTranslation,
+    InfoType.SQL_DROP_VIEW: SQLDropView,
+    InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
+    InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_FILE_USAGE: SQLFileUsage,
+    InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
+    InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_GETDATA_EXTENSIONS: SQLGetDataExtensions,
     InfoType.SQL_GROUP_BY: SQLGroupBy,
     InfoType.SQL_IDENTIFIER_CASE: SQLIdentifierCase,
+    InfoType.SQL_INDEX_KEYWORDS: SQLIndexKeywords,
+    InfoType.SQL_INFO_SCHEMA_VIEWS: SQLInfoSchemaViews,
+    InfoType.SQL_INSERT_STATEMENT: SQLInsertStatement,
+    InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
+    InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_NON_NULLABLE_COLUMNS: SQLNonNullableColumns,
     InfoType.SQL_NULL_COLLATION: SQLNullCollation,
     InfoType.SQL_NUMERIC_FUNCTIONS: SQLNumericFunctions,
-    InfoType.SQL_ODBC_SQL_CONFORMANCE: SQLOdbcSqlConformance,
+    InfoType.SQL_ODBC_INTERFACE_CONFORMANCE: SQLOdbcInterfaceConformance,
     InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE: SQLOdbcSagCliConformance,
+    InfoType.SQL_ODBC_SQL_CONFORMANCE: SQLOdbcSqlConformance,
+    InfoType.SQL_OJ_CAPABILITIES: SQLOuterJoinCapabilities,
     InfoType.SQL_OUTER_JOINS: SQLOuterJoins,
+    InfoType.SQL_PARAM_ARRAY_ROW_COUNTS: SQLParamArrayRowCounts,
+    InfoType.SQL_PARAM_ARRAY_SELECTS: SQLParamArraySelects,
+    InfoType.SQL_QUOTED_IDENTIFIER_CASE: SQLIdentifierCase,
+    InfoType.SQL_SCHEMA_USAGE: SQLSchemaUsage,
     InfoType.SQL_SCROLL_CONCURRENCY: SQLScrollConcurrency,
     InfoType.SQL_SCROLL_OPTIONS: SQLScrollOptions,
+    InfoType.SQL_SQL_CONFORMANCE: SQLSqlConformance,
+    InfoType.SQL_SQL92_DATETIME_FUNCTIONS: SQLSql92DatetimeFunctions,
+    InfoType.SQL_SQL92_FOREIGN_KEY_DELETE_RULE: SQLSql92ForeignKeyDeleteRule,
+    InfoType.SQL_SQL92_FOREIGN_KEY_UPDATE_RULE: SQLSql92ForeignKeyUpdateRule,
+    InfoType.SQL_SQL92_GRANT: SQLSql92Grant,
+    InfoType.SQL_SQL92_NUMERIC_VALUE_FUNCTIONS: SQLSql92NumericValueFunctions,
+    InfoType.SQL_SQL92_PREDICATES: SQLSql92Predicates,
+    InfoType.SQL_SQL92_RELATIONAL_JOIN_OPERATORS: SQLSql92RelationalJoinOperators,
+    InfoType.SQL_SQL92_REVOKE: SQLSql92Revoke,
+    InfoType.SQL_SQL92_ROW_VALUE_CONSTRUCTOR: SQLSql92RowValueConstructor,
+    InfoType.SQL_SQL92_STRING_FUNCTIONS: SQLSql92StringFunctions,
+    InfoType.SQL_SQL92_VALUE_EXPRESSIONS: SQLSql92ValueExpressions,
+    InfoType.SQL_STANDARD_CLI_CONFORMANCE: SQLStandardCliConformance,
+    InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1: SQLCursorAttributes1,
+    InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2: SQLCursorAttributes2,
     InfoType.SQL_STRING_FUNCTIONS: SQLStringFunctions,
+    InfoType.SQL_SUBQUERIES: SQLSubqueries,
     InfoType.SQL_SYSTEM_FUNCTIONS: SQLSystemFunctions,
+    InfoType.SQL_TIMEDATE_ADD_INTERVALS: SQLTimestampIntervals,
+    InfoType.SQL_TIMEDATE_DIFF_INTERVALS: SQLTimestampIntervals,
     InfoType.SQL_TIMEDATE_FUNCTIONS: SQLTimeDateFunctions,
     InfoType.SQL_TXN_CAPABLE: SQLTxnCapable,
     InfoType.SQL_TXN_ISOLATION_OPTION: SQLTxnIsolationOption,
+    InfoType.SQL_UNION: SQLUnion,
 }
 
 SQLWCHAR_SIZE: Final[int] = ffi.sizeof("SQLWCHAR")
@@ -925,12 +1082,18 @@ class DriverManager:
         info_type: Literal[
             InfoType.SQL_ACCESSIBLE_PROCEDURES,
             InfoType.SQL_ACCESSIBLE_TABLES,
+            InfoType.SQL_CATALOG_NAME,
             InfoType.SQL_COLUMN_ALIAS,
             InfoType.SQL_DATA_SOURCE_READ_ONLY,
+            InfoType.SQL_DESCRIBE_PARAMETER,
             InfoType.SQL_EXPRESSIONS_IN_ORDERBY,
             InfoType.SQL_INTEGRITY,
+            InfoType.SQL_LIKE_ESCAPE_CLAUSE,
+            InfoType.SQL_MAX_ROW_SIZE_INCLUDES_LONG,
             InfoType.SQL_MULT_RESULT_SETS,
             InfoType.SQL_MULTIPLE_ACTIVE_TXN,
+            InfoType.SQL_NEED_LONG_DATA_LEN,
+            InfoType.SQL_ORDER_BY_COLUMNS_IN_SELECT,
             InfoType.SQL_PROCEDURES,
             InfoType.SQL_ROW_UPDATES,
         ],
@@ -943,10 +1106,12 @@ class DriverManager:
         info_type: Literal[
             InfoType.SQL_CATALOG_NAME_SEPARATOR,
             InfoType.SQL_CATALOG_TERM,
+            InfoType.SQL_COLLATION_SEQ,
             InfoType.SQL_DATA_SOURCE_NAME,
             InfoType.SQL_DATABASE_NAME,
             InfoType.SQL_DBMS_NAME,
             InfoType.SQL_DBMS_VER,
+            InfoType.SQL_DM_VER,
             InfoType.SQL_DRIVER_NAME,
             InfoType.SQL_DRIVER_ODBC_VER,
             InfoType.SQL_DRIVER_VER,
@@ -957,8 +1122,10 @@ class DriverManager:
             InfoType.SQL_SCHEMA_TERM,
             InfoType.SQL_SEARCH_PATTERN_ESCAPE,
             InfoType.SQL_SERVER_NAME,
+            InfoType.SQL_SPECIAL_CHARACTERS,
             InfoType.SQL_TABLE_TERM,
             InfoType.SQL_USER_NAME,
+            InfoType.SQL_XOPEN_CLI_YEAR,
         ],
     ) -> str: ...
 
@@ -967,16 +1134,45 @@ class DriverManager:
         self,
         connection_handle: ConnectionHandle,
         info_type: Literal[
+            InfoType.SQL_ACTIVE_ENVIRONMENTS,
+            InfoType.SQL_MAX_ASYNC_CONCURRENT_STATEMENTS,
+            InfoType.SQL_MAX_BINARY_LITERAL_LEN,
             InfoType.SQL_MAX_CATALOG_NAME_LEN,
+            InfoType.SQL_MAX_CHAR_LITERAL_LEN,
             InfoType.SQL_MAX_CONCURRENT_ACTIVITIES,
             InfoType.SQL_MAX_COLUMN_NAME_LEN,
+            InfoType.SQL_MAX_COLUMNS_IN_GROUP_BY,
+            InfoType.SQL_MAX_COLUMNS_IN_INDEX,
+            InfoType.SQL_MAX_COLUMNS_IN_ORDER_BY,
+            InfoType.SQL_MAX_COLUMNS_IN_SELECT,
+            InfoType.SQL_MAX_COLUMNS_IN_TABLE,
             InfoType.SQL_MAX_CURSOR_NAME_LEN,
             InfoType.SQL_MAX_DRIVER_CONNECTIONS,
+            InfoType.SQL_MAX_IDENTIFIER_LEN,
+            InfoType.SQL_MAX_INDEX_SIZE,
+            InfoType.SQL_MAX_ROW_SIZE,
             InfoType.SQL_MAX_PROCEDURE_NAME_LEN,
             InfoType.SQL_MAX_SCHEMA_NAME_LEN,
+            InfoType.SQL_MAX_STATEMENT_LEN,
             InfoType.SQL_MAX_TABLE_NAME_LEN,
+            InfoType.SQL_MAX_TABLES_IN_SELECT,
+            InfoType.SQL_MAX_USER_NAME_LEN,
         ],
     ) -> int: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_AGGREGATE_FUNCTIONS],
+    ) -> SQLAggregateFunctions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_ALTER_DOMAIN],
+    ) -> SQLAlterDomain: ...
 
     @overload
     def sql_get_info_w(
@@ -989,8 +1185,57 @@ class DriverManager:
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_ASYNC_DBC_FUNCTIONS],
+    ) -> SQLAsyncDbcFunctions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_ASYNC_MODE],
+    ) -> SQLAsyncMode: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_ASYNC_NOTIFICATION],
+    ) -> SQLAsyncNotification: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_BATCH_ROW_COUNT],
+    ) -> SQLBatchRowCount: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_BATCH_SUPPORT],
+    ) -> SQLBatchSupport: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_BOOKMARK_PERSISTENCE],
     ) -> SQLBookmarkPersistence: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CATALOG_LOCATION],
+    ) -> SQLCatalogLocation: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CATALOG_USAGE],
+    ) -> SQLCatalogUsage: ...
 
     @overload
     def sql_get_info_w(
@@ -1026,6 +1271,9 @@ class DriverManager:
             InfoType.SQL_CONVERT_TINYINT,
             InfoType.SQL_CONVERT_VARBINARY,
             InfoType.SQL_CONVERT_VARCHAR,
+            InfoType.SQL_CONVERT_WCHAR,
+            InfoType.SQL_CONVERT_WLONGVARCHAR,
+            InfoType.SQL_CONVERT_WVARCHAR,
         ],
     ) -> SQLConvert: ...
 
@@ -1047,6 +1295,86 @@ class DriverManager:
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CREATE_ASSERTION],
+    ) -> SQLCreateAssertion: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CREATE_CHARACTER_SET],
+    ) -> SQLCreateCharacterSet: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CREATE_COLLATION],
+    ) -> SQLCreateCollation: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CREATE_DOMAIN],
+    ) -> SQLCreateDomain: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CREATE_SCHEMA],
+    ) -> SQLCreateSchema: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CREATE_TABLE],
+    ) -> SQLCreateTable: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CREATE_TRANSLATION],
+    ) -> SQLCreateTranslation: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CREATE_VIEW],
+    ) -> SQLCreateView: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[
+            InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1,
+            InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1,
+            InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1,
+            InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1,
+        ],
+    ) -> SQLCursorAttributes1: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[
+            InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2,
+            InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2,
+            InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2,
+            InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2,
+        ],
+    ) -> SQLCursorAttributes2: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_CURSOR_COMMIT_BEHAVIOR],
     ) -> SQLCursorCommitBehavior: ...
 
@@ -1061,8 +1389,92 @@ class DriverManager:
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_CURSOR_SENSITIVITY],
+    ) -> SQLCursorSensitivity: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DATETIME_LITERALS],
+    ) -> SQLDatetimeLiterals: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DDL_INDEX],
+    ) -> SQLDdlIndex: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_DEFAULT_TXN_ISOLATION],
     ) -> SQLTxnIsolationOption: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DRIVER_AWARE_POOLING_SUPPORTED],
+    ) -> SQLDriverAwarePoolingSupported: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_ASSERTION],
+    ) -> SQLDropAssertion: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_CHARACTER_SET],
+    ) -> SQLDropCharacterSet: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_COLLATION],
+    ) -> SQLDropCollation: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_DOMAIN],
+    ) -> SQLDropDomain: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_SCHEMA],
+    ) -> SQLDropSchema: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_TABLE],
+    ) -> SQLDropTable: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_TRANSLATION],
+    ) -> SQLDropTranslation: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_DROP_VIEW],
+    ) -> SQLDropView: ...
 
     @overload
     def sql_get_info_w(
@@ -1082,8 +1494,36 @@ class DriverManager:
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_GROUP_BY],
+    ) -> SQLGroupBy: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_IDENTIFIER_CASE],
     ) -> SQLIdentifierCase: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_INDEX_KEYWORDS],
+    ) -> SQLIndexKeywords: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_INFO_SCHEMA_VIEWS],
+    ) -> SQLInfoSchemaViews: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_INSERT_STATEMENT],
+    ) -> SQLInsertStatement: ...
 
     @overload
     def sql_get_info_w(
@@ -1110,6 +1550,13 @@ class DriverManager:
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_ODBC_INTERFACE_CONFORMANCE],
+    ) -> SQLOdbcInterfaceConformance: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE],
     ) -> SQLOdbcSagCliConformance: ...
 
@@ -1124,8 +1571,43 @@ class DriverManager:
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_OJ_CAPABILITIES],
+    ) -> SQLOuterJoinCapabilities: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_OUTER_JOINS],
     ) -> SQLOuterJoins: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_PARAM_ARRAY_ROW_COUNTS],
+    ) -> SQLParamArrayRowCounts: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_PARAM_ARRAY_SELECTS],
+    ) -> SQLParamArraySelects: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_QUOTED_IDENTIFIER_CASE],
+    ) -> SQLIdentifierCase: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SCHEMA_USAGE],
+    ) -> SQLSchemaUsage: ...
 
     @overload
     def sql_get_info_w(
@@ -1145,6 +1627,97 @@ class DriverManager:
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL_CONFORMANCE],
+    ) -> SQLSqlConformance: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_DATETIME_FUNCTIONS],
+    ) -> SQLSql92DatetimeFunctions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_FOREIGN_KEY_DELETE_RULE],
+    ) -> SQLSql92ForeignKeyDeleteRule: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_FOREIGN_KEY_UPDATE_RULE],
+    ) -> SQLSql92ForeignKeyUpdateRule: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_GRANT],
+    ) -> SQLSql92Grant: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_NUMERIC_VALUE_FUNCTIONS],
+    ) -> SQLSql92NumericValueFunctions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_PREDICATES],
+    ) -> SQLSql92Predicates: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_RELATIONAL_JOIN_OPERATORS],
+    ) -> SQLSql92RelationalJoinOperators: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_REVOKE],
+    ) -> SQLSql92Revoke: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_ROW_VALUE_CONSTRUCTOR],
+    ) -> SQLSql92RowValueConstructor: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_STRING_FUNCTIONS],
+    ) -> SQLSql92StringFunctions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SQL92_VALUE_EXPRESSIONS],
+    ) -> SQLSql92ValueExpressions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_STANDARD_CLI_CONFORMANCE],
+    ) -> SQLStandardCliConformance: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_STRING_FUNCTIONS],
     ) -> SQLStringFunctions: ...
 
@@ -1152,8 +1725,22 @@ class DriverManager:
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_SUBQUERIES],
+    ) -> SQLSubqueries: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
         info_type: Literal[InfoType.SQL_SYSTEM_FUNCTIONS],
     ) -> SQLSystemFunctions: ...
+
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_TIMEDATE_ADD_INTERVALS, InfoType.SQL_TIMEDATE_DIFF_INTERVALS],
+    ) -> SQLTimestampIntervals: ...
 
     @overload
     def sql_get_info_w(
@@ -1176,6 +1763,13 @@ class DriverManager:
         info_type: Literal[InfoType.SQL_TXN_ISOLATION_OPTION],
     ) -> SQLTxnIsolationOption: ...
 
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: Literal[InfoType.SQL_UNION],
+    ) -> SQLUnion: ...
+
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,
@@ -1186,6 +1780,7 @@ class DriverManager:
         :param connection_handle: Connection handle (HDBC).
         :param info_type: Type of information.
         :return: The info for the requested info_type.
+        :raise ODBCError: An error occurred.
         """
         hdbc = connection_handle.handle
         string_length_ptr = ffi.new("SQLSMALLINT *")

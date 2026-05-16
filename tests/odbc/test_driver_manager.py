@@ -3,7 +3,12 @@ from typing import Literal
 
 import pytest
 
-from odbcffi.odbc import *
+from odbcffi.odbc.connection_handle import ConnectionHandle
+from odbcffi.odbc.driver_manager import DriverManager
+from odbcffi.odbc.enums import *
+from odbcffi.odbc.enums import SQLDropTable
+from odbcffi.odbc.environment_handle import EnvironmentHandle
+from odbcffi.odbc.errors import ODBCError
 from tests.conftest import ConnectionInfo
 
 
@@ -34,6 +39,38 @@ class TestSQLGetInfoW:
 
         assert actual in {"Y", "N"}
 
+    def test_sql_active_environments(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ACTIVE_ENVIRONMENTS,
+        )
+
+        assert isinstance(actual, int)
+        assert actual >= 0
+
+    def test_sql_aggregate_functions(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLAggregateFunctions = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_AGGREGATE_FUNCTIONS,
+        )
+
+        assert isinstance(actual, SQLAggregateFunctions)
+
+    def test_sql_alter_domain(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLAlterDomain = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ALTER_DOMAIN,
+        )
+
+        assert isinstance(actual, SQLAlterDomain)
+
     def test_sql_alter_table(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
 
         actual: SQLAlterTable = driver_manager.sql_get_info_w(
@@ -42,6 +79,56 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, SQLAlterTable)
+
+    def test_sql_async_dbc_functions(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        ctx = (
+            pytest.raises(ODBCError)
+            if connection_info.driver == "FreeTDS"
+            or connection_info.driver.startswith("PostgreSQL")
+            or connection_info.driver == "SQL Server"
+            else nullcontext()
+        )
+
+        with ctx:
+            actual: SQLAsyncDbcFunctions = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_ASYNC_DBC_FUNCTIONS,
+            )
+
+            assert isinstance(actual, SQLAsyncDbcFunctions)
+
+    def test_sql_async_mode(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLAsyncMode = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ASYNC_MODE,
+        )
+
+        assert isinstance(actual, SQLAsyncMode)
+
+    def test_sql_batch_row_count(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLBatchRowCount = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_BATCH_ROW_COUNT,
+        )
+
+        assert isinstance(actual, SQLBatchRowCount)
+
+    def test_sql_batch_support(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLBatchSupport = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_BATCH_SUPPORT,
+        )
+
+        assert isinstance(actual, SQLBatchSupport)
 
     def test_sql_bookmark_persistence(
         self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
@@ -53,6 +140,30 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, SQLBookmarkPersistence)
+
+    def test_sql_catalog_location(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCatalogLocation = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CATALOG_LOCATION,
+        )
+
+        assert isinstance(actual, SQLCatalogLocation)
+
+    def test_sql_catalog_name(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CATALOG_NAME,
+        )
+
+        assert actual in ("Y", "N")
 
     def test_sql_catalog_name_separator(
         self,
@@ -81,6 +192,35 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, str)
         assert actual
+
+    def test_sql_catalog_usage(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLCatalogUsage = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CATALOG_USAGE,
+        )
+
+        assert isinstance(actual, SQLCatalogUsage)
+
+    def test_sql_collation_seq(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        # Not implemented in FreeTDS
+        # https://github.com/FreeTDS/freetds/blob/217ffa7674ae3462c5d663ae2df579a98f44c348/src/odbc/odbc.c#L5551-L5554
+        ctx = pytest.raises(ODBCError) if connection_info.driver == "FreeTDS" else nullcontext()
+
+        with ctx:
+            actual: str = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_COLLATION_SEQ,
+            )
+
+            assert isinstance(actual, str)
 
     def test_sql_column_alias(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
 
@@ -370,6 +510,45 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLConvert)
 
+    def test_sql_convert_wchar(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver == "PostgreSQL ANSI" else nullcontext()
+
+        with ctx:
+            actual: SQLConvert = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle, info_type=InfoType.SQL_CONVERT_WCHAR
+            )
+
+            assert isinstance(actual, SQLConvert)
+
+    def test_sql_convert_wlongvarchar(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver == "PostgreSQL ANSI" else nullcontext()
+
+        with ctx:
+            actual: SQLConvert = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle, info_type=InfoType.SQL_CONVERT_WLONGVARCHAR
+            )
+
+            assert isinstance(actual, SQLConvert)
+
+    def test_sql_convert_wvarchar(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver == "PostgreSQL ANSI" else nullcontext()
+
+        with ctx:
+            actual: SQLConvert = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle, info_type=InfoType.SQL_CONVERT_WVARCHAR
+            )
+
+            assert isinstance(actual, SQLConvert)
+
     def test_sql_cursor_commit_behavior(
         self,
         driver_manager: DriverManager,
@@ -383,7 +562,7 @@ class TestSQLGetInfoW:
 
         assert actual in list(SQLCursorCommitBehavior)
 
-    def test_correlation_name(
+    def test_sql_correlation_name(
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
@@ -397,6 +576,86 @@ class TestSQLGetInfoW:
         assert isinstance(actual, SQLCorrelationName)
         assert actual in list(SQLCorrelationName)
 
+    def test_sql_create_assertion(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCreateAssertion = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_ASSERTION,
+        )
+
+        assert isinstance(actual, SQLCreateAssertion)
+
+    def test_sql_create_character_set(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCreateCharacterSet = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_CHARACTER_SET,
+        )
+
+        assert isinstance(actual, SQLCreateCharacterSet)
+
+    def test_sql_create_collation(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCreateCollation = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_COLLATION,
+        )
+
+        assert isinstance(actual, SQLCreateCollation)
+
+    def test_sql_create_domain(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLCreateDomain = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_DOMAIN,
+        )
+
+        assert isinstance(actual, SQLCreateDomain)
+
+    def test_sql_create_schema(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLCreateSchema = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_SCHEMA,
+        )
+
+        assert isinstance(actual, SQLCreateSchema)
+
+    def test_sql_create_table(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLCreateTable = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_TABLE,
+        )
+
+        assert isinstance(actual, SQLCreateTable)
+
+    def test_sql_create_translation(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCreateTranslation = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_TRANSLATION,
+        )
+
+        assert isinstance(actual, SQLCreateTranslation)
+
+    def test_sql_create_view(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLCreateView = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_CREATE_VIEW,
+        )
+
+        assert isinstance(actual, SQLCreateView)
+
     def test_sql_cursor_rollback_behavior(
         self,
         driver_manager: DriverManager,
@@ -409,6 +668,23 @@ class TestSQLGetInfoW:
         )
 
         assert actual in list(SQLCursorRollbackBehavior)
+
+    def test_sql_cursor_sensitivity(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver.startswith("PostgreSQL") else nullcontext()
+
+        with ctx:
+            actual: SQLCursorSensitivity = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_CURSOR_SENSITIVITY,
+            )
+
+            assert actual in list(SQLCursorSensitivity)
 
     def test_sql_data_source_name(
         self,
@@ -429,7 +705,7 @@ class TestSQLGetInfoW:
         open_connection_handle: ConnectionHandle,
     ) -> None:
 
-        actual: str = driver_manager.sql_get_info_w(
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_DATA_SOURCE_READ_ONLY,
         )
@@ -455,6 +731,25 @@ class TestSQLGetInfoW:
         )
 
         assert actual == expected
+
+    def test_sql_datetime_literals(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        # Not implemented in psqlodbc
+        # https://github.com/postgresql-interfaces/psqlodbc/blob/863a0e938dd50c7b68208484bdc3ef8b00735a92/info.c#L1057
+        ctx = pytest.raises(ODBCError) if connection_info.driver.startswith("PostgreSQL") else nullcontext()
+
+        with ctx:
+            actual: SQLDatetimeLiterals = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_DATETIME_LITERALS,
+            )
+
+            assert isinstance(actual, SQLDatetimeLiterals)
 
     def test_sql_dbms_name(
         self,
@@ -484,6 +779,15 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_ddl_index(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLDdlIndex = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DDL_INDEX,
+        )
+
+        assert isinstance(actual, SQLDdlIndex)
+
     def test_sql_default_txn_isolation(
         self,
         driver_manager: DriverManager,
@@ -504,6 +808,45 @@ class TestSQLGetInfoW:
         )
 
         assert actual == expected
+
+    def test_sql_driver_aware_pooling_supported(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        # Only implemented by windows driver managers, seemingly...
+        ctx = pytest.raises(ODBCError) if not driver_manager.is_windows_dm else nullcontext()
+
+        with ctx:
+            actual: SQLDriverAwarePoolingSupported = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_DRIVER_AWARE_POOLING_SUPPORTED,
+            )
+
+            assert isinstance(actual, SQLDriverAwarePoolingSupported)
+
+    def test_sql_describe_parameter(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DESCRIBE_PARAMETER,
+        )
+
+        assert actual in ("Y", "N")
+
+    def test_sql_dm_ver(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: str = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DM_VER,
+        )
+
+        assert isinstance(actual, str)
+        assert actual
 
     def test_sql_driver_name(
         self,
@@ -546,6 +889,132 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_drop_assertion(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropAssertion = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_ASSERTION,
+        )
+
+        assert isinstance(actual, SQLDropAssertion)
+
+    def test_sql_drop_character_set(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropCharacterSet = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_CHARACTER_SET,
+        )
+
+        assert isinstance(actual, SQLDropCharacterSet)
+
+    def test_sql_drop_collation(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropCollation = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_COLLATION,
+        )
+
+        assert isinstance(actual, SQLDropCollation)
+
+    def test_sql_drop_domain(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropDomain = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_DOMAIN,
+        )
+
+        assert isinstance(actual, SQLDropDomain)
+
+    def test_sql_drop_schema(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropSchema = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_SCHEMA,
+        )
+
+        assert isinstance(actual, SQLDropSchema)
+
+    def test_sql_drop_table(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropTable = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_TABLE,
+        )
+
+        assert isinstance(actual, SQLDropTable)
+
+    def test_sql_drop_translation(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropTranslation = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_TRANSLATION,
+        )
+
+        assert isinstance(actual, SQLDropTranslation)
+
+    def test_sql_drop_view(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLDropView = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DROP_VIEW,
+        )
+
+        assert isinstance(actual, SQLDropView)
+
+    def test_sql_dynamic_cursor_attributes_1(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes1 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes1)
+
+    def test_sql_dynamic_cursor_attributes_2(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes2 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes2)
+
     def test_sql_expressions_in_order_by(
         self,
         driver_manager: DriverManager,
@@ -569,6 +1038,28 @@ class TestSQLGetInfoW:
         assert isinstance(actual, SQLFileUsage)
         assert actual in list(SQLFileUsage)
 
+    def test_sql_forward_only_cursor_attributes_1(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes1 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes1)
+
+    def test_sql_forward_only_cursor_attributes_2(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes2 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes2)
+
     def test_sql_getdata_extensions(
         self,
         driver_manager: DriverManager,
@@ -581,6 +1072,15 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, SQLGetDataExtensions)
+
+    def test_sql_group_by(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLGroupBy = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_GROUP_BY,
+        )
+
+        assert isinstance(actual, SQLGroupBy)
 
     def test_sql_identifier_case(
         self,
@@ -611,6 +1111,37 @@ class TestSQLGetInfoW:
 
         assert actual == expected
 
+    def test_sql_index_keywords(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLIndexKeywords = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_INDEX_KEYWORDS,
+        )
+
+        assert isinstance(actual, SQLIndexKeywords)
+
+    def test_sql_info_schema_views(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLInfoSchemaViews = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_INFO_SCHEMA_VIEWS,
+        )
+
+        assert isinstance(actual, SQLInfoSchemaViews)
+
+    def test_sql_insert_statement(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLInsertStatement = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_INSERT_STATEMENT,
+        )
+
+        assert isinstance(actual, SQLInsertStatement)
+
     def test_sql_integrity(
         self,
         driver_manager: DriverManager,
@@ -623,6 +1154,28 @@ class TestSQLGetInfoW:
         )
 
         assert actual in ("Y", "N")
+
+    def test_sql_keyset_cursor_attributes_1(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes1 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes1)
+
+    def test_sql_keyset_cursor_attributes_2(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes2 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes2)
 
     def test_sql_keywords(
         self,
@@ -638,6 +1191,51 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         # no `assert actual` here because postgres returns an empty string.
 
+    def test_sql_like_escape_clause(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_LIKE_ESCAPE_CLAUSE,
+        )
+
+        assert actual in ("Y", "N")
+
+    def test_sql_max_async_concurrent_statements(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        # Not implemented in psqlodbc
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver.startswith("PostgreSQL") else nullcontext()
+
+        with ctx:
+            actual: int = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_MAX_ASYNC_CONCURRENT_STATEMENTS,
+            )
+
+            assert actual >= 0
+
+    def test_sql_max_binary_literal_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_BINARY_LITERAL_LEN,
+        )
+
+        assert actual >= 0
+
     def test_sql_max_catalog_name_len(
         self,
         driver_manager: DriverManager,
@@ -651,6 +1249,19 @@ class TestSQLGetInfoW:
 
         assert actual >= 0
 
+    def test_sql_max_char_literal_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_CHAR_LITERAL_LEN,
+        )
+
+        assert actual >= 0
+
     def test_sql_max_column_name_len(
         self,
         driver_manager: DriverManager,
@@ -660,6 +1271,71 @@ class TestSQLGetInfoW:
         actual: int = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_MAX_COLUMN_NAME_LEN,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_group_by(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_GROUP_BY,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_index(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_INDEX,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_order_by(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_ORDER_BY,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_select(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_SELECT,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_columns_in_table(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_COLUMNS_IN_TABLE,
         )
 
         assert actual >= 0
@@ -703,6 +1379,32 @@ class TestSQLGetInfoW:
 
         assert actual == 0
 
+    def test_sql_max_identifier_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_IDENTIFIER_LEN,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_index_size(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_INDEX_SIZE,
+        )
+
+        assert actual >= 0
+
     def test_sql_max_procedure_name_len(
         self,
         driver_manager: DriverManager,
@@ -716,6 +1418,32 @@ class TestSQLGetInfoW:
 
         assert actual >= 0
 
+    def test_sql_max_row_size(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_ROW_SIZE,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_row_size_includes_long(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_ROW_SIZE_INCLUDES_LONG,
+        )
+
+        assert actual in ("Y", "N")
+
     def test_sql_max_schema_name_len(
         self,
         driver_manager: DriverManager,
@@ -725,6 +1453,19 @@ class TestSQLGetInfoW:
         actual: int = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_MAX_SCHEMA_NAME_LEN,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_statement_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_STATEMENT_LEN,
         )
 
         assert actual >= 0
@@ -742,13 +1483,39 @@ class TestSQLGetInfoW:
 
         assert actual >= 0
 
+    def test_sql_max_tables_in_select(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_TABLES_IN_SELECT,
+        )
+
+        assert actual >= 0
+
+    def test_sql_max_user_name_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_MAX_USER_NAME_LEN,
+        )
+
+        assert actual >= 0
+
     def test_sql_mult_result_sets(
         self,
         driver_manager: DriverManager,
         open_connection_handle: ConnectionHandle,
     ) -> None:
 
-        actual: str = driver_manager.sql_get_info_w(
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_MULT_RESULT_SETS,
         )
@@ -761,9 +1528,22 @@ class TestSQLGetInfoW:
         open_connection_handle: ConnectionHandle,
     ) -> None:
 
-        actual: str = driver_manager.sql_get_info_w(
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
             connection_handle=open_connection_handle,
             info_type=InfoType.SQL_MULTIPLE_ACTIVE_TXN,
+        )
+
+        assert actual in ("Y", "N")
+
+    def test_sql_need_long_data_len(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_NEED_LONG_DATA_LEN,
         )
 
         assert actual in ("Y", "N")
@@ -800,6 +1580,17 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, SQLNumericFunctions)
+
+    def test_sql_odbc_interface_conformance(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLOdbcInterfaceConformance = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ODBC_INTERFACE_CONFORMANCE,
+        )
+
+        assert isinstance(actual, SQLOdbcInterfaceConformance)
 
     def test_sql_odbc_sag_cli_conformance(
         self,
@@ -848,6 +1639,30 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_oj_capabilities(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLOuterJoinCapabilities = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_OJ_CAPABILITIES,
+        )
+
+        assert isinstance(actual, SQLOuterJoinCapabilities)
+
+    def test_sql_order_by_columns_in_select(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: Literal["Y", "N"] = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_ORDER_BY_COLUMNS_IN_SELECT,
+        )
+
+        assert actual in ("Y", "N")
+
     def test_sql_outer_joins(
         self,
         driver_manager: DriverManager,
@@ -860,6 +1675,32 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, SQLOuterJoins)
+
+    def test_sql_param_array_row_counts(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLParamArrayRowCounts = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_PARAM_ARRAY_ROW_COUNTS,
+        )
+
+        assert isinstance(actual, SQLParamArrayRowCounts)
+
+    def test_sql_param_array_selects(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLParamArraySelects = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_PARAM_ARRAY_SELECTS,
+        )
+
+        assert isinstance(actual, SQLParamArraySelects)
 
     def test_sql_procedure_term(
         self,
@@ -886,6 +1727,17 @@ class TestSQLGetInfoW:
         )
 
         assert actual in ("Y", "N")
+
+    def test_sql_quoted_identifier_case(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLIdentifierCase = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_QUOTED_IDENTIFIER_CASE,
+        )
+
+        assert isinstance(actual, SQLIdentifierCase)
 
     def test_sql_row_updates(
         self,
@@ -919,6 +1771,15 @@ class TestSQLGetInfoW:
         )
 
         assert actual == expected
+
+    def test_sql_schema_usage(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLSchemaUsage = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SCHEMA_USAGE,
+        )
+
+        assert isinstance(actual, SQLSchemaUsage)
 
     def test_sql_scroll_concurrency(
         self,
@@ -973,6 +1834,216 @@ class TestSQLGetInfoW:
         assert isinstance(actual, str)
         assert actual
 
+    def test_sql_special_characters(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: str = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SPECIAL_CHARACTERS,
+        )
+
+        assert isinstance(actual, str)
+        assert actual
+
+    def test_sql_sql_conformance(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSqlConformance = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL_CONFORMANCE,
+        )
+
+        assert isinstance(actual, SQLSqlConformance)
+
+    def test_sql_sql92_datetime_functions(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92DatetimeFunctions = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_DATETIME_FUNCTIONS,
+        )
+
+        assert isinstance(actual, SQLSql92DatetimeFunctions)
+
+    def test_sql_sql92_foreign_key_delete_rule(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92ForeignKeyDeleteRule = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_FOREIGN_KEY_DELETE_RULE,
+        )
+
+        assert isinstance(actual, SQLSql92ForeignKeyDeleteRule)
+
+    def test_sql_sql92_foreign_key_update_rule(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92ForeignKeyUpdateRule = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_FOREIGN_KEY_UPDATE_RULE,
+        )
+
+        assert isinstance(actual, SQLSql92ForeignKeyUpdateRule)
+
+    def test_sql_sql92_grant(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92Grant = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_GRANT,
+        )
+
+        assert isinstance(actual, SQLSql92Grant)
+
+    def test_sql_sql92_numeric_value_functions(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92NumericValueFunctions = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_NUMERIC_VALUE_FUNCTIONS,
+        )
+
+        assert isinstance(actual, SQLSql92NumericValueFunctions)
+
+    def test_sql_sql92_predicates(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92Predicates = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_PREDICATES,
+        )
+
+        assert isinstance(actual, SQLSql92Predicates)
+
+    def test_sql_sql92_relational_join_operators(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92RelationalJoinOperators = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_RELATIONAL_JOIN_OPERATORS,
+        )
+
+        assert isinstance(actual, SQLSql92RelationalJoinOperators)
+
+    def test_sql_sql92_revoke(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92Revoke = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_REVOKE,
+        )
+
+        assert isinstance(actual, SQLSql92Revoke)
+
+    def test_sql_sql92_row_value_constructor(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92RowValueConstructor = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_ROW_VALUE_CONSTRUCTOR,
+        )
+
+        assert isinstance(actual, SQLSql92RowValueConstructor)
+
+    def test_sql_sql92_string_functions(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92StringFunctions = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_STRING_FUNCTIONS,
+        )
+
+        assert isinstance(actual, SQLSql92StringFunctions)
+
+    def test_sql_sql92_value_expressions(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSql92ValueExpressions = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SQL92_VALUE_EXPRESSIONS,
+        )
+
+        assert isinstance(actual, SQLSql92ValueExpressions)
+
+    def test_sql_standard_cli_conformance(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        # Not implemented in psqlodbc
+        # https://github.com/postgresql-interfaces/psqlodbc/blob/863a0e938dd50c7b68208484bdc3ef8b00735a92/info.c#L1065
+
+        ctx = pytest.raises(ODBCError) if connection_info.driver.startswith("PostgreSQL") else nullcontext()
+
+        with ctx:
+            actual: SQLStandardCliConformance = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_STANDARD_CLI_CONFORMANCE,
+            )
+
+            assert isinstance(actual, SQLStandardCliConformance)
+
+    def test_sql_static_cursor_attributes_1(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes1 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes1)
+
+    def test_sql_static_cursor_attributes_2(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLCursorAttributes2 = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2,
+        )
+
+        assert isinstance(actual, SQLCursorAttributes2)
+
     def test_sql_string_functions(
         self,
         driver_manager: DriverManager,
@@ -985,6 +2056,19 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, SQLStringFunctions)
+
+    def test_sql_subqueries(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+    ) -> None:
+
+        actual: SQLSubqueries = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_SUBQUERIES,
+        )
+
+        assert isinstance(actual, SQLSubqueries)
 
     def test_sql_system_functions(
         self,
@@ -1012,6 +2096,28 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, str)
         assert actual
+
+    def test_sql_timedate_add_intervals(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLTimestampIntervals = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_TIMEDATE_ADD_INTERVALS,
+        )
+
+        assert isinstance(actual, SQLTimestampIntervals)
+
+    def test_sql_timedate_diff_intervals(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: SQLTimestampIntervals = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_TIMEDATE_DIFF_INTERVALS,
+        )
+
+        assert isinstance(actual, SQLTimestampIntervals)
 
     def test_sql_timedate_functions(
         self,
@@ -1053,6 +2159,15 @@ class TestSQLGetInfoW:
 
         assert isinstance(actual, SQLTxnIsolationOption)
 
+    def test_sql_union(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual: SQLUnion = driver_manager.sql_get_info_w(
+            connection_handle=open_connection_handle,
+            info_type=InfoType.SQL_UNION,
+        )
+
+        assert isinstance(actual, SQLUnion)
+
     def test_sql_user_name(
         self,
         driver_manager: DriverManager,
@@ -1065,6 +2180,29 @@ class TestSQLGetInfoW:
         )
 
         assert isinstance(actual, str)
+
+    def test_xopen_cli_year(
+        self,
+        driver_manager: DriverManager,
+        open_connection_handle: ConnectionHandle,
+        connection_info: ConnectionInfo,
+    ) -> None:
+
+        # Not sure why, but it only fails with pgsql on Windows...
+        ctx = (
+            pytest.raises(ODBCError)
+            if driver_manager.is_windows_dm and connection_info.driver.startswith("PostgreSQL")
+            else nullcontext()
+        )
+
+        with ctx:
+            actual: str = driver_manager.sql_get_info_w(
+                connection_handle=open_connection_handle,
+                info_type=InfoType.SQL_XOPEN_CLI_YEAR,
+            )
+
+            assert isinstance(actual, str)
+            assert actual
 
 
 class TestSQLGetSetConnectAttr:

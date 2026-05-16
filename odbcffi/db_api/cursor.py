@@ -3,6 +3,8 @@
 from collections.abc import Sequence
 from typing import Any, Literal
 
+__all__ = ["Cursor"]
+
 
 class Cursor:
     """A DB-API 2.0 Cursor object.

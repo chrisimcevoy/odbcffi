@@ -15,37 +15,92 @@ __all__ = [
     "EnvironmentAttribute",
     "HandleType",
     "InfoType",
+    "SQLAggregateFunctions",
+    "SQLAlterDomain",
     "SQLAlterTable",
+    "SQLAsyncDbcFunctions",
+    "SQLAsyncMode",
+    "SQLAsyncNotification",
     "SQLAttrAccessMode",
     "SQLAttrAutocommit",
     "SQLAttrCPMatch",
     "SQLAttrConnectionPooling",
     "SQLAttrODBCVersion",
     "SQLAttrTrace",
+    "SQLBatchRowCount",
+    "SQLBatchSupport",
     "SQLBookmarkPersistence",
+    "SQLCatalogLocation",
+    "SQLCatalogUsage",
     "SQLConcatNullBehavior",
     "SQLConvert",
     "SQLConvertFunctions",
     "SQLCorrelationName",
+    "SQLCreateAssertion",
+    "SQLCreateCharacterSet",
+    "SQLCreateCollation",
+    "SQLCreateDomain",
+    "SQLCreateSchema",
+    "SQLCreateTable",
+    "SQLCreateTranslation",
+    "SQLCreateView",
+    "SQLCursorAttributes1",
+    "SQLCursorAttributes2",
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
+    "SQLCursorSensitivity",
+    "SQLDatetimeLiterals",
+    "SQLDdlIndex",
+    "SQLDriverAwarePoolingSupported",
+    "SQLDropAssertion",
+    "SQLDropCharacterSet",
+    "SQLDropCollation",
+    "SQLDropDomain",
+    "SQLDropSchema",
+    "SQLDropTranslation",
+    "SQLDropView",
     "SQLFileUsage",
     "SQLGetDataExtensions",
+    "SQLGroupBy",
     "SQLIdentifierCase",
+    "SQLIndexKeywords",
+    "SQLInfoSchemaViews",
+    "SQLInsertStatement",
     "SQLNonNullableColumns",
     "SQLNullCollation",
     "SQLNumericFunctions",
+    "SQLOdbcInterfaceConformance",
     "SQLOdbcSagCliConformance",
     "SQLOdbcSqlConformance",
+    "SQLOuterJoinCapabilities",
     "SQLOuterJoins",
+    "SQLParamArrayRowCounts",
+    "SQLParamArraySelects",
     "SQLReturn",
+    "SQLSchemaUsage",
     "SQLScrollConcurrency",
     "SQLScrollOptions",
+    "SQLSql92DatetimeFunctions",
+    "SQLSql92ForeignKeyDeleteRule",
+    "SQLSql92ForeignKeyUpdateRule",
+    "SQLSql92Grant",
+    "SQLSql92NumericValueFunctions",
+    "SQLSql92Predicates",
+    "SQLSql92RelationalJoinOperators",
+    "SQLSql92Revoke",
+    "SQLSql92RowValueConstructor",
+    "SQLSql92StringFunctions",
+    "SQLSql92ValueExpressions",
+    "SQLSqlConformance",
+    "SQLStandardCliConformance",
     "SQLStringFunctions",
+    "SQLSubqueries",
     "SQLSystemFunctions",
     "SQLTimeDateFunctions",
+    "SQLTimestampIntervals",
     "SQLTxnCapable",
     "SQLTxnIsolationOption",
+    "SQLUnion",
 ]
 
 
@@ -358,7 +413,10 @@ class InfoType(IntEnum):
     SQL_EXPRESSIONS_IN_ORDERBY = 27
     """ "Y" if the data source supports expressions in the ORDER BY list; "N" if it does not."""
     SQL_IDENTIFIER_CASE = 28
-    """An SQLUSMALLINT value indicating the case-sensitivity of identifiers.
+    """An SQLUSMALLINT value indicating the case-sensitivity of object names (such as table-name).
+
+    This should be contrasted with SQL_QUOTED_IDENTIFIER_CASE, which indicates the case-sensitivity of *quoted*
+    identifiers.
 
     Because identifiers in SQL-92 are never case-sensitive, a driver that conforms strictly to SQL-92 (any level) will
     never return the SQL_IC_SENSITIVE option as supported.
@@ -733,89 +791,475 @@ class InfoType(IntEnum):
     """
 
     SQL_KEYWORDS = 89
+    """A character string that contains a comma-separated list of all data source-specific keywords.
+
+    This list does not contain keywords specific to ODBC or keywords used by both the data source and ODBC. This list
+    represents all the reserved keywords; interoperable applications should not use these words in object names.
+    """
     SQL_ORDER_BY_COLUMNS_IN_SELECT = 90
+    """A character string: "Y" if the columns in the ORDER BY clause must be in the select list; otherwise, "N"."""
     SQL_SCHEMA_USAGE = 91
+    """An SQLUINTEGER bitmask enumerating the statements in which schemas can be used.
+
+    SQL_SU_DML_STATEMENTS = Schemas are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE,
+    DELETE, and if supported, SELECT FOR UPDATE and positioned update and delete statements.
+
+    SQL_SU_PROCEDURE_INVOCATION = Schemas are supported in the ODBC procedure invocation statement.
+
+    SQL_SU_TABLE_DEFINITION = Schemas are supported in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER
+    TABLE, DROP TABLE, and DROP VIEW.
+
+    SQL_SU_INDEX_DEFINITION = Schemas are supported in all index definition statements: CREATE INDEX and DROP INDEX.
+
+    SQL_SU_PRIVILEGE_DEFINITION = Schemas are supported in all privilege definition statements: GRANT and REVOKE.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_SU_DML_STATEMENTS, SQL_SU_TABLE_DEFINITION, and
+    SQL_SU_PRIVILEGE_DEFINITION options, as supported.
+
+    This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_OWNER_USAGE.
+    """
     SQL_CATALOG_USAGE = 92
+    """An SQLUINTEGER bitmask enumerating the statements in which catalogs can be used.
+
+    The following bitmasks are used to determine where catalogs can be used:
+
+    SQL_CU_DML_STATEMENTS = Catalogs are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE,
+    DELETE, and if supported, SELECT FOR UPDATE and positioned update and delete statements.
+
+    SQL_CU_PROCEDURE_INVOCATION = Catalogs are supported in the ODBC procedure invocation statement.
+
+    SQL_CU_TABLE_DEFINITION = Catalogs are supported in all table definition statements: CREATE TABLE, CREATE VIEW,
+    ALTER TABLE, DROP TABLE, and DROP VIEW.
+
+    SQL_CU_INDEX_DEFINITION = Catalogs are supported in all index definition statements: CREATE INDEX and DROP INDEX.
+
+    SQL_CU_PRIVILEGE_DEFINITION = Catalogs are supported in all privilege definition statements: GRANT and REVOKE.
+
+    A value of 0 is returned if catalogs are not supported by the data source. To determine whether catalogs are
+    supported, an application calls SQLGetInfo with the SQL_CATALOG_NAME information type. A SQL-92 Full
+    level-conformant driver will always return a bitmask with all of these bits set.
+
+    This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_USAGE.
+    """
     SQL_QUOTED_IDENTIFIER_CASE = 93
+    """An SQLUSMALLINT value indicating how quoted identifiers are stored in the system catalog.
+
+    This should be contrasted with SQL_IDENTIFIER_CASE, which indicates the case-sensitivity of *unquoted* identifiers.
+
+    - SQL_IC_UPPER = Quoted identifiers in SQL are not case-sensitive and are stored in uppercase in the system catalog.
+    - SQL_IC_LOWER = Quoted identifiers in SQL are not case-sensitive and are stored in lowercase in the system catalog.
+    - SQL_IC_SENSITIVE = Quoted identifiers in SQL are case sensitive and are stored in mixed case in the system
+      catalog. (In a SQL-92-compliant database, quoted identifiers are always case-sensitive.)
+    - SQL_IC_MIXED = Quoted identifiers in SQL are not case-sensitive and are stored in mixed case in the system
+      catalog.
+
+    A SQL-92 Entry level-conformant driver will always return SQL_IC_SENSITIVE.
+    """
     SQL_SPECIAL_CHARACTERS = 94
+    """A character string that contains all special characters (that is, all characters except a through z, A through Z,
+    0 through 9, and underscore) that can be used in an identifier name, such as a table name, column name, or index
+    name, on the data source.
+
+    For example, "#$^". If an identifier contains one or more of these characters, the identifier must be a delimited
+    identifier.
+    """
     SQL_SUBQUERIES = 95
+    """An SQLUINTEGER bitmask enumerating the predicates that support subqueries:
+
+    SQL_SQ_CORRELATED_SUBQUERIES
+    SQL_SQ_COMPARISON
+    SQL_SQ_EXISTS
+    SQL_SQ_IN
+    SQL_SQ_QUANTIFIED
+
+    The SQL_SQ_CORRELATED_SUBQUERIES bitmask indicates that all predicates that support subqueries support correlated
+    subqueries.
+
+    A SQL-92 Entry level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
     SQL_UNION = 96
+    """An SQLUINTEGER bitmask enumerating the support for the UNION clause:
+
+    SQL_U_UNION = The data source supports the UNION clause.
+
+    SQL_U_UNION_ALL = The data source supports the ALL keyword in the UNION clause. (SQLGetInfo returns both
+    SQL_U_UNION and SQL_U_UNION_ALL in this case.)
+
+    A SQL-92 Entry level-conformant driver will always return both of these options as supported.
+    """
     SQL_MAX_COLUMNS_IN_GROUP_BY = 97
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in a GROUP BY clause.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 6. An FIPS Intermediate level-conformant driver will
+    return at least 15.
+    """
     SQL_MAX_COLUMNS_IN_INDEX = 98
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in an index.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+    """
     SQL_MAX_COLUMNS_IN_ORDER_BY = 99
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in an ORDER BY clause.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 6. An FIPS Intermediate level-conformant driver will
+    return at least 15.
+    """
     SQL_MAX_COLUMNS_IN_SELECT = 100
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in a select list.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 100. An FIPS Intermediate level-conformant driver will
+    return at least 250.
+    """
     SQL_MAX_COLUMNS_IN_TABLE = 101
+    """An SQLUSMALLINT value that specifies the maximum number of columns allowed in a table.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 100. An FIPS Intermediate level-conformant driver will
+    return at least 250.
+    """
     SQL_MAX_INDEX_SIZE = 102
+    """An SQLUINTEGER value that specifies the maximum number of bytes allowed in the combined fields of an index.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+    """
     SQL_MAX_ROW_SIZE_INCLUDES_LONG = 103
+    """A character string: "Y" if the maximum row size returned for the SQL_MAX_ROW_SIZE information type includes the
+    length of all SQL_LONGVARCHAR and SQL_LONGVARBINARY columns in the row; "N" otherwise.
+    """
     SQL_MAX_ROW_SIZE = 104
+    """An SQLUINTEGER value that specifies the maximum length of a single row in a table.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 2,000. An FIPS Intermediate level-conformant driver will
+    return at least 8,000.
+    """
     SQL_MAX_STATEMENT_LEN = 105
+    """An SQLUINTEGER value that specifies the maximum length (number of characters, including white space) of a SQL
+    statement.
+
+    If there is no maximum length or the length is unknown, this value is set to zero.
+    """
     SQL_MAX_TABLES_IN_SELECT = 106
+    """An SQLUSMALLINT value that specifies the maximum number of tables allowed in the FROM clause of a SELECT
+    statement.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+
+    An FIPS Entry level-conformant driver will return at least 15. An FIPS Intermediate level-conformant driver will
+    return at least 50.
+    """
     SQL_MAX_USER_NAME_LEN = 107
+    """An SQLUSMALLINT value that specifies the maximum length of a user name in the data source.
+
+    If there is no maximum length or the length is unknown, this value is set to zero.
+    """
     SQL_MAX_CHAR_LITERAL_LEN = 108
+    """An SQLUINTEGER value that specifies the maximum length (number of characters, excluding the literal prefix and
+    suffix returned by SQLGetTypeInfo) of a character literal in a SQL statement.
+
+    If there is no maximum length or the length is unknown, this value is set to zero.
+    """
     SQL_TIMEDATE_ADD_INTERVALS = 109
+    """An SQLUINTEGER bitmask enumerating the timestamp intervals supported by the driver and associated data source for
+    the TIMESTAMPADD scalar function.
+
+    The following bitmasks are used to determine which intervals are supported:
+
+    SQL_FN_TSI_FRAC_SECOND
+    SQL_FN_TSI_SECOND
+    SQL_FN_TSI_MINUTE
+    SQL_FN_TSI_HOUR
+    SQL_FN_TSI_DAY
+    SQL_FN_TSI_WEEK
+    SQL_FN_TSI_MONTH
+    SQL_FN_TSI_QUARTER
+    SQL_FN_TSI_YEAR
+
+    An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
     SQL_TIMEDATE_DIFF_INTERVALS = 110
+    """An SQLUINTEGER bitmask enumerating the timestamp intervals supported by the driver and associated data source for
+    the TIMESTAMPDIFF scalar function.
+
+    The following bitmasks are used to determine which intervals are supported:
+
+    SQL_FN_TSI_FRAC_SECOND
+    SQL_FN_TSI_SECOND
+    SQL_FN_TSI_MINUTE
+    SQL_FN_TSI_HOUR
+    SQL_FN_TSI_DAY
+    SQL_FN_TSI_WEEK
+    SQL_FN_TSI_MONTH
+    SQL_FN_TSI_QUARTER
+    SQL_FN_TSI_YEAR
+
+    An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
     SQL_NEED_LONG_DATA_LEN = 111
+    """A character string: "Y" if the data source needs the length of a long data value (the data type is
+    SQL_LONGVARCHAR, SQL_LONGVARBINARY, or a long data source-specific data type) before that value is sent to the data
+    source, "N" if it does not.
+    """
     SQL_MAX_BINARY_LITERAL_LEN = 112
+    """An SQLUINTEGER value that specifies the maximum length (number of hexadecimal characters, excluding the literal
+    prefix and suffix returned by SQLGetTypeInfo) of a binary literal in a SQL statement.
+
+    For example, the binary literal 0xFFAA has a length of 4. If there is no maximum length or the length is unknown,
+    this value is set to zero.
+    """
     SQL_LIKE_ESCAPE_CLAUSE = 113
+    """A character string: "Y" if the data source supports an escape character for the percent character (%) and
+    underscore character (_) in a LIKE predicate and the driver supports the ODBC syntax for defining a LIKE predicate
+    escape character; "N" otherwise."""
     SQL_CATALOG_LOCATION = 114
+    """An SQLUSMALLINT value that indicates the position of the catalog in a qualified table name:
+
+    * SQL_CL_START
+    * SQL_CL_END
+
+    For example, an Xbase driver returns SQL_CL_START because the directory (catalog) name is at the start of the table
+    name, as in \\EMPDATA\\EMP.DBF. An ORACLE Server driver returns SQL_CL_END because the catalog is at the end of the
+    table name, as in ADMIN.EMP@EMPDATA.
+
+    A SQL-92 Full level-conformant driver will always return SQL_CL_START. A value of 0 is returned if catalogs are not
+    supported by the data source. To determine whether catalogs are supported, an application calls SQLGetInfo with the
+    SQL_CATALOG_NAME information type.
+
+    This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_LOCATION.
+    """
     SQL_OJ_CAPABILITIES = 115
+    """An SQLUINTEGER bitmask enumerating the types of outer joins supported by the driver and data source.
+
+    For information about the support of relational join operators in a SELECT statement, as defined by SQL-92, see
+    SQL_SQL92_RELATIONAL_JOIN_OPERATORS.
+    """
     SQL_ACTIVE_ENVIRONMENTS = 116
+    """An SQLUSMALLINT value that specifies the maximum number of active environments that the driver can support.
+
+    If there is no specified limit or the limit is unknown, this value is set to zero.
+    """
     SQL_ALTER_DOMAIN = 117
+    """An SQLUINTEGER bitmask enumerating the clauses in the ALTER DOMAIN statement, as defined in SQL-92, supported by
+    the data source.
+
+    A SQL-92 Full level-compliant driver will always return all the bitmasks.
+
+    A return value of "0" means that the ALTER DOMAIN statement is not supported.
+    """
     SQL_SQL_CONFORMANCE = 118
-    SQL_ANSI_SQL_DATETIME_LITERALS = 119
+    """An SQLUINTEGER value that indicates the level of SQL-92 supported by the driver."""
+    SQL_DATETIME_LITERALS = 119
+    """An SQLUINTEGER bitmask enumerating the SQL-92 datetime literals supported by the data source.
+
+    Note that these are the datetime literals listed in the SQL-92 specification and are separate from the datetime
+    literal escape clauses defined by ODBC.
+    """
     SQL_BATCH_ROW_COUNT = 120
+    """A SQLUINTEGER bitmask that enumerates the driver's behavior with respect to the availability of row counts."""
     SQL_BATCH_SUPPORT = 121
+    """An SQLUINTEGER bitmask enumerating the driver's support for batches."""
     SQL_CONVERT_WCHAR = 122
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for SQL_WCHAR.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CONVERT_INTERVAL_DAY_TIME = 123
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for day-time
+    intervals.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CONVERT_INTERVAL_YEAR_MONTH = 124
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for year-month
+    intervals.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CONVERT_WLONGVARCHAR = 125
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for
+    SQL_WLONGVARCHAR.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CONVERT_WVARCHAR = 126
+    """An SQLUINTEGER bitmask.
+
+    The bitmask indicates the conversions supported by the data source with the CONVERT scalar function for
+    SQL_WVARCHAR.
+
+    If the bitmask equals zero, the data source does not support any conversions from data of that type, including
+    conversion to the same data type.
+    """
     SQL_CREATE_ASSERTION = 127
+    """Bitmask for the clauses in the CREATE ASSERTION statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_CHARACTER_SET = 128
+    """Bitmask of clauses in the CREATE CHARACTER SET statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_COLLATION = 129
+    """Bitmask for the clauses in the CREATE COLLATION statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_DOMAIN = 130
+    """Bitmask of the clauses in the CREATE DOMAIN statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_SCHEMA = 131
+    """Bitmask of the clauses in the CREATE SCHEMA statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_TABLE = 132
+    """Bitmask for the clauses in the CREATE TABLE statement, as defined in SQL-92, supported by the data source."""
     SQL_CREATE_TRANSLATION = 133
+    """Bitmask of the clauses in the CREATE TRANSLATION statement, as defined in SQL-92, supported by the data
+    source."""
     SQL_CREATE_VIEW = 134
+    """Bitmask of the clauses in the CREATE VIEW statement, as defined in SQL-92, supported by the data source."""
     SQL_DRIVER_HDESC = 135  # deliberately not implemented (exposes driver handles)
     SQL_DROP_ASSERTION = 136
+    """Bitmask of the clauses in the DROP ASSERTION statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_CHARACTER_SET = 137
+    """Bitmask for clauses in the DROP CHARACTER SET statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_COLLATION = 138
+    """Bitmask for the clauses in the DROP COLLATION statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_DOMAIN = 139
+    """Bitmask for the clauses in the DROP DOMAIN statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_SCHEMA = 140
+    """Bitmask of the clauses in the DROP SCHEMA statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_TABLE = 141
+    """Bitmask of the clauses in the DROP TABLE statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_TRANSLATION = 142
+    """Bitmask for the clauses in the DROP TRANSLATION statement, as defined in SQL-92, supported by the data source."""
     SQL_DROP_VIEW = 143
+    """Bitmask of the clauses in the DROP VIEW statement, as defined in SQL-92, supported by the data source."""
     SQL_DYNAMIC_CURSOR_ATTRIBUTES1 = 144
+    """An SQLUINTEGER bitmask that describes the attributes of a dynamic cursor that are supported by the driver.
+
+    This bitmask contains the first subset of attributes; for the second subset, see SQL_DYNAMIC_CURSOR_ATTRIBUTES2.
+    """
     SQL_DYNAMIC_CURSOR_ATTRIBUTES2 = 145
+    """An SQLUINTEGER bitmask that describes the attributes of a dynamic cursor that are supported by the driver.
+
+    This bitmask contains the second subset of attributes; for the first subset, see SQL_DYNAMIC_CURSOR_ATTRIBUTES1.
+    """
     SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1 = 146
+    """An SQLUINTEGER bitmask that describes the attributes of a forward only cursor that are supported by the driver.
+
+    This bitmask contains the first subset of attributes; for the second subset, see
+    SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2.
+    """
     SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2 = 147
+    """An SQLUINTEGER bitmask that describes the attributes of a forward only cursor that are supported by the driver.
+
+    This bitmask contains the second subset of attributes; for the first subset, see
+    SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1.
+    """
     SQL_INDEX_KEYWORDS = 148
+    """An SQLUINTEGER bitmask that enumerates keywords in the CREATE INDEX statement that are supported by the driver.
+
+    To see whether the CREATE INDEX statement is supported, an application calls SQLGetInfo with the SQL_DLL_INDEX
+    information type.
+    """
     SQL_INFO_SCHEMA_VIEWS = 149
+    """An SQLUINTEGER bitmask enumerating the views in the INFORMATION_SCHEMA that are supported by the driver.
+
+    The views in, and the contents of, INFORMATION_SCHEMA are as defined in SQL-92.
+    """
     SQL_KEYSET_CURSOR_ATTRIBUTES1 = 150
+    """An SQLUINTEGER bitmask that describes the attributes of a keyset cursor that are supported by the driver.
+
+    This bitmask contains the first subset of attributes; for the second subset, see SQL_KEYSET_CURSOR_ATTRIBUTES2.
+    """
     SQL_KEYSET_CURSOR_ATTRIBUTES2 = 151
+    """An SQLUINTEGER bitmask that describes the attributes of a keyset cursor that are supported by the driver.
+
+    This bitmask contains the second subset of attributes; for the first subset, see SQL_KEYSET_CURSOR_ATTRIBUTES1.
+    """
     SQL_ODBC_INTERFACE_CONFORMANCE = 152
+    """An SQLUINTEGER value that indicates the level of the ODBC 3*.x* interface that the driver complies with."""
     SQL_PARAM_ARRAY_ROW_COUNTS = 153
+    """An SQLUINTEGER enumerating the driver's properties regarding the availability of row counts in a parameterized
+    execution."""
     SQL_PARAM_ARRAY_SELECTS = 154
+    """An SQLUINTEGER enumerating the driver's properties regarding the availability of result sets in a parameterized
+    execution."""
     SQL_SQL92_DATETIME_FUNCTIONS = 155
+    """An SQLUINTEGER bitmask enumerating the datetime scalar functions that are supported by the driver and data
+    source, as defined in SQL-92."""
     SQL_SQL92_FOREIGN_KEY_DELETE_RULE = 156
+    """An SQLUINTEGER bitmask enumerating the rules supported for a foreign key in a DELETE statement, as defined in
+    SQL-92."""
     SQL_SQL92_FOREIGN_KEY_UPDATE_RULE = 157
+    """An SQLUINTEGER bitmask enumerating the rules supported for a foreign key in a DELETE statement, as defined in
+    SQL-92."""
     SQL_SQL92_GRANT = 158
+    """An SQLUINTEGER bitmask enumerating the clauses supported in the GRANT statement, as defined in SQL-92."""
     SQL_SQL92_NUMERIC_VALUE_FUNCTIONS = 159
+    """An SQLUINTEGER bitmask enumerating the numeric value scalar functions that are supported by the driver and the
+    associated data source, as defined in SQL-92."""
     SQL_SQL92_PREDICATES = 160
+    """An SQLUINTEGER bitmask enumerating the predicates supported in a SELECT statement, as defined in SQL-92."""
     SQL_SQL92_RELATIONAL_JOIN_OPERATORS = 161
+    """An SQLUINTEGER bitmask enumerating the relational join operators supported in a SELECT statement, as defined in
+    SQL-92."""
     SQL_SQL92_REVOKE = 162
+    """An SQLUINTEGER bitmask enumerating the clauses supported in the REVOKE statement, as defined in SQL-92, supported
+    by the data source."""
     SQL_SQL92_ROW_VALUE_CONSTRUCTOR = 163
+    """An SQLUINTEGER bitmask enumerating the row value constructor expressions supported in a SELECT statement, as
+    defined in SQL-92."""
     SQL_SQL92_STRING_FUNCTIONS = 164
+    """An SQLUINTEGER bitmask enumerating the string scalar functions that are supported by the driver and the
+    associated data source, as defined in SQL-92."""
     SQL_SQL92_VALUE_EXPRESSIONS = 165
+    """An SQLUINTEGER bitmask enumerating the value expressions supported, as defined in SQL-92."""
     SQL_STANDARD_CLI_CONFORMANCE = 166
+    """An SQLUINTEGER bitmask enumerating the CLI standard or standards to which the driver conforms."""
     SQL_STATIC_CURSOR_ATTRIBUTES1 = 167
+    """An SQLUINTEGER bitmask that describes the attributes of a static cursor that are supported by the driver.
+
+    This bitmask contains the first subset of attributes; for the second subset, see SQL_STATIC_CURSOR_ATTRIBUTES2.
+    """
     SQL_STATIC_CURSOR_ATTRIBUTES2 = 168
+    """An SQLUINTEGER bitmask that describes the attributes of a static cursor that are supported by the driver.
+
+    This bitmask contains the second subset of attributes; for the first subset, see SQL_STATIC_CURSOR_ATTRIBUTES1.
+    """
     SQL_AGGREGATE_FUNCTIONS = 169
+    """An SQLUINTEGER bitmask enumerating support for aggregation functions.
+
+    A SQL-92 Entry level-conformant driver will always return all of these options as supported.
+    """
     SQL_DDL_INDEX = 170
+    """An SQLUINTEGER value that indicates support for creation and dropping of indexes."""
     SQL_DM_VER = 171
+    """A character string with the version of the Driver Manager.
+
+    - The version is of the form ##.##.####.####, where:
+    - The first set of two digits is the major ODBC version, as given by the constant SQL_SPEC_MAJOR.
+    - The second set of two digits is the minor ODBC version, as given by the constant SQL_SPEC_MINOR.
+    - The third set of four digits is the Driver Manager major build number.
+    - The last set of four digits is the Driver Manager minor build number.
+
+    The Windows 7 Driver Manager version is 03.80. The Windows 8 Driver Manager version is 03.81.
+    """
     SQL_INSERT_STATEMENT = 172
+    """An SQLUINTEGER bitmask that indicates support for INSERT statements.
+
+    A SQL-92 Entry level-conformant driver will always return all of the options as supported.
+    """
     SQL_CONVERT_GUID = 173
     """An SQLUINTEGER bitmask.
 
@@ -826,16 +1270,131 @@ class InfoType(IntEnum):
     """
 
     SQL_XOPEN_CLI_YEAR = 10000
+    """A character string that indicates the year of publication of the Open Group specification with which the version
+    of the ODBC Driver Manager fully complies."""
     SQL_CURSOR_SENSITIVITY = 10001
+    """An SQLUINTEGER value that indicates the support for cursor sensitivity.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_UNSPECIFIED option as supported.
+
+    A SQL-92 Full level-conformant driver will always return the SQL_INSENSITIVE option as supported.
+    """
     SQL_DESCRIBE_PARAMETER = 10002
+    """A character string: "Y" if parameters can be described; "N", if not.
+
+    A SQL-92 Full level-conformant driver will usually return "Y" because it will support the DESCRIBE INPUT statement.
+    Because this does not directly specify the underlying SQL support, however, describing parameters might not be
+    supported, even in a SQL-92 Full level-conformant driver.
+    """
     SQL_CATALOG_NAME = 10003
+    """A character string: "Y" if the server supports catalog names, or "N" if it does not.
+
+    A SQL-92 Full level-conformant driver will always return "Y".
+    """
     SQL_COLLATION_SEQ = 10004
+    """The name of the collation sequence.
+
+    This is a character string that indicates the name of the default collation for the default character set for this
+    server (for example, 'ISO 8859-1' or EBCDIC). If this is unknown, an empty string will be returned. A SQL-92 Full
+    level-conformant driver will always return a non-empty string.
+    """
     SQL_MAX_IDENTIFIER_LEN = 10005
+    """An SQLUSMALLINT that indicates the maximum size in characters that the data source supports for user-defined
+    names.
+
+    An FIPS Entry level-conformant driver will return at least 18. An FIPS Intermediate level-conformant driver will
+    return at least 128.
+    """
     SQL_ASYNC_MODE = 10021
+    """A SQLUINTEGER value that indicates the level of asynchronous support in the driver."""
     SQL_MAX_ASYNC_CONCURRENT_STATEMENTS = 10022
+    """An SQLUINTEGER value that specifies the maximum number of active concurrent statements in asynchronous mode that
+    the driver can support on a given connection.
+
+    If there is no specific limit or the limit is unknown, this value is zero.
+    """
     SQL_ASYNC_DBC_FUNCTIONS = 10023
+    """A SQLUINTEGER value that indicates if the driver can execute functions asynchronously on the connection
+    handle."""
     SQL_DRIVER_AWARE_POOLING_SUPPORTED = 10024
+    """A SQLUINTEGER value that indicates if the driver support driver-aware pooling.
+
+    A driver does not need to implement SQL_DRIVER_AWARE_POOLING_SUPPORTED and the Driver Manager will not honor to the
+    driver's return value.
+    """
     SQL_ASYNC_NOTIFICATION = 10025
+    """A SQLUINTEGER value that indicates if the driver supports asynchronous notification."""
+
+
+class SQLAggregateFunctions(IntFlag):
+    """An SQLUINTEGER bitmask enumerating support for aggregation functions.
+
+    A SQL-92 Entry level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_AF_AVG = 0x00000001
+    """The AVG aggregate function is supported."""
+
+    SQL_AF_COUNT = 0x00000002
+    """The COUNT aggregate function is supported."""
+
+    SQL_AF_MAX = 0x00000004
+    """The MAX aggregate function is supported."""
+
+    SQL_AF_MIN = 0x00000008
+    """The MIN aggregate function is supported."""
+
+    SQL_AF_SUM = 0x00000010
+    """The SUM aggregate function is supported."""
+
+    SQL_AF_DISTINCT = 0x00000020
+    """Aggregate functions with the DISTINCT keyword are supported."""
+
+    SQL_AF_ALL = 0x00000040
+    """Aggregate functions with the ALL keyword are supported."""
+
+
+class SQLAlterDomain(IntFlag):
+    """The clauses in the ALTER DOMAIN statement, as defined in SQL-92, which are supported by the data source.
+
+    A SQL-92 Full level-compliant driver will always return all the bitmasks.
+
+    A return value of "0" means that the ALTER DOMAIN statement is not supported.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_AD_CONSTRAINT_NAME_DEFINITION = 0x00000001
+    """<constraint name definition clause> is supported for naming domain constraint (Intermediate level)"""
+    SQL_AD_ADD_DOMAIN_CONSTRAINT = 0x00000002
+    """Adding a domain constraint is supported (Full level)"""
+    SQL_AD_DROP_DOMAIN_CONSTRAINT = 0x00000004
+    """<drop domain constraint clause> is supported (Full level)"""
+    SQL_AD_ADD_DOMAIN_DEFAULT = 0x00000008
+    """<alter domain> <set domain default clause> is supported (Full level)"""
+    SQL_AD_DROP_DOMAIN_DEFAULT = 0x00000010
+    """<alter domain> <drop domain default clause> is supported (Full level)"""
+    SQL_AD_ADD_CONSTRAINT_INITIALLY_DEFERRED = 0x00000020
+    """The INITIALLY DEFERRED constraint attribute is supported for added domain constraints. (Full level)
+
+    This bit is meaningful only if SQL_AD_ADD_DOMAIN_CONSTRAINT is also set.
+    """
+    SQL_AD_ADD_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000040
+    """The INITIALLY IMMEDIATE constraint attribute is supported for added domain constraints. (Full level)
+
+    This bit is meaningful only if SQL_AD_ADD_DOMAIN_CONSTRAINT is also set.
+    """
+    SQL_AD_ADD_CONSTRAINT_DEFERRABLE = 0x00000080
+    """The DEFERRABLE constraint attribute is supported for added domain constraints. (Full level)
+
+    This bit is meaningful only if SQL_AD_ADD_DOMAIN_CONSTRAINT is also set.
+    """
+    SQL_AD_ADD_CONSTRAINT_NON_DEFERRABLE = 0x00000100
+    """The NOT DEFERRABLE constraint attribute is supported for added domain constraints. (Full level)
+
+    This bit is meaningful only if SQL_AD_ADD_DOMAIN_CONSTRAINT is also set.
+    """
 
 
 class SQLAlterTable(IntFlag):
@@ -936,6 +1495,53 @@ class SQLAlterTable(IntFlag):
     This bit is meaningful when support for adding column constraints or table constraints is reported by
     SQL_AT_ADD_CONSTRAINT or SQL_AT_ADD_TABLE_CONSTRAINT. (Full level) (ODBC 3.0)
     """
+
+
+class SQLAsyncDbcFunctions(IntEnum):
+    """A SQLUINTEGER that indicates if the driver can execute functions asynchronously on the connection handle."""
+
+    SQL_ASYNC_DBC_CAPABLE = 0x00000001
+    """The driver can execute connection functions asynchronously."""
+
+    SQL_ASYNC_DBC_NOT_CAPABLE = 0x00000000
+    """The driver cannot execute connection functions asynchronously."""
+
+
+class SQLAsyncMode(IntEnum):
+    """A SQLUINTEGER value that indicates the level of asynchronous support in the driver."""
+
+    SQL_AM_NONE = 0
+    """Asynchronous mode is not supported."""
+
+    SQL_AM_CONNECTION = 1
+    """Connection level asynchronous execution is supported.
+
+    Either all statement handles associated with a given connection handle are in asynchronous mode or all are in
+    synchronous mode. A statement handle on a connection cannot be in asynchronous mode while another statement handle
+    on the same connection is in synchronous mode, and vice versa.
+    """
+
+    SQL_AM_STATEMENT = 2
+    """Statement level asynchronous execution is supported.
+
+    Some statement handles associated with a connection handle can be in asynchronous mode, while other statement
+    handles on the same connection are in synchronous mode.
+    """
+
+
+class SQLAsyncNotification(IntEnum):
+    """A SQLUINTEGER value that indicates if the driver supports asynchronous notification.
+
+    There are two categories of ODBC asynchronous operations: connection level asynchronous operations and statement
+    level asynchronous operations. If a driver returns SQL_ASYNC_NOTIFICATION_CAPABLE, it must support notification for
+    all APIs that it can execute asynchronously.
+    """
+
+    SQL_ASYNC_NOTIFICATION_NOT_CAPABLE = 0x00000000
+    """Asynchronous execution notification is not supported by the driver."""
+
+    SQL_ASYNC_NOTIFICATION_CAPABLE = 0x00000001
+    """Asynchronous execution notification is supported by the driver."""
 
 
 class SQLAttrAccessMode(IntEnum):
@@ -1070,6 +1676,108 @@ class SQLAttrTrace(IntEnum):
     """Tracing on."""
 
 
+class SQLBatchRowCount(IntFlag):
+    """A SQLUINTEGER bitmask that enumerates the driver's behavior with respect to the availability of row counts."""
+
+    SQL_BRC_PROCEDURES = 0x0000001
+    """Row counts, if any, are available when a batch is executed in a stored procedure.
+
+    If row counts are available, they can be rolled up or individually available, depending on the SQL_BRC_ROLLED_UP
+    bit.
+    """
+    SQL_BRC_EXPLICIT = 0x0000002
+    """Row counts, if any, are available when a batch is executed directly by calling SQLExecute or SQLExecDirect.
+
+    If row counts are available, they can be rolled up or individually available, depending on the SQL_BRC_ROLLED_UP
+    bit.
+    """
+    SQL_BRC_ROLLED_UP = 0x0000004
+    """Row counts for consecutive INSERT, DELETE, or UPDATE statements are rolled up into one.
+
+    If this bit is not set, row counts are available for each statement.
+    """
+
+
+class SQLBatchSupport(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the driver's support for batches."""
+
+    SQL_BS_SELECT_EXPLICIT = 0x00000001
+    """The driver supports explicit batches that can have result-set generating statements."""
+    SQL_BS_ROW_COUNT_EXPLICIT = 0x00000002
+    """The driver supports explicit batches that can have row-count generating statements."""
+    SQL_BS_SELECT_PROC = 0x00000004
+    """The driver supports explicit procedures that can have result-set generating statements."""
+    SQL_BS_ROW_COUNT_PROC = 0x00000008
+    """The driver supports explicit procedures that can have row-count generating statements."""
+
+
+class SQLBookmarkPersistence(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the operations through which bookmarks persist."""
+
+    SQL_BP_CLOSE = 0x00000001
+    """Bookmarks are valid after an application calls SQLFreeStmt with the SQL_CLOSE option, or SQLCloseCursor to close
+    the cursor associated with a statement."""
+    SQL_BP_DELETE = 0x00000002
+    """The bookmark for a row is valid after that row has been deleted."""
+    SQL_BP_DROP = 0x00000004
+    """Bookmarks are valid after an application calls SQLFreeHandle with a HandleType of SQL_HANDLE_STMT to drop a
+    statement."""
+    SQL_BP_TRANSACTION = 0x00000008
+    """Bookmarks are valid after an application commits or rolls back a transaction."""
+    SQL_BP_UPDATE = 0x00000010
+    """The bookmark for a row is valid after any column in that row has been updated, including key columns."""
+    SQL_BP_OTHER_HSTMT = 0x00000020
+    """A bookmark associated with one statement can be used with another statement.
+
+    Unless SQL_BP_CLOSE or SQL_BP_DROP is specified, the cursor on the first statement must be open.
+    """
+
+    SQL_BP_SCROLL = 0x00000040
+    """Bookmarks are valid after an application scrolls through the result set using SQLFetchScroll or other cursor
+    navigation operations."""
+
+
+class SQLCatalogLocation(IntEnum):
+    r"""An SQLUSMALLINT value that indicates the position of the catalog in a qualified table name.
+
+    For example, an Xbase driver returns SQL_CL_START because the directory (catalog) name is at the start of the table
+    name, as in \EMPDATA\EMP.DBF. An ORACLE Server driver returns SQL_CL_END because the catalog is at the end of the
+    table name, as in ADMIN.EMP@EMPDATA.
+
+    A SQL-92 Full level-conformant driver will always return SQL_CL_START. A value of 0 is returned if catalogs are not
+    supported by the data source. To determine whether catalogs are supported, an application calls SQLGetInfo with the
+    SQL_CATALOG_NAME information type.
+    """
+
+    UNSUPPORTED = 0
+    SQL_CL_START = 0x0001
+    SQL_CL_END = 0x0002
+
+
+class SQLCatalogUsage(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the statements in which catalogs can be used.
+
+    A value of 0 is returned if catalogs are not supported by the data source. To determine whether catalogs are
+    supported, an application calls SQLGetInfo with the SQL_CATALOG_NAME information type. A SQL-92 Full level-
+    conformant driver will always return a bitmask with all of these bits set.
+    """
+
+    SQL_CU_DML_STATEMENTS = 0x00000001
+    """Catalogs are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE, DELETE, and if
+    supported, SELECT FOR UPDATE and positioned update and delete statements.
+    """
+    SQL_CU_PROCEDURE_INVOCATION = 0x00000002
+    """Catalogs are supported in the ODBC procedure invocation statement."""
+    SQL_CU_TABLE_DEFINITION = 0x00000004
+    """Catalogs are supported in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER TABLE, DROP TABLE,
+    and DROP VIEW.
+    """
+    SQL_CU_INDEX_DEFINITION = 0x00000008
+    """Catalogs are supported in all index definition statements: CREATE INDEX and DROP INDEX."""
+    SQL_CU_PRIVILEGE_DEFINITION = 0x00000010
+    """Catalogs are supported in all privilege definition statements: GRANT and REVOKE."""
+
+
 class SQLConcatNullBehavior(IntEnum):
     """Indicates how the data source handles the concatenation of NULL & non-NULL valued character data type columns."""
 
@@ -1144,6 +1852,344 @@ class SQLCorrelationName(IntEnum):
     """Correlation names are supported and can be any valid user-defined name."""
 
 
+class SQLCreateAssertion(IntFlag):
+    """The clauses in the CREATE ASSERTION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported. A return value of "0"
+    means that the CREATE ASSERTION statement is not supported.
+    """
+
+    SQL_CA_CREATE_ASSERTION = 0x00000001
+    SQL_CA_CONSTRAINT_INITIALLY_DEFERRED = 0x00000010
+    SQL_CA_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000020
+    SQL_CA_CONSTRAINT_DEFERRABLE = 0x00000040
+    SQL_CA_CONSTRAINT_NON_DEFERRABLE = 0x00000080
+
+
+class SQLCreateCharacterSet(IntFlag):
+    """Bitmask of clauses in the CREATE CHARACTER SET statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported. A return value of "0"
+    means that the CREATE CHARACTER SET statement is not supported.
+    """
+
+    SQL_CCS_CREATE_CHARACTER_SET = 0x00000001
+    SQL_CCS_COLLATE_CLAUSE = 0x00000002
+    SQL_CCS_LIMITED_COLLATION = 0x00000004
+
+
+class SQLCreateCollation(IntFlag):
+    """Bitmask for the clauses in the CREATE COLLATION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported. A return value of "0" means that
+    the CREATE COLLATION statement is not supported.
+    """
+
+    SQL_CCOL_CREATE_COLLATION = 0x00000001
+
+
+class SQLCreateDomain(IntFlag):
+    """Bitmask of the clauses in the CREATE DOMAIN statement, as defined in SQL-92, supported by the data source.
+
+    A return value of "0" means that the CREATE DOMAIN statement is not supported.
+    """
+
+    SQL_CDO_CREATE_DOMAIN = 0x00000001
+    """The CREATE DOMAIN statement is supported (Intermediate level)."""
+    SQL_CDO_DEFAULT = 0x00000002
+    """Specifying domain constraints is supported (Intermediate level)."""
+    SQL_CDO_CONSTRAINT = 0x00000004
+    """Specifying domain defaults is supported (Intermediate level)."""
+    SQL_CDO_COLLATION = 0x00000008
+    """Specifying domain collation is supported (Full level)."""
+    SQL_CDO_CONSTRAINT_NAME_DEFINITION = 0x00000010
+    """<constraint name definition> is supported for naming domain constraints (Intermediate level)."""
+    SQL_CDO_CONSTRAINT_INITIALLY_DEFERRED = 0x00000020
+    """Supports the INITIALLY DEFERRED domain constraint attribute. (Full level).
+
+    Only meaningful if the SQL_CDO_DEFAULT bit is set.
+    """
+    SQL_CDO_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000040
+    """Supports the INITIALLY IMMEDIATE domain constraint attribute. (Full level).
+
+    Only meaningful if the SQL_CDO_DEFAULT bit is set.
+    """
+    SQL_CDO_CONSTRAINT_DEFERRABLE = 0x00000080
+    """Supports the DEFERRABLE domain constraint attribute. (Full level).
+
+    Only meaningful if the SQL_CDO_DEFAULT bit is set.
+    """
+    SQL_CDO_CONSTRAINT_NON_DEFERRABLE = 0x00000100
+    """Supports the NON DEFERRABLE domain constraint attribute. (Full level).
+
+    Only meaningful if the SQL_CDO_DEFAULT bit is set.
+    """
+
+
+class SQLCreateSchema(IntFlag):
+    """Bitmask of the clauses in the CREATE SCHEMA statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Intermediate level-conformant driver will always return the SQL_CS_CREATE_SCHEMA and SQL_CS_AUTHORIZATION
+    options as supported. These must also be supported at the SQL-92 Entry level, but not necessarily as SQL statements.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_CS_CREATE_SCHEMA = 0x00000001
+    SQL_CS_AUTHORIZATION = 0x00000002
+    SQL_CS_DEFAULT_CHARACTER_SET = 0x00000004
+
+
+class SQLCreateTable(IntFlag):
+    """Bitmask for the clauses in the CREATE TABLE statement, as defined in SQL-92, supported by the data source.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_CT_CREATE_TABLE = 0x00000001
+    """The CREATE TABLE statement is supported (Entry level)."""
+    SQL_CT_COMMIT_PRESERVE = 0x00000002
+    """Deleted rows are preserved on commit (Full level)."""
+    SQL_CT_COMMIT_DELETE = 0x00000004
+    """Deleted rows are deleted on commit (Full level)."""
+    SQL_CT_GLOBAL_TEMPORARY = 0x00000008
+    """Global temporary tables can be created (Full level)."""
+    SQL_CT_LOCAL_TEMPORARY = 0x00000010
+    """Local temporary tables can be created (Full level)."""
+    SQL_CT_CONSTRAINT_INITIALLY_DEFERRED = 0x00000020
+    """The INITIALLY DEFERRED constraint attribute is supported (Full level).
+
+    Only meaningful if specifying column or table constraints is supported, i.e. if the SQL_CT_COLUMN_CONSTRAINT or the
+    SQL_CT_TABLE_CONSTRAINT bit is set.
+    """
+    SQL_CT_CONSTRAINT_INITIALLY_IMMEDIATE = 0x00000040
+    """The INITIALLY IMMEDIATE constraint attribute is supported (Full level).
+
+    Only meaningful if specifying column or table constraints is supported, i.e. if the SQL_CT_COLUMN_CONSTRAINT or the
+    SQL_CT_TABLE_CONSTRAINT bit is set.
+    """
+    SQL_CT_CONSTRAINT_DEFERRABLE = 0x00000080
+    """The DEFERRABLE constraint attribute is supported (Full level).
+
+    Only meaningful if specifying column or table constraints is supported, i.e. if the SQL_CT_COLUMN_CONSTRAINT or the
+    SQL_CT_TABLE_CONSTRAINT bit is set.
+    """
+    SQL_CT_CONSTRAINT_NON_DEFERRABLE = 0x00000100
+    """The NON DEFERRABLE constraint attribute is supported (Full level).
+
+    Only meaningful if specifying column or table constraints is supported, i.e. if the SQL_CT_COLUMN_CONSTRAINT or the
+    SQL_CT_TABLE_CONSTRAINT bit is set.
+    """
+    SQL_CT_COLUMN_CONSTRAINT = 0x00000200
+    """Specifying column constraints is supported (FIPS Transitional level)."""
+    SQL_CT_COLUMN_DEFAULT = 0x00000400
+    """Specifying column defaults is supported (FIPS Transitional level)."""
+    SQL_CT_COLUMN_COLLATION = 0x00000800
+    """Specifying column collation is supported (Full level)."""
+    SQL_CT_TABLE_CONSTRAINT = 0x00001000
+    """Specifying table constraints is supported (FIPS Transitional level)"""
+    SQL_CT_CONSTRAINT_NAME_DEFINITION = 0x00002000
+    """The <constraint name definition> clause is supported for naming column and table constraints (Intermediate
+    level)"""
+
+
+class SQLCreateTranslation(IntFlag):
+    """Bitmask of the clauses in the CREATE TRANSLATION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return these options as supported. A return value of "0" means
+    that the CREATE TRANSLATION statement is not supported.
+    """
+
+    SQL_CTR_CREATE_TRANSLATION = 0x00000001
+
+
+class SQLCreateView(IntFlag):
+    """Bitmask of the clauses in the CREATE VIEW statement, as defined in SQL-92, supported by the data source.
+
+    A return value of "0" means that the CREATE VIEW statement is not supported.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_CV_CREATE_VIEW and SQL_CV_CHECK_OPTION options as
+    supported.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_CV_CREATE_VIEW = 0x00000001
+    SQL_CV_CHECK_OPTION = 0x00000002
+    SQL_CV_CASCADED = 0x00000004
+    SQL_CV_LOCAL = 0x00000008
+
+
+class SQLCursorAttributes1(IntFlag):
+    """An SQLUINTEGER bitmask that describes the attributes of a cursor that are supported by the driver.
+
+    This is the return value of calling ``DriverManager.sql_get_info_w`` with an InfoType of
+    SQL_DYNAMIC_CURSOR_ATTRIBUTES1, SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1, SQL_KEYSET_CURSOR_ATTRIBUTES1, or
+    SQL_STATIC_CURSOR_ATTRIBUTES1.
+
+    This bitmask contains the first subset of attributes; for the second subset, see SQLCursorAttributes2.
+
+    A SQL-92 Intermediate level-conformant driver will usually return the SQL_CA1_NEXT, SQL_CA1_ABSOLUTE, and
+    SQL_CA1_RELATIVE options as supported, because it supports scrollable cursors through the embedded SQL FETCH
+    statement. Because this does not directly determine the underlying SQL support, however, scrollable cursors may not
+    be supported, even for a SQL-92 Intermediate level-conformant driver.
+    """
+
+    SQL_CA1_NEXT = 0x00000001
+    """A FetchOrientation argument of SQL_FETCH_NEXT is supported in a call to SQLFetchScroll for this cursor type."""
+    SQL_CA1_ABSOLUTE = 0x00000002
+    """FetchOrientation arguments of SQL_FETCH_FIRST, SQL_FETCH_LAST, and SQL_FETCH_ABSOLUTE are supported in a call to
+    SQLFetchScroll for this cursor type.
+
+    The rowset that will be fetched is independent of the current cursor position.
+    """
+    SQL_CA1_RELATIVE = 0x00000004
+    """FetchOrientation arguments of SQL_FETCH_PRIOR and SQL_FETCH_RELATIVE are supported in a call to SQLFetchScroll
+    for this cursor type.
+
+    The rowset that will be fetched depends on the current cursor position. Note that this is separated from
+    SQL_FETCH_NEXT because in a forward-only cursor, only SQL_FETCH_NEXT is supported.
+    """
+    SQL_CA1_BOOKMARK = 0x00000008
+    """A FetchOrientation argument of SQL_FETCH_BOOKMARK is supported in a call to SQLFetchScroll for this cursor
+    type."""
+    SQL_CA1_LOCK_NO_CHANGE = 0x00000040
+    """A LockType argument of SQL_LOCK_NO_CHANGE is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_LOCK_EXCLUSIVE = 0x00000080
+    """A LockType argument of SQL_LOCK_EXCLUSIVE is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_LOCK_UNLOCK = 0x00000100
+    """A LockType argument of SQL_LOCK_UNLOCK is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POS_POSITION = 0x00000200
+    """An Operation argument of SQL_POSITION is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POS_UPDATE = 0x00000400
+    """An Operation argument of SQL_UPDATE is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POS_DELETE = 0x00000800
+    """An Operation argument of SQL_DELETE is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POS_REFRESH = 0x00001000
+    """An Operation argument of SQL_REFRESH is supported in a call to SQLSetPos for this cursor type."""
+    SQL_CA1_POSITIONED_UPDATE = 0x00002000
+    """An UPDATE WHERE CURRENT OF SQL statement is supported for this cursor type.
+
+    A SQL-92 Entry level-conformant driver will always return this option as supported.
+    """
+    SQL_CA1_POSITIONED_DELETE = 0x00004000
+    """A DELETE WHERE CURRENT OF SQL statement is supported for this cursor type.
+
+    A SQL-92 Entry level-conformant driver will always return this option as supported.
+    """
+    SQL_CA1_SELECT_FOR_UPDATE = 0x00008000
+    """A SELECT FOR UPDATE SQL statement is supported for this cursor type.
+
+    A SQL-92 Entry level-conformant driver will always return this option as supported.
+    """
+    SQL_CA1_BULK_ADD = 0x00010000
+    """An Operation argument of SQL_ADD is supported in a call to SQLBulkOperations for this cursor type."""
+    SQL_CA1_BULK_UPDATE_BY_BOOKMARK = 0x00020000
+    """An Operation argument of SQL_UPDATE_BY_BOOKMARK is supported in a call to SQLBulkOperations for this cursor
+    type."""
+    SQL_CA1_BULK_DELETE_BY_BOOKMARK = 0x00040000
+    """An Operation argument of SQL_DELETE_BY_BOOKMARK is supported in a call to SQLBulkOperations for this cursor
+    type."""
+    SQL_CA1_BULK_FETCH_BY_BOOKMARK = 0x00080000
+    """An Operation argument of SQL_FETCH_BY_BOOKMARK is supported in a call to SQLBulkOperations for this cursor
+    type."""
+
+
+class SQLCursorAttributes2(IntFlag):
+    """An SQLUINTEGER bitmask that describes the attributes of a cursor that are supported by the driver.
+
+    This is the return value of calling ``DriverManager.sql_get_info_w`` with an InfoType of
+    SQL_DYNAMIC_CURSOR_ATTRIBUTES2, SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2, SQL_KEYSET_CURSOR_ATTRIBUTES2, or
+    SQL_STATIC_CURSOR_ATTRIBUTES2.
+
+    This bitmask contains the second subset of attributes; for the first subset, see SQLCursorAttributes1.
+    """
+
+    SQL_CA2_READ_ONLY_CONCURRENCY = 0x00000001
+    """A read-only cursor, in which no updates are allowed, is supported.
+
+    (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_READ_ONLY for this cursor type).
+    """
+    SQL_CA2_LOCK_CONCURRENCY = 0x00000002
+    """A cursor that uses the lowest level of locking sufficient to ensure that the row can be updated is supported.
+
+    (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_LOCK for this cursor type.)
+
+    These locks must be consistent with the transaction isolation level set by the SQL_ATTR_TXN_ISOLATION connection
+    attribute.
+    """
+    SQL_CA2_OPT_ROWVER_CONCURRENCY = 0x00000004
+    """A cursor that uses the optimistic concurrency control comparing row versions is supported.
+
+    (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_ROWVER for this cursor type.)
+    """
+    SQL_CA2_OPT_VALUES_CONCURRENCY = 0x00000008
+    """A cursor that uses the optimistic concurrency control comparing values is supported.
+
+    (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_VALUES for this cursor type.)
+    """
+    SQL_CA2_SENSITIVITY_ADDITIONS = 0x00000010
+    """Added rows are visible to a cursor of this type; the cursor can scroll to those rows.
+
+    (Where these rows are added to the cursor is driver-dependent.)
+    """
+    SQL_CA2_SENSITIVITY_DELETIONS = 0x00000020
+    """Deleted rows are no longer available to a cursor of this type, and do not leave a "hole" in the result set; after
+    the cursor scrolls from a deleted row, it cannot return to that row."""
+    SQL_CA2_SENSITIVITY_UPDATES = 0x00000040
+    """Updates to rows are visible to a cursor of this type; if the cursor scrolls from and returns to an updated row,
+    the data returned by the cursor is the updated data, not the original data."""
+    SQL_CA2_MAX_ROWS_SELECT = 0x00000080
+    """The SQL_ATTR_MAX_ROWS statement attribute affects SELECT statements for this cursor type."""
+    SQL_CA2_MAX_ROWS_INSERT = 0x00000100
+    """The SQL_ATTR_MAX_ROWS statement attribute affects INSERT statements for this cursor type."""
+    SQL_CA2_MAX_ROWS_DELETE = 0x00000200
+    """The SQL_ATTR_MAX_ROWS statement attribute affects DELETE statements for this cursor type."""
+    SQL_CA2_MAX_ROWS_UPDATE = 0x00000400
+    """The SQL_ATTR_MAX_ROWS statement attribute affects UPDATE statements for this cursor type."""
+    SQL_CA2_MAX_ROWS_CATALOG = 0x00000800
+    """The SQL_ATTR_MAX_ROWS statement attribute affects CATALOG result sets for this cursor type."""
+    SQL_CA2_MAX_ROWS_AFFECTS_ALL = (
+        SQL_CA2_MAX_ROWS_SELECT
+        | SQL_CA2_MAX_ROWS_INSERT
+        | SQL_CA2_MAX_ROWS_DELETE
+        | SQL_CA2_MAX_ROWS_UPDATE
+        | SQL_CA2_MAX_ROWS_CATALOG
+    )
+    """The SQL_ATTR_MAX_ROWS statement attribute affects SELECT, INSERT, DELETE, and UPDATE statements, and CATALOG
+    result sets for this cursor type."""
+    SQL_CA2_CRC_EXACT = 0x00001000
+    """The exact row count is available in the SQL_DIAG_CURSOR_ROW_COUNT diagnostic field for this cursor type."""
+    SQL_CA2_CRC_APPROXIMATE = 0x00002000
+    """An approximate row count is available in the SQL_DIAG_CURSOR_ROW_COUNT diagnostic field for this cursor type."""
+    SQL_CA2_SIMULATE_NON_UNIQUE = 0x00004000
+    """The driver does not guarantee that simulated positioned update or delete statements will affect only one row for
+    this cursor type; it is the application's responsibility to guarantee this.
+
+    (If a statement affects more than one row, SQLExecute or SQLExecDirect returns SQLSTATE 01001 [Cursor operation
+    conflict].) To set this behavior, the application calls SQLSetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR attribute
+    set to SQL_SC_NON_UNIQUE.
+    """
+    SQL_CA2_SIMULATE_TRY_UNIQUE = 0x00008000
+    """The driver tries to guarantee that simulated positioned update or delete statements will affect only one row for
+    this cursor type.
+
+    The driver always executes such statements, even if they might affect more than one row, such as when there is no
+    unique key. (If a statement affects more than one row, SQLExecute or SQLExecDirect returns SQLSTATE 01001 [Cursor
+    operation conflict].) To set this behavior, the application calls SQLSetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR
+    attribute set to SQL_SC_TRY_UNIQUE.
+    """
+    SQL_CA2_SIMULATE_UNIQUE = 0x00010000
+    """The driver guarantees that simulated positioned update or delete statements will affect only one row for this
+    cursor type.
+
+    If the driver cannot guarantee this for a given statement, SQLExecDirect or SQLPrepare return SQLSTATE 01001 (Cursor
+    operation conflict). To set this behavior, the application calls SQLSetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR
+    attribute set to SQL_SC_UNIQUE.
+    """
+
+
 class SQLCursorCommitBehavior(IntEnum):
     """Indicates how a COMMIT operation affects cursors and prepared statements in the data source.
 
@@ -1197,30 +2243,160 @@ class SQLCursorRollbackBehavior(IntEnum):
     """
 
 
-class SQLBookmarkPersistence(IntFlag):
-    """An SQLUINTEGER bitmask enumerating the operations through which bookmarks persist."""
+class SQLCursorSensitivity(IntEnum):
+    """An SQLUINTEGER value that indicates the support for cursor sensitivity.
 
-    SQL_BP_CLOSE = 0x00000001
-    """Bookmarks are valid after an application calls SQLFreeStmt with the SQL_CLOSE option, or SQLCloseCursor to close
-    the cursor associated with a statement."""
-    SQL_BP_DELETE = 0x00000002
-    """The bookmark for a row is valid after that row has been deleted."""
-    SQL_BP_DROP = 0x00000004
-    """Bookmarks are valid after an application calls SQLFreeHandle with a HandleType of SQL_HANDLE_STMT to drop a
-    statement."""
-    SQL_BP_TRANSACTION = 0x00000008
-    """Bookmarks are valid after an application commits or rolls back a transaction."""
-    SQL_BP_UPDATE = 0x00000010
-    """The bookmark for a row is valid after any column in that row has been updated, including key columns."""
-    SQL_BP_OTHER_HSTMT = 0x00000020
-    """A bookmark associated with one statement can be used with another statement.
+    A SQL-92 Entry level-conformant driver will always return the SQL_UNSPECIFIED option as supported.
 
-    Unless SQL_BP_CLOSE or SQL_BP_DROP is specified, the cursor on the first statement must be open.
+    A SQL-92 Full level-conformant driver will always return the SQL_INSENSITIVE option as supported.
     """
 
-    SQL_BP_SCROLL = 0x00000040
-    """Bookmarks are valid after an application scrolls through the result set using SQLFetchScroll or other cursor
-    navigation operations."""
+    SQL_UNSPECIFIED = 0
+    """It is unspecified whether cursors on the statement handle make visible the changes that were made to a result set
+    by another cursor within the same transaction.
+
+    Cursors on the statement handle may make visible none, some, or all such changes.
+    """
+
+    SQL_INSENSITIVE = 1
+    """All cursors on the statement handle show the result set without reflecting any changes that were made to it by
+    any other cursor within the same transaction."""
+
+    SQL_SENSITIVE = 2
+    """Cursors are sensitive to changes that were made by other cursors within the same transaction."""
+
+
+class SQLDatetimeLiterals(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the SQL-92 datetime literals supported by the data source.
+
+    Note that these are the datetime literals listed in the SQL-92 specification and are separate from the datetime
+    literal escape clauses defined by ODBC.
+
+    A FIPS Transitional level-conformant driver will always return the "1" value in the bitmask for all bits.
+
+    A value of "0" means that SQL-92 datetime literals are not supported.
+    """
+
+    SQL_DL_SQL92_DATE = 0x00000001
+    SQL_DL_SQL92_TIME = 0x00000002
+    SQL_DL_SQL92_TIMESTAMP = 0x00000004
+    SQL_DL_SQL92_INTERVAL_YEAR = 0x00000008
+    SQL_DL_SQL92_INTERVAL_MONTH = 0x00000010
+    SQL_DL_SQL92_INTERVAL_DAY = 0x00000020
+    SQL_DL_SQL92_INTERVAL_HOUR = 0x00000040
+    SQL_DL_SQL92_INTERVAL_MINUTE = 0x00000080
+    SQL_DL_SQL92_INTERVAL_SECOND = 0x00000100
+    SQL_DL_SQL92_INTERVAL_YEAR_TO_MONTH = 0x00000200
+    SQL_DL_SQL92_INTERVAL_DAY_TO_HOUR = 0x00000400
+    SQL_DL_SQL92_INTERVAL_DAY_TO_MINUTE = 0x00000800
+    SQL_DL_SQL92_INTERVAL_DAY_TO_SECOND = 0x00001000
+    SQL_DL_SQL92_INTERVAL_HOUR_TO_MINUTE = 0x00002000
+    SQL_DL_SQL92_INTERVAL_HOUR_TO_SECOND = 0x00004000
+    SQL_DL_SQL92_INTERVAL_MINUTE_TO_SECOND = 0x00008000
+
+
+class SQLDdlIndex(IntFlag):
+    """An SQLUINTEGER value that indicates support for creation and dropping of indexes."""
+
+    SQL_DI_CREATE_INDEX = 0x00000001
+    """The CREATE INDEX statement is supported."""
+
+    SQL_DI_DROP_INDEX = 0x00000002
+    """The DROP INDEX statement is supported."""
+
+
+class SQLDriverAwarePoolingSupported(IntEnum):
+    """A SQLUINTEGER value that indicates if the driver support driver-aware pooling.
+
+    A driver does not need to implement SQL_DRIVER_AWARE_POOLING_SUPPORTED and the Driver Manager will not honor to the
+    driver's return value.
+    """
+
+    SQL_DRIVER_AWARE_POOLING_NOT_CAPABLE = 0x00000000
+    """The driver cannot support driver-aware pooling mechanism."""
+
+    SQL_DRIVER_AWARE_POOLING_CAPABLE = 0x00000001
+    """The driver can support driver-aware pooling mechanism."""
+
+
+class SQLDropAssertion(IntFlag):
+    """Bitmask of the clauses in the DROP ASSERTION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported.
+    """
+
+    SQL_DA_DROP_ASSERTION = 0x00000001
+
+
+class SQLDropCharacterSet(IntFlag):
+    """Bitmask for the clauses in the DROP CHARACTER SET statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported.
+    """
+
+    SQL_DCS_DROP_CHARACTER_SET = 0x00000001
+
+
+class SQLDropCollation(IntFlag):
+    """Bitmask for the clauses in the DROP COLLATION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported.
+    """
+
+    SQL_DC_DROP_COLLATION = 0x00000001
+
+
+class SQLDropDomain(IntFlag):
+    """Bitmask for the clauses in the DROP DOMAIN statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Intermediate level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_DD_DROP_DOMAIN = 0x00000001
+    SQL_DD_RESTRICT = 0x00000002
+    SQL_DD_CASCADE = 0x00000004
+
+
+class SQLDropSchema(IntFlag):
+    """Bitmask for the clauses in the DROP SCHEMA statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Intermediate level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_DS_DROP_SCHEMA = 0x00000001
+    SQL_DS_RESTRICT = 0x00000002
+    SQL_DS_CASCADE = 0x00000004
+
+
+class SQLDropTable(IntFlag):
+    """Bitmask for the clauses in the DROP TABLE statement, as defined in SQL-92, supported by the data source.
+
+    An FIPS Transitional level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_DT_DROP_TABLE = 0x00000001
+    SQL_DT_RESTRICT = 0x00000002
+    SQL_DT_CASCADE = 0x00000004
+
+
+class SQLDropTranslation(IntFlag):
+    """Bitmask for the clauses in the DROP TRANSLATION statement, as defined in SQL-92, supported by the data source.
+
+    A SQL-92 Full level-conformant driver will always return this option as supported.
+    """
+
+    SQL_DTR_DROP_TRANSLATION = 0x00000001
+
+
+class SQLDropView(IntFlag):
+    """Bitmask of the clauses in the DROP VIEW statement, as defined in SQL-92, supported by the data source.
+
+    An FIPS Transitional level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_DV_DROP_VIEW = 0x00000001
+    SQL_DV_RESTRICT = 0x00000002
+    SQL_DV_CASCADE = 0x00000004
 
 
 class SQLFileUsage(IntEnum):
@@ -1340,6 +2516,108 @@ class SQLIdentifierCase(IntEnum):
     """Identifiers are not case-sensitive and are stored in mixed case in system catalog."""
 
 
+class SQLIndexKeywords(IntFlag):
+    """An SQLUINTEGER bitmask that enumerates keywords in the CREATE INDEX statement that are supported by the driver.
+
+    To see whether the CREATE INDEX statement is supported, an application calls SQLGetInfo with the SQL_DLL_INDEX
+    information type.
+    """
+
+    SQL_IK_NONE = 0x00000000
+    """None of the keywords is supported."""
+    SQL_IK_ASC = 0x00000001
+    """ASC keyword is supported."""
+    SQL_IK_DESC = 0x00000002
+    """DESC keyword is supported."""
+    SQL_IK_ALL = SQL_IK_ASC | SQL_IK_DESC
+    """All keywords are supported."""
+
+
+class SQLInfoSchemaViews(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the views in the INFORMATION_SCHEMA that are supported by the driver.
+
+    The views in, and the contents of, INFORMATION_SCHEMA are as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_ISV_ASSERTIONS = 0x00000001
+    """Identifies the catalog's assertions that are owned by a given user (Full level)."""
+    SQL_ISV_CHARACTER_SETS = 0x00000002
+    """Identifies the catalog's character sets that can be accessed by a given user (Intermediate level)."""
+    SQL_ISV_CHECK_CONSTRAINTS = 0x00000004
+    """Identifies the CHECK constraints that are owned by a given user (Intermediate level)."""
+    SQL_ISV_COLLATIONS = 0x00000008
+    """Identifies the character collations for the catalog that can be accessed by a given user (Full level)."""
+    SQL_ISV_COLUMN_DOMAIN_USAGE = 0x00000010
+    """Identifies columns for the catalog that depend on domains defined in the catalog and are owned by a given user
+    (Intermediate level)."""
+    SQL_ISV_COLUMN_PRIVILEGES = 0x00000020
+    """Identifies the privileges on columns of persistent tables that are available to or granted by a given user (FIPS
+    Transitional level)."""
+    SQL_ISV_COLUMNS = 0x00000040
+    """Identifies the columns of persistent tables that can be accessed by a given user (FIPS Transitional level)."""
+    SQL_ISV_CONSTRAINT_COLUMN_USAGE = 0x00000080
+    """Similar to CONSTRAINT_TABLE_USAGE view, columns are identified for the various constraints that are owned by a
+    given user (Intermediate level)."""
+    SQL_ISV_CONSTRAINT_TABLE_USAGE = 0x00000100
+    """Identifies the tables that are used by constraints (referential, unique, and assertions), and are owned by a
+    given user (Intermediate level)."""
+    SQL_ISV_DOMAIN_CONSTRAINTS = 0x00000200
+    """Identifies the domain constraints (of the domains in the catalog) that can be accessed by a given user
+    (Intermediate level)."""
+    SQL_ISV_DOMAINS = 0x00000400
+    """Identifies the domains defined in a catalog that can be accessed by the user (Intermediate level)."""
+    SQL_ISV_KEY_COLUMN_USAGE = 0x00000800
+    """Identifies columns defined in the catalog that are constrained as keys by a given user (Intermediate level)."""
+    SQL_ISV_REFERENTIAL_CONSTRAINTS = 0x00001000
+    """Identifies the referential constraints that are owned by a given user (Intermediate level)."""
+    SQL_ISV_SCHEMATA = 0x00002000
+    """Identifies the schemas that are owned by a given user (Intermediate level)."""
+    SQL_ISV_SQL_LANGUAGES = 0x00004000
+    """Identifies the SQL conformance levels, options, and dialects supported by the SQL implementation (Intermediate
+    level)."""
+    SQL_ISV_TABLE_CONSTRAINTS = 0x00008000
+    """Identifies the table constraints that are owned by a given user (Intermediate level)."""
+    SQL_ISV_TABLE_PRIVILEGES = 0x00010000
+    """Identifies the privileges on persistent tables that are available to or granted by a given user (FIPS
+    Transitional level)."""
+    SQL_ISV_TABLES = 0x00020000
+    """Identifies the persistent tables defined in a catalog that can be accessed by a given user (FIPS Transitional
+    level)."""
+    SQL_ISV_TRANSLATIONS = 0x00040000
+    """Identifies character translations for the catalog that can be accessed by a given user (Full level)."""
+    SQL_ISV_USAGE_PRIVILEGES = 0x00080000
+    """Identifies the USAGE privileges on catalog objects that are available to or owned by a given user (FIPS
+    Transitional level)."""
+    SQL_ISV_VIEW_COLUMN_USAGE = 0x00100000
+    """Identifies the columns on which the catalog's views that are owned by a given user are dependent (Intermediate
+    level)."""
+    SQL_ISV_VIEW_TABLE_USAGE = 0x00200000
+    """Identifies the tables on which the catalog's views that are owned by a given user are dependent (Intermediate
+    level)."""
+    SQL_ISV_VIEWS = 0x00400000
+    """Identifies the viewed tables defined in this catalog that can be accessed by a given user (FIPS Transitional
+    level)."""
+
+
+class SQLInsertStatement(IntFlag):
+    """An SQLUINTEGER bitmask that indicates support for INSERT statements.
+
+    A SQL-92 Entry level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_IS_INSERT_LITERALS = 0x00000001
+    """INSERT statements using literal VALUES clauses are supported."""
+
+    SQL_IS_INSERT_SEARCHED = 0x00000002
+    """INSERT statements using the result of a query are supported."""
+
+    SQL_IS_SELECT_INTO = 0x00000004
+    """The SELECT INTO statement is supported."""
+
+
 class SQLNonNullableColumns(IntEnum):
     """An SQLUSMALLINT value that specifies whether the data source supports NOT NULL in columns.
 
@@ -1401,6 +2679,28 @@ class SQLNullCollation(IntEnum):
     """NULLs are sorted at the end of the result set, regardless of the ASC or DESC keywords."""
 
 
+class SQLOdbcInterfaceConformance(IntEnum):
+    """An SQLUINTEGER value that indicates the level of the ODBC 3*.x* interface that the driver complies with.
+
+    For more information, see
+    https://learn.microsoft.com/en-us/sql/odbc/reference/develop-app/interface-conformance-levels
+    """
+
+    SQL_OIC_CORE = 1
+    """The minimum level that all ODBC drivers are expected to comply with.
+
+    This level includes basic interface elements such as connection functions, functions for preparing and executing a
+    SQL statement, basic result set metadata functions, basic catalog functions, and so on.
+    """
+    SQL_OIC_LEVEL1 = 2
+    """A level including the core standards compliance level functionality, plus scrollable cursors, bookmarks,
+    positioned updates and deletes, and so on."""
+    SQL_OIC_LEVEL2 = 3
+    """A level including level 1 standards compliance level functionality, plus advanced features such as sensitive
+    cursors; update, delete, and refresh by bookmarks; stored procedure support; catalog functions for primary and
+    foreign keys; multi-catalog support; and so on."""
+
+
 class SQLOdbcSqlConformance(IntEnum):
     """An SQLSMALLINT value indicating SQL grammar supported by the driver."""
 
@@ -1424,6 +2724,33 @@ class SQLOdbcSagCliConformance(IntEnum):
     """The driver conforms to the SAG CLI specification."""
 
 
+class SQLOuterJoinCapabilities(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the types of outer joins supported by the driver and data source."""
+
+    SQL_OJ_LEFT = 0x00000001
+    """Left outer joins are supported."""
+    SQL_OJ_RIGHT = 0x00000002
+    """Right outer joins are supported."""
+    SQL_OJ_FULL = 0x00000004
+    """Full outer joins are supported."""
+    SQL_OJ_NESTED = 0x00000008
+    """Nested outer joins are supported."""
+    SQL_OJ_NOT_ORDERED = 0x00000010
+    """The column names in the ON clause of the outer join do not have to be in the same order as their respective table
+    names in the OUTER JOIN clause."""
+    SQL_OJ_INNER = 0x00000020
+    """The inner table (the right table in a left outer join or the left table in a right outer join) can also be used
+    in an inner join.
+
+    This does not apply to full outer joins, which do not have an inner table.
+    """
+    SQL_OJ_ALL_COMPARISON_OPS = 0x00000040
+    """The comparison operator in the ON clause can be any of the ODBC comparison operators.
+
+    If this bit is not set, only the equals (=) comparison operator can be used in outer joins.
+    """
+
+
 class SQLOuterJoins(Enum):
     """Indicated the level of support for outer joins."""
 
@@ -1445,6 +2772,44 @@ class SQLOuterJoins(Enum):
     """
     FULL = "F"
     """The data source fully supports nested outer joins, and the driver supports the ODBC outer join syntax."""
+
+
+class SQLParamArrayRowCounts(IntEnum):
+    """An SQLUINTEGER enumerating the row counts available from the driver in a parameterized execution."""
+
+    SQL_PARC_BATCH = 1
+    """Individual row counts are available for each set of parameters.
+
+    This is conceptually equivalent to the driver generating a batch of SQL statements, one for each parameter set in
+    the array. Extended error information can be retrieved by using the SQL_PARAM_STATUS_PTR descriptor field.
+    """
+    SQL_PARC_NO_BATCH = 2
+    """There is only one row count available, which is the cumulative row count resulting from the execution of the
+    statement for the entire array of parameters.
+
+    This is conceptually equivalent to treating the statement together with the complete parameter array as one atomic
+    unit. Errors are handled the same as if one statement were executed.
+    """
+
+
+class SQLParamArraySelects(IntEnum):
+    """An SQLUINTEGER enumerating the availability of result sets from the driver in a parameterized execution."""
+
+    SQL_PAS_BATCH = 1
+    """There is one result set available per set of parameters.
+
+    This is conceptually equivalent to the driver generating a batch of SQL statements, one for each parameter set in
+    the array.
+    """
+    SQL_PAS_NO_BATCH = 2
+    """There is only one result set available, which represents the cumulative result set resulting from the execution
+    of the statement for the complete array of parameters.
+
+    This is conceptually equivalent to treating the statement together with the complete parameter array as one atomic
+    unit.
+    """
+    SQL_PAS_NO_SELECT = 3
+    """A driver does not allow a result-set generating statement to be executed with an array of parameters."""
 
 
 class SQLReturn(IntEnum):
@@ -1537,6 +2902,349 @@ class SQLScrollOptions(IntFlag):
 
     (ODBC 2.0)
     """
+
+
+class SQLSchemaUsage(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the statements in which schemas can be used.
+
+    A SQL-92 Entry level-conformant driver will always return the SQL_SU_DML_STATEMENTS, SQL_SU_TABLE_DEFINITION, and
+    SQL_SU_PRIVILEGE_DEFINITION options, as supported.
+
+    This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_OWNER_USAGE.
+    """
+
+    SQL_SU_DML_STATEMENTS = 0x00000001
+    """Schemas are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE, DELETE, and if
+    supported, SELECT FOR UPDATE and positioned update and delete statements.
+    """
+    SQL_SU_PROCEDURE_INVOCATION = 0x00000002
+    """Schemas are supported in the ODBC procedure invocation statement."""
+    SQL_SU_TABLE_DEFINITION = 0x00000004
+    """Schemas are supported in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER TABLE, DROP TABLE,
+    and DROP VIEW.
+    """
+    SQL_SU_INDEX_DEFINITION = 0x00000008
+    """Schemas are supported in all index definition statements: CREATE INDEX and DROP INDEX."""
+    SQL_SU_PRIVILEGE_DEFINITION = 0x00000010
+    """Schemas are supported in all privilege definition statements: GRANT and REVOKE."""
+
+
+class SQLSql92DatetimeFunctions(IntFlag):
+    """The datetime scalar functions that are supported by the driver and data source, as defined in SQL-92."""
+
+    SQL_SDF_CURRENT_DATE = 0x00000001
+    SQL_SDF_CURRENT_TIME = 0x00000002
+    SQL_SDF_CURRENT_TIMESTAMP = 0x00000004
+
+
+class SQLSql92ForeignKeyDeleteRule(IntFlag):
+    """The rules supported for a foreign key in a DELETE statement, as defined in SQL-92.
+
+    An FIPS Transitional level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_SFKD_CASCADE = 0x00000001
+    SQL_SFKD_NO_ACTION = 0x00000002
+    SQL_SFKD_SET_DEFAULT = 0x00000004
+    SQL_SFKD_SET_NULL = 0x00000008
+
+
+class SQLSql92ForeignKeyUpdateRule(IntFlag):
+    """A bitmask enumerating the rules supported for a foreign key in an UPDATE statement, as defined in SQL-92.
+
+    A SQL-92 Full level-conformant driver will always return all of these options as supported.
+    """
+
+    SQL_SFKD_CASCADE = 0x00000001
+    SQL_SFKD_NO_ACTION = 0x00000002
+    SQL_SFKD_SET_DEFAULT = 0x00000004
+    SQL_SFKD_SET_NULL = 0x00000008
+
+
+class SQLSql92Grant(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the clauses supported in the GRANT statement, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SG_USAGE_ON_DOMAIN = 0x00000001
+    """The USAGE ON DOMAIN clause is supported (FIPS Transitional level)."""
+
+    SQL_SG_USAGE_ON_CHARACTER_SET = 0x00000002
+    """The USAGE ON CHARACTER SET clause is supported (FIPS Transitional level)."""
+
+    SQL_SG_USAGE_ON_COLLATION = 0x00000004
+    """The USAGE ON COLLATION clause is supported (FIPS Transitional level)."""
+
+    SQL_SG_USAGE_ON_TRANSLATION = 0x00000008
+    """The USAGE ON TRANSLATION clause is supported (FIPS Transitional level)."""
+
+    SQL_SG_WITH_GRANT_OPTION = 0x00000010
+    """The WITH GRANT OPTION clause is supported (Entry level)."""
+
+    SQL_SG_DELETE_TABLE = 0x00000020
+    """The DELETE privilege on tables is supported (Entry level)."""
+
+    SQL_SG_INSERT_TABLE = 0x00000040
+    """The INSERT privilege on tables is supported (Entry level)."""
+
+    SQL_SG_INSERT_COLUMN = 0x00000080
+    """The INSERT privilege on columns is supported (Intermediate level)."""
+
+    SQL_SG_REFERENCES_TABLE = 0x00000100
+    """The REFERENCES privilege on tables is supported (Entry level)."""
+
+    SQL_SG_REFERENCES_COLUMN = 0x00000200
+    """The REFERENCES privilege on columns is supported (Entry level)."""
+
+    SQL_SG_SELECT_TABLE = 0x00000400
+    """The SELECT privilege on tables is supported (Entry level)."""
+
+    SQL_SG_UPDATE_TABLE = 0x00000800
+    """The UPDATE privilege on tables is supported (Entry level)."""
+
+    SQL_SG_UPDATE_COLUMN = 0x00001000
+    """The UPDATE privilege on columns is supported (Entry level)."""
+
+
+class SQLSql92NumericValueFunctions(IntFlag):
+    """The numeric value scalar functions that are supported by the driver and data source, as defined in SQL-92."""
+
+    SQL_SNVF_BIT_LENGTH = 0x00000001
+    SQL_SNVF_CHAR_LENGTH = 0x00000002
+    SQL_SNVF_CHARACTER_LENGTH = 0x00000004
+    SQL_SNVF_EXTRACT = 0x00000008
+    SQL_SNVF_OCTET_LENGTH = 0x00000010
+    SQL_SNVF_POSITION = 0x00000020
+
+
+class SQLSql92Predicates(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the predicates supported in a SELECT statement, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SP_EXISTS = 0x00000001
+    """The EXISTS predicate is supported (Entry level)."""
+
+    SQL_SP_ISNOTNULL = 0x00000002
+    """The IS NOT NULL predicate is supported (Entry level)."""
+
+    SQL_SP_ISNULL = 0x00000004
+    """The IS NULL predicate is supported (Entry level)."""
+
+    SQL_SP_MATCH_FULL = 0x00000008
+    """The MATCH FULL predicate is supported (Full level)."""
+
+    SQL_SP_MATCH_PARTIAL = 0x00000010
+    """The MATCH PARTIAL predicate is supported (Full level)."""
+
+    SQL_SP_MATCH_UNIQUE_FULL = 0x00000020
+    """The MATCH UNIQUE FULL predicate is supported (Full level)."""
+
+    SQL_SP_MATCH_UNIQUE_PARTIAL = 0x00000040
+    """The MATCH UNIQUE PARTIAL predicate is supported (Full level)."""
+
+    SQL_SP_OVERLAPS = 0x00000080
+    """The OVERLAPS predicate is supported (FIPS Transitional level)."""
+
+    SQL_SP_UNIQUE = 0x00000100
+    """The UNIQUE predicate is supported (Entry level)."""
+
+    SQL_SP_LIKE = 0x00000200
+    """The LIKE predicate is supported (Entry level)."""
+
+    SQL_SP_IN = 0x00000400
+    """The IN predicate is supported (Entry level)."""
+
+    SQL_SP_BETWEEN = 0x00000800
+    """The BETWEEN predicate is supported (Entry level)."""
+
+    SQL_SP_COMPARISON = 0x00001000
+    """Comparison predicates are supported (Entry level)."""
+
+    SQL_SP_QUANTIFIED_COMPARISON = 0x00002000
+    """Quantified comparison predicates are supported (Entry level)."""
+
+
+class SQLSql92RelationalJoinOperators(IntFlag):
+    """A bitmask enumerating the relational join operators supported in a SELECT statement, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SRJO_CORRESPONDING_CLAUSE = 0x00000001
+    """The CORRESPONDING clause is supported (Intermediate level)."""
+
+    SQL_SRJO_CROSS_JOIN = 0x00000002
+    """The CROSS JOIN operator is supported (Full level)."""
+
+    SQL_SRJO_EXCEPT_JOIN = 0x00000004
+    """The EXCEPT JOIN operator is supported (Intermediate level)."""
+
+    SQL_SRJO_FULL_OUTER_JOIN = 0x00000008
+    """The FULL OUTER JOIN operator is supported (Intermediate level)."""
+
+    SQL_SRJO_INNER_JOIN = 0x00000010
+    """The INNER JOIN syntax is supported (FIPS Transitional level)."""
+
+    SQL_SRJO_INTERSECT_JOIN = 0x00000020
+    """The INTERSECT JOIN operator is supported (Intermediate level)."""
+
+    SQL_SRJO_LEFT_OUTER_JOIN = 0x00000040
+    """The LEFT OUTER JOIN operator is supported (FIPS Transitional level)."""
+
+    SQL_SRJO_NATURAL_JOIN = 0x00000080
+    """The NATURAL JOIN operator is supported (FIPS Transitional level)."""
+
+    SQL_SRJO_RIGHT_OUTER_JOIN = 0x00000100
+    """The RIGHT OUTER JOIN operator is supported (FIPS Transitional level)."""
+
+    SQL_SRJO_UNION_JOIN = 0x00000200
+    """The UNION JOIN operator is supported (Full level)."""
+
+
+class SQLSql92Revoke(IntFlag):
+    """A bitmask enumerating the clauses supported by the data source in the REVOKE statement, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SR_USAGE_ON_DOMAIN = 0x00000001
+    """The USAGE ON DOMAIN clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_USAGE_ON_CHARACTER_SET = 0x00000002
+    """The USAGE ON CHARACTER SET clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_USAGE_ON_COLLATION = 0x00000004
+    """The USAGE ON COLLATION clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_USAGE_ON_TRANSLATION = 0x00000008
+    """The USAGE ON TRANSLATION clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_GRANT_OPTION_FOR = 0x00000010
+    """The GRANT OPTION FOR clause is supported (Intermediate level)."""
+
+    SQL_SR_CASCADE = 0x00000020
+    """The CASCADE clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_RESTRICT = 0x00000040
+    """The RESTRICT clause is supported (FIPS Transitional level)."""
+
+    SQL_SR_DELETE_TABLE = 0x00000080
+    """The DELETE privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_INSERT_TABLE = 0x00000100
+    """The INSERT privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_INSERT_COLUMN = 0x00000200
+    """The INSERT privilege on columns can be revoked (Intermediate level)."""
+
+    SQL_SR_REFERENCES_TABLE = 0x00000400
+    """The REFERENCES privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_REFERENCES_COLUMN = 0x00000800
+    """The REFERENCES privilege on columns can be revoked (Entry level)."""
+
+    SQL_SR_SELECT_TABLE = 0x00001000
+    """The SELECT privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_UPDATE_TABLE = 0x00002000
+    """The UPDATE privilege on tables can be revoked (Entry level)."""
+
+    SQL_SR_UPDATE_COLUMN = 0x00004000
+    """The UPDATE privilege on columns can be revoked (Entry level)."""
+
+
+class SQLSql92RowValueConstructor(IntFlag):
+    """Bitmask for the row value constructor expressions supported in a SELECT statement, as defined in SQL-92."""
+
+    SQL_SRVC_VALUE_EXPRESSION = 0x00000001
+    """Row value constructors containing value expressions are supported."""
+
+    SQL_SRVC_NULL = 0x00000002
+    """Row value constructors containing NULL are supported."""
+
+    SQL_SRVC_DEFAULT = 0x00000004
+    """Row value constructors containing DEFAULT are supported."""
+
+    SQL_SRVC_ROW_SUBQUERY = 0x00000008
+    """Row value constructors containing row subqueries are supported."""
+
+
+class SQLSql92StringFunctions(IntFlag):
+    """Bitmask for the string scalar functions that the driver and data source support, as defined in SQL-92."""
+
+    SQL_SSF_CONVERT = 0x00000001
+    """The CONVERT string function is supported."""
+
+    SQL_SSF_LOWER = 0x00000002
+    """The LOWER string function is supported."""
+
+    SQL_SSF_UPPER = 0x00000004
+    """The UPPER string function is supported."""
+
+    SQL_SSF_SUBSTRING = 0x00000008
+    """The SUBSTRING string function is supported."""
+
+    SQL_SSF_TRANSLATE = 0x00000010
+    """The TRANSLATE string function is supported."""
+
+    SQL_SSF_TRIM_BOTH = 0x00000020
+    """The TRIM function with BOTH trim specification is supported."""
+
+    SQL_SSF_TRIM_LEADING = 0x00000040
+    """The TRIM function with LEADING trim specification is supported."""
+
+    SQL_SSF_TRIM_TRAILING = 0x00000080
+    """The TRIM function with TRAILING trim specification is supported."""
+
+
+class SQLSql92ValueExpressions(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the value expressions supported, as defined in SQL-92.
+
+    The SQL-92 or FIPS conformance level at which this feature must be supported is shown in parentheses next to each
+    bitmask.
+    """
+
+    SQL_SVE_CASE = 0x00000001
+    """The CASE expression is supported (Intermediate level)."""
+
+    SQL_SVE_CAST = 0x00000002
+    """The CAST expression is supported (FIPS Transitional level)."""
+
+    SQL_SVE_COALESCE = 0x00000004
+    """The COALESCE expression is supported (Intermediate level)."""
+
+    SQL_SVE_NULLIF = 0x00000008
+    """The NULLIF expression is supported (Intermediate level)."""
+
+
+class SQLSqlConformance(IntEnum):
+    """An SQLUINTEGER value that indicates the level of SQL-92 supported by the driver."""
+
+    SQL_SC_SQL92_ENTRY = 0x00000001
+    """Entry level SQL-92 compliant."""
+    SQL_SC_FIPS127_2_TRANSITIONAL = 0x00000002
+    """FIPS 127-2 transitional level compliant."""
+    SQL_SC_SQL92_INTERMEDIATE = 0x00000004
+    """Intermediate level SQL-92 compliant."""
+    SQL_SC_SQL92_FULL = 0x00000008
+    """Full level SQL-92 compliant."""
+
+
+class SQLStandardCliConformance(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the CLI standard or standards to which the driver conforms."""
+
+    SQL_SCC_XOPEN_CLI_VERSION1 = 0x00000001
+    """The driver complies with the Open Group CLI version 1."""
+
+    SQL_SCC_ISO92_CLI = 0x00000002
+    """The driver complies with the ISO 92 CLI."""
 
 
 class SQLStringFunctions(IntFlag):
@@ -1742,6 +3450,24 @@ class SQLStringFunctions(IntFlag):
     Returns the position of the first character expression in the second character expression. The result is an exact
     numeric with an implementation-defined precision and a scale of 0.
     """
+
+
+class SQLSubqueries(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the predicates that support subqueries.
+
+    A SQL-92 Entry level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
+
+    SQL_SQ_COMPARISON = 0x00000001
+    """The comparison predicate."""
+    SQL_SQ_EXISTS = 0x00000002
+    """The *exists* predicate."""
+    SQL_SQ_IN = 0x00000004
+    """The *in* predicate."""
+    SQL_SQ_QUANTIFIED = 0x00000008
+    """The predicates containing a quantification scalar function."""
+    SQL_SQ_CORRELATED_SUBQUERIES = 0x00000010
+    """All predicates that support subqueries support correlated subqueries."""
 
 
 class SQLSystemFunctions(IntFlag):
@@ -1989,6 +3715,23 @@ class SQLTimeDateFunctions(IntFlag):
     """
 
 
+class SQLTimestampIntervals(IntFlag):
+    """The timestamp intervals which the driver and data source support for TIMESTAMPADD/TIMESTAMPDIFF scalar functions.
+
+    An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.
+    """
+
+    SQL_FN_TSI_FRAC_SECOND = 0x00000001
+    SQL_FN_TSI_SECOND = 0x00000002
+    SQL_FN_TSI_MINUTE = 0x00000004
+    SQL_FN_TSI_HOUR = 0x00000008
+    SQL_FN_TSI_DAY = 0x00000010
+    SQL_FN_TSI_WEEK = 0x00000020
+    SQL_FN_TSI_MONTH = 0x00000040
+    SQL_FN_TSI_QUARTER = 0x00000080
+    SQL_FN_TSI_YEAR = 0x00000100
+
+
 class SQLTxnCapable(IntEnum):
     """An SQLUSMALLINT value describing the transaction support in the driver or data source."""
 
@@ -2045,4 +3788,19 @@ class SQLTxnIsolationOption(IntFlag):
     """Transactions are serializable.
 
     Serializable transactions do not allow dirty reads, non-repeatable reads, or phantoms.
+    """
+
+
+class SQLUnion(IntFlag):
+    """An SQLUINTEGER bitmask enumerating the support for the UNION clause.
+
+    A SQL-92 Entry level-conformant driver will always return both of the options as supported.
+    """
+
+    SQL_U_UNION = 0x00000001
+    """The data source supports the UNION clause."""
+    SQL_U_UNION_ALL = 0x00000002
+    """The data source supports the ALL keyword in the UNION clause.
+
+    (SQLGetInfo returns both SQL_U_UNION and SQL_U_UNION_ALL in this case.)
     """

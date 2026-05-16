@@ -2,6 +2,8 @@
 
 from .cursor import Cursor
 
+__all__ = ["Connection"]
+
 
 class Connection:
     """A DB-API 2.0 Connection object.
