@@ -13,6 +13,7 @@ __all__ = [
     "ConnectionAttribute",
     "DriverCompletion",
     "EnvironmentAttribute",
+    "FetchDirection",
     "HandleType",
     "InfoType",
     "SQLAggregateFunctions",
@@ -57,6 +58,7 @@ __all__ = [
     "SQLDropCollation",
     "SQLDropDomain",
     "SQLDropSchema",
+    "SQLDropTable",
     "SQLDropTranslation",
     "SQLDropView",
     "SQLFileUsage",
@@ -168,6 +170,34 @@ class EnvironmentAttribute(IntEnum):
     SQL_ATTR_ODBC_VERSION = 200
     """Determines whether certain functionality exhibits ODBC 2.x or
     3.x behavior."""
+
+
+class FetchDirection(IntEnum):
+    """Enumeration of fetch directions used by various ODBC functions.
+
+    These constants are used with functions that support positioned or sequential fetching, such as SQLFetchScroll and
+    SQLDrivers.
+
+    Not all fetch directions are valid for all functions.
+    """
+
+    SQL_FETCH_NEXT = 1
+    """Fetch the next row or item in the result set or enumeration."""
+
+    SQL_FETCH_FIRST = 2
+    """Fetch the first row or item in the result set or enumeration."""
+
+    SQL_FETCH_LAST = 3
+    """Fetch the last row in the result set."""
+
+    SQL_FETCH_PRIOR = 4
+    """Fetch the row preceding the current row in the result set."""
+
+    SQL_FETCH_ABSOLUTE = 5
+    """Fetch the row identified by an absolute row number."""
+
+    SQL_FETCH_RELATIVE = 6
+    """Fetch the row relative to the current row position."""
 
 
 class HandleType(IntEnum):

@@ -5,11 +5,24 @@ import pytest
 
 from odbcffi.odbc.connection_handle import ConnectionHandle
 from odbcffi.odbc.driver_manager import DriverManager
+from odbcffi.odbc.dto import DriverInfo
 from odbcffi.odbc.enums import *
 from odbcffi.odbc.enums import SQLDropTable
 from odbcffi.odbc.environment_handle import EnvironmentHandle
 from odbcffi.odbc.errors import ODBCError
 from tests.conftest import ConnectionInfo
+
+
+class TestSQLDriversW:
+    def test_sql_drivers_w(self, driver_manager: DriverManager, environment_handle: EnvironmentHandle) -> None:
+
+        actual: list[DriverInfo] = driver_manager.sql_drivers_w(environment_handle=environment_handle)
+
+        assert isinstance(actual, list)
+        assert len(actual) > 0
+        assert all(isinstance(driver_info, DriverInfo) for driver_info in actual)
+        assert all(driver_info.description for driver_info in actual)
+        assert all(isinstance(driver_info.attributes, dict) for driver_info in actual)
 
 
 class TestSQLGetInfoW:

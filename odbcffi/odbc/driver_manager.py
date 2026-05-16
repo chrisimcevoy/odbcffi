@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import platform
 import sys
 from enum import Enum, IntEnum, auto
@@ -10,8 +11,8 @@ from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 from cffi import FFI
 
+from .dto import DriverInfo
 from .enums import *
-from .enums import SQLDropTable
 from .errors import ODBCError
 
 if TYPE_CHECKING:
@@ -24,6 +25,8 @@ if TYPE_CHECKING:
     from .handle import Handle
 
 __all__ = ["DriverManager"]
+
+logger = logging.getLogger(__name__)
 
 ffi = FFI()
 SQL_NTS = -3
@@ -61,6 +64,16 @@ SQLRETURN SQLDriverConnectW(
      SQLSMALLINT    BufferLength,
      SQLSMALLINT *  StringLength2Ptr,
      SQLUSMALLINT   DriverCompletion);
+
+SQLRETURN SQLDriversW(
+     SQLHENV         EnvironmentHandle,
+     SQLUSMALLINT    Direction,
+     SQLWCHAR *      DriverDescription,
+     SQLSMALLINT     BufferLength1,
+     SQLSMALLINT *   DescriptionLengthPtr,
+     SQLWCHAR *      DriverAttributes,
+     SQLSMALLINT     BufferLength2,
+     SQLSMALLINT *   AttributesLengthPtr);
 
 SQLRETURN SQLFreeHandle(
      SQLSMALLINT   HandleType,
@@ -616,26 +629,33 @@ class DriverManager:
             + (f"\nLast error: {last_err}" if last_err else "")
         )
 
-    def raise_for_return_code(
+    def _raise_for_fatal_return_code(
         self,
         return_code: int,
         what: str,
         handle: Handle | None,
-    ) -> None:
-        """Raise ``ODBCError`` if the provided return code does not indicate success.
+    ) -> Literal[
+        SQLReturn.SQL_SUCCESS,
+        SQLReturn.SQL_SUCCESS_WITH_INFO,
+        SQLReturn.SQL_NO_DATA,
+        SQLReturn.SQL_NEED_DATA,
+        SQLReturn.SQL_STILL_EXECUTING,
+    ]:
+        """Raise ``ODBCError`` if the provided return code is fatal, i.e. SQL_ERROR or SQL_INVALID_HANDLE.
 
         ODBC diagnostics will be included in the error message if they are available from the driver manager.
 
         :param return_code: The return code from a call to an underlying driver manager function.
         :param what: The name of the driver manager function which was called.
         :param handle: The Handle object involved in the function call.
-        :raise ODBCError: If the return code does not indicate success.
+        :return: The ``SQLReturn`` enum member for the given ``return_code`` integer, if it was non-fatal.
+        :raise ODBCError: If the return code is fatal, i.e. SQL_ERROR or SQL_INVALID_HANDLE.
         """
         rc_enum = SQLReturn(return_code)
 
-        # TODO: SQL_RETURN_WITH_INFO handling here?
-        if rc_enum in (SQLReturn.SQL_SUCCESS, SQLReturn.SQL_SUCCESS_WITH_INFO):
-            return
+        # Only auto-raise for fatal return codes.
+        if rc_enum != SQLReturn.SQL_ERROR and rc_enum != SQLReturn.SQL_INVALID_HANDLE:
+            return rc_enum
 
         if handle is not None:
             try:
@@ -890,7 +910,7 @@ class DriverManager:
             parent_handle.handle if parent_handle is not None else SQL_NULL_HANDLE,
             output_handle_ptr,
         )
-        self.raise_for_return_code(
+        self._raise_for_fatal_return_code(
             return_code=rc,
             what="SQLAllocHandle",
             handle=parent_handle,
@@ -903,7 +923,7 @@ class DriverManager:
         :param connection_handle: The connection handle to close the connection for.
         """
         rc = self._lib.SQLDisconnect(connection_handle.handle)
-        self.raise_for_return_code(
+        self._raise_for_fatal_return_code(
             return_code=rc,
             what="SQLDisconnect",
             handle=connection_handle,
@@ -935,11 +955,139 @@ class DriverManager:
             ffi.NULL,  # StringLength2Ptr
             int(DriverCompletion.SQL_DRIVER_NOPROMPT),
         )
-        self.raise_for_return_code(
+        self._raise_for_fatal_return_code(
             return_code=rc,
             what="SQLDriverConnectW",
             handle=connection_handle,
         )
+
+    def sql_drivers_w(self, environment_handle: EnvironmentHandle) -> list[DriverInfo]:
+        """SQLDrivers lists driver descriptions and driver attribute keywords.
+
+        This function is implemented only by the Driver Manager.
+
+        :param environment_handle: The environment handle.
+        :return: A list of ``DriverInfo`` objects representing the driver descriptions and attributes reported by the
+            driver manager.
+        """
+        return self._sql_drivers_w(
+            environment_handle=environment_handle,
+            fetch_direction=FetchDirection.SQL_FETCH_FIRST,
+            buffer_length_hint=512,
+        )
+
+    def _sql_drivers_w(
+        self,
+        environment_handle: EnvironmentHandle,
+        fetch_direction: Literal[FetchDirection.SQL_FETCH_NEXT, FetchDirection.SQL_FETCH_FIRST],
+        buffer_length_hint: int,
+    ) -> list[DriverInfo]:
+        """Private method which implements buffer resizing and retry logic for SQLDriversW.
+
+        This exists merely to avoid exposing the fetch_direction and buffer_length_hint parameters publicly.
+
+        :param environment_handle: The environment handle.
+        :param fetch_direction: The direction of the next value to retrieve. Can be one of SQL_FETCH_FIRST or
+            SQL_FETCH_NEXT.
+        :param buffer_length_hint: A hint as to the initial buffer size to use for retrieving the driver desctiption and
+            attributes from the driver manager.
+        :return: A list of ``DriverInfo`` objects representing the driver descriptions and attributes reported by the
+            driver manager.
+        """
+        driver_infos: list[DriverInfo] = []
+
+        while True:
+            driver_description = ffi.new("SQLWCHAR[]", buffer_length_hint)
+            driver_attributes = ffi.new("SQLWCHAR[]", buffer_length_hint)
+
+            description_length_ptr = ffi.new("SQLSMALLINT *")
+            attributes_length_ptr = ffi.new("SQLSMALLINT *")
+
+            rc = self._lib.SQLDriversW(
+                environment_handle.handle,  # EnvironmentHandle
+                int(fetch_direction),  # Direction
+                driver_description,
+                len(driver_description),  # BufferLength1
+                description_length_ptr,  # DescriptionLengthPtr
+                driver_attributes,  # DriverAttributes
+                len(driver_attributes),  # BufferLength2
+                attributes_length_ptr,  # AttributesLengthPtr
+            )
+
+            # Reset fetch direction to SQL_FETCH_NEXT after SQL_FETCH_FIRST
+            fetch_direction = FetchDirection.SQL_FETCH_NEXT
+
+            rc_enum = self._raise_for_fatal_return_code(
+                return_code=rc,
+                what="SQLDriversW",
+                handle=environment_handle,
+            )
+
+            if rc_enum == SQLReturn.SQL_NO_DATA:
+                # No more drivers to gather data for.
+                break
+
+            if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+                diagnostics = self.sql_get_diag_rec_w(handle=environment_handle)
+
+                if any(sql_state == "01004" for sql_state, native_error, message in diagnostics):
+                    # Data has been truncated due to insufficient buffer length.
+                    # Resize and try again, from SQL_FETCH_FIRST.
+
+                    new_buffer_length_hint = (
+                        max(description_length_ptr[0], attributes_length_ptr[0]) + 1
+                    )  # NUL terminator
+
+                    logger.debug(
+                        "SQLDriversW returned SQL_SUCCESS_WITH_INFO; retrying with larger buffer",
+                        extra={
+                            "buffer_length_hint": buffer_length_hint,
+                            "new_buffer_length_hint": new_buffer_length_hint,
+                            "description_length": description_length_ptr[0],
+                            "attributes_length": attributes_length_ptr[0],
+                            "diagnostics": diagnostics,
+                        },
+                    )
+
+                    return self._sql_drivers_w(
+                        environment_handle,
+                        fetch_direction=FetchDirection.SQL_FETCH_FIRST,
+                        buffer_length_hint=new_buffer_length_hint,
+                    )
+
+                elif diagnostics:
+                    for sql_state, native_error, message in diagnostics:
+                        logger.warning(
+                            "SQLDriversW returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                            sql_state,
+                            native_error,
+                            message,
+                        )
+
+            driver_description_value = decode_sqlwchar_buffer(driver_description, num_chars=description_length_ptr[0])
+            driver_attributes_value = decode_sqlwchar_buffer(driver_attributes, num_chars=attributes_length_ptr[0])
+
+            attributes = {}
+
+            for kv_string in driver_attributes_value.split("\x00"):
+                if kv_string == "":
+                    continue
+
+                try:
+                    key, value = kv_string.split(sep="=", maxsplit=1)
+                except ValueError:
+                    pass
+                else:
+                    attributes[key] = value
+
+            driver_infos.append(
+                DriverInfo(
+                    description=driver_description_value,
+                    attributes=attributes,
+                )
+            )
+
+        return driver_infos
 
     def sql_free_handle(self, handle: Handle) -> None:
         """Free resources associated with a specific environment, connection, statement, or descriptor handle.
@@ -947,7 +1095,7 @@ class DriverManager:
         :param handle: The handle to free.
         """
         rc = self._lib.SQLFreeHandle(int(handle.handle_type), handle.handle)
-        self.raise_for_return_code(
+        self._raise_for_fatal_return_code(
             return_code=rc,
             what="SQLFreeHandle",
             handle=handle,
@@ -1003,7 +1151,7 @@ class DriverManager:
             ffi.sizeof("SQLINTEGER"),
             string_length_ptr,
         )
-        self.raise_for_return_code(
+        self._raise_for_fatal_return_code(
             return_code=rc,
             what="SQLGetConnectAttrW",
             handle=connection_handle,
@@ -1061,7 +1209,7 @@ class DriverManager:
             ffi.sizeof("SQLINTEGER"),
             string_length_ptr,
         )
-        self.raise_for_return_code(
+        self._raise_for_fatal_return_code(
             return_code=rc,
             what="SQLGetEnvAttr",
             handle=environment_handle,
@@ -1796,7 +1944,7 @@ class DriverManager:
                 buffer_nbytes,
                 string_length_ptr,
             )
-            self.raise_for_return_code(
+            self._raise_for_fatal_return_code(
                 return_code=rc,
                 what="SQLGetInfoW",
                 handle=connection_handle,
@@ -1819,7 +1967,7 @@ class DriverManager:
                 0,  # ignored for non-strings
                 string_length_ptr,
             )
-            self.raise_for_return_code(
+            self._raise_for_fatal_return_code(
                 return_code=rc,
                 what="SQLGetInfoW",
                 handle=connection_handle,
@@ -1876,7 +2024,7 @@ class DriverManager:
             ffi.cast("SQLPOINTER", int(value)),
             0,
         )
-        self.raise_for_return_code(
+        self._raise_for_fatal_return_code(
             return_code=rc,
             what="SQLSetConnectAttrW",
             handle=connection_handle,
@@ -1929,7 +2077,7 @@ class DriverManager:
             ffi.cast("SQLPOINTER", int(value)),
             0,
         )
-        self.raise_for_return_code(
+        self._raise_for_fatal_return_code(
             return_code=rc,
             what="SQLSetEnvAttr",
             handle=environment_handle,
