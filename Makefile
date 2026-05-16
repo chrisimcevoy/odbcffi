@@ -11,13 +11,13 @@ dc-build:
 test: dc-build test.cpython test.cpython-latest test.pypy test.pypy-latest
 
 test.cpython:
-	@docker compose run --rm cpython uv run pytest -vvs
+	@docker compose run --rm cpython uv run pytest -vvvs
 
 test.cpython-latest:
-	@docker compose run --rm cpython-latest uv run pytest -vvs
+	@docker compose run --rm cpython-latest uv run pytest -vvvs
 
 test.pypy:
-	@docker compose run --rm pypy uv run pytest -vvs
+	@docker compose run --rm pypy uv run pytest -vvvs
 
 test.pypy-latest:
-	@docker compose run --rm pypy-latest uv run pytest -vvs
+	@docker compose run --rm pypy-latest uv run pytest -vvvs
