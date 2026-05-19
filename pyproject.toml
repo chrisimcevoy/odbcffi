@@ -45,6 +45,9 @@ wrap-descriptions = 120
 strict = true
 
 [tool.pytest.ini_options]
+filterwarnings = [
+    "error"
+]
 log_cli = true
 log_cli_level = "DEBUG"
 xfail_strict = true
