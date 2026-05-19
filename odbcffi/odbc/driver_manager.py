@@ -770,31 +770,9 @@ class DriverManager:
         :return: A list of ``DriverInfo`` objects representing the driver descriptions and attributes reported by the
             driver manager.
         """
-        return self._sql_drivers_w(
-            environment_handle=environment_handle,
-            fetch_direction=FetchDirection.SQL_FETCH_FIRST,
-            buffer_length_hint=512,
-        )
-
-    def _sql_drivers_w(
-        self,
-        environment_handle: EnvironmentHandle,
-        fetch_direction: Literal[FetchDirection.SQL_FETCH_NEXT, FetchDirection.SQL_FETCH_FIRST],
-        buffer_length_hint: int,
-    ) -> list[DriverInfo]:
-        """Private method which implements buffer resizing and retry logic for SQLDriversW.
-
-        This exists merely to avoid exposing the fetch_direction and buffer_length_hint parameters publicly.
-
-        :param environment_handle: The environment handle.
-        :param fetch_direction: The direction of the next value to retrieve. Can be one of SQL_FETCH_FIRST or
-            SQL_FETCH_NEXT.
-        :param buffer_length_hint: A hint as to the initial buffer size to use for retrieving the driver desctiption and
-            attributes from the driver manager.
-        :return: A list of ``DriverInfo`` objects representing the driver descriptions and attributes reported by the
-            driver manager.
-        """
         driver_infos: list[DriverInfo] = []
+        buffer_length_hint = 512
+        fetch_direction = FetchDirection.SQL_FETCH_FIRST
 
         while True:
             driver_description = self._ffi.new("SQLWCHAR[]", buffer_length_hint)
@@ -849,11 +827,10 @@ class DriverManager:
                         },
                     )
 
-                    return self._sql_drivers_w(
-                        environment_handle,
-                        fetch_direction=FetchDirection.SQL_FETCH_FIRST,
-                        buffer_length_hint=new_buffer_length_hint,
-                    )
+                    driver_infos = []
+                    fetch_direction = FetchDirection.SQL_FETCH_FIRST
+                    buffer_length_hint = new_buffer_length_hint
+                    continue
 
                 elif diagnostics:
                     for sql_state, native_error, message in diagnostics:
