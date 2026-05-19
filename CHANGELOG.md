@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/chrisimcevoy/odbcffi/compare/v0.1.0...v0.2.0) (2026-05-18)
+
+
+### Features
+
+* SQLDriversW ([#11](https://github.com/chrisimcevoy/odbcffi/issues/11)) ([7448b2c](https://github.com/chrisimcevoy/odbcffi/commit/7448b2cf94510ffc1a8a3e8f47959abf8ba2673e))
+
+
+### Bug Fixes
+
+* create an `FFI` object per `DriverManager` instance ([425f196](https://github.com/chrisimcevoy/odbcffi/commit/425f1966b68d2c4717ceb5a05fef900a9c95aad3))
+
 ## 0.1.0 (2026-05-16)
 
 
