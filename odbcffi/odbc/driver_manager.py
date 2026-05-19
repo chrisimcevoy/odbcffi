@@ -770,31 +770,9 @@ class DriverManager:
         :return: A list of ``DriverInfo`` objects representing the driver descriptions and attributes reported by the
             driver manager.
         """
-        return self._sql_drivers_w(
-            environment_handle=environment_handle,
-            fetch_direction=FetchDirection.SQL_FETCH_FIRST,
-            buffer_length_hint=512,
-        )
-
-    def _sql_drivers_w(
-        self,
-        environment_handle: EnvironmentHandle,
-        fetch_direction: Literal[FetchDirection.SQL_FETCH_NEXT, FetchDirection.SQL_FETCH_FIRST],
-        buffer_length_hint: int,
-    ) -> list[DriverInfo]:
-        """Private method which implements buffer resizing and retry logic for SQLDriversW.
-
-        This exists merely to avoid exposing the fetch_direction and buffer_length_hint parameters publicly.
-
-        :param environment_handle: The environment handle.
-        :param fetch_direction: The direction of the next value to retrieve. Can be one of SQL_FETCH_FIRST or
-            SQL_FETCH_NEXT.
-        :param buffer_length_hint: A hint as to the initial buffer size to use for retrieving the driver desctiption and
-            attributes from the driver manager.
-        :return: A list of ``DriverInfo`` objects representing the driver descriptions and attributes reported by the
-            driver manager.
-        """
         driver_infos: list[DriverInfo] = []
+        buffer_length_hint = 512
+        fetch_direction = FetchDirection.SQL_FETCH_FIRST
 
         while True:
             driver_description = self._ffi.new("SQLWCHAR[]", buffer_length_hint)
@@ -849,11 +827,10 @@ class DriverManager:
                         },
                     )
 
-                    return self._sql_drivers_w(
-                        environment_handle,
-                        fetch_direction=FetchDirection.SQL_FETCH_FIRST,
-                        buffer_length_hint=new_buffer_length_hint,
-                    )
+                    driver_infos = []
+                    fetch_direction = FetchDirection.SQL_FETCH_FIRST
+                    buffer_length_hint = new_buffer_length_hint
+                    continue
 
                 elif diagnostics:
                     for sql_state, native_error, message in diagnostics:
@@ -1942,87 +1919,79 @@ class DriverManager:
         hdbc = connection_handle.handle
         string_length_ptr = self._ffi.new("SQLSMALLINT *")
 
-        if info_type in SQL_GET_INFO_STRING_INFO_TYPES:
-            # TODO: Lower initial buffer size when unixODBC >= 2.3.14 is released.
-            #  https://github.com/lurcher/unixODBC/issues/235
-            #  The current buffer size works for the MySQL ANSI driver in tests only because
-            #  it is large enough to avoid the "truncation" / SQL_SUCCESS_WITH_INFO flow.
-            buffer = self._ffi.new("SQLWCHAR[]", 2056)
+        is_string = info_type in SQL_GET_INFO_STRING_INFO_TYPES
+        is_int = info_type in SQL_GET_INFO_USMALLINT_INFO_TYPES
 
-            while True:
-                buffer_nbytes = self._ffi.sizeof(buffer)
+        if not is_string and not is_int:
+            raise NotImplementedError(f"Unsupported InfoType: {info_type}")
 
-                rc = self._lib.SQLGetInfoW(
-                    self._ffi.cast("SQLHDBC", hdbc),
-                    int(info_type),
-                    buffer,
-                    buffer_nbytes,
-                    string_length_ptr,
-                )
+        if is_string and is_int:
+            raise RuntimeError(f"InfoType {info_type} cannot be both an int and a str.")
 
-                rc_enum = self._raise_for_fatal_return_code(
-                    return_code=rc,
-                    what="SQLGetInfoW",
-                    handle=connection_handle,
-                )
+        # TODO: Lower initial buffer size for str InfoTypes when unixODBC >= 2.3.14 is released.
+        #  https://github.com/lurcher/unixODBC/issues/235
+        #  The current buffer size works for the MySQL ANSI driver in tests only because
+        #  it is large enough to avoid the "truncation" / SQL_SUCCESS_WITH_INFO flow.
+        buffer = self._ffi.new("SQLWCHAR[]", 2056) if is_string else self._ffi.new("SQLUSMALLINT *")
 
-                string_length: int = string_length_ptr[0]
+        while True:
+            # For str InfoTypes, the buffer length is specified in bytes.
+            # Buffer size is ignored by the Driver Manager for int InfoTypes,
+            # so 0 is as good as any value.
+            buffer_nbytes = self._ffi.sizeof(buffer) if is_string else 0
 
-                if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
-                    diagnostics = self.sql_get_diag_rec_w(connection_handle)
-
-                    if (
-                        any(sql_state == "01004" for sql_state, native_error, message in diagnostics)
-                        # The 01004 SQL state check above should suffice according to the spec, but FreeTDS doesn't
-                        # provide any diagnostics whatsoever. So we have an extra condition on string/buffer length.
-                        or string_length >= buffer_nbytes
-                    ):
-                        # Data has been truncated due to insufficient buffer length. Resize and try again. First, we
-                        # need to convert the reported length (in bytes) to the required buffer size (in wide chars).
-                        new_buffer_size: int = ceil(
-                            (
-                                string_length  # The reported size of the string in bytes, excluding NUL...
-                                + self._sqlwchar_size  # ...plus the size of one SQLWCHAR for the null terminator...
-                            )
-                            / self._sqlwchar_size  # ...divided by SQLWCHAR size to get the number of characters.
-                        )
-                        buffer = self._ffi.new("SQLWCHAR[]", new_buffer_size)
-                        continue
-                    else:
-                        for sql_state, native_error, message in diagnostics:
-                            logger.warning(
-                                "SQLGetInfoW returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
-                                sql_state,
-                                native_error,
-                                message,
-                            )
-                break
-
-            ret = self._decode_sqlwchar_buffer(buffer, num_bytes=string_length)
-
-            if enum_type := SQL_GET_INFO_ENUM_MAP.get(info_type):
-                return enum_type(ret)
-
-            return ret
-
-        if info_type in SQL_GET_INFO_USMALLINT_INFO_TYPES:
-            value = self._ffi.new("SQLUSMALLINT *")
             rc = self._lib.SQLGetInfoW(
                 self._ffi.cast("SQLHDBC", hdbc),
                 int(info_type),
-                value,
-                0,  # ignored for non-strings
+                buffer,
+                buffer_nbytes,
                 string_length_ptr,
             )
-            self._raise_for_fatal_return_code(
+
+            rc_enum = self._raise_for_fatal_return_code(
                 return_code=rc,
                 what="SQLGetInfoW",
                 handle=connection_handle,
             )
-            if (enum_type := SQL_GET_INFO_ENUM_MAP.get(info_type)) is not None:
-                return enum_type(value[0])
-            return value[0]
-        raise NotImplementedError(f"Unsupported info type: {info_type}")
+
+            string_length: int = string_length_ptr[0]
+
+            if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+                diagnostics = self.sql_get_diag_rec_w(connection_handle)
+
+                if is_string and (
+                    any(sql_state == "01004" for sql_state, native_error, message in diagnostics)
+                    # The 01004 SQL state check above should suffice according to the spec, but FreeTDS doesn't
+                    # provide any diagnostics whatsoever. So we have an extra condition on string/buffer length.
+                    or string_length >= buffer_nbytes
+                ):
+                    # Data has been truncated due to insufficient buffer length. Resize and try again. First, we
+                    # need to convert the reported length (in bytes) to the required buffer size (in wide chars).
+                    new_buffer_size: int = ceil(
+                        (
+                            string_length  # The reported size of the string in bytes, excluding NUL...
+                            + self._sqlwchar_size  # ...plus the size of one SQLWCHAR for the null terminator...
+                        )
+                        / self._sqlwchar_size  # ...divided by SQLWCHAR size to get the number of characters.
+                    )
+                    buffer = self._ffi.new("SQLWCHAR[]", new_buffer_size)
+                    continue
+                else:
+                    for sql_state, native_error, message in diagnostics:
+                        logger.warning(
+                            "SQLGetInfoW returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                            sql_state,
+                            native_error,
+                            message,
+                        )
+            break
+
+        ret: str | int = self._decode_sqlwchar_buffer(buffer, num_bytes=string_length) if is_string else buffer[0]
+
+        if enum_type := SQL_GET_INFO_ENUM_MAP.get(info_type):
+            return enum_type(ret)
+
+        return ret
 
     @overload
     def sql_set_connect_attr_w(
