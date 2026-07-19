@@ -10,6 +10,7 @@ import pytest
 from odbcffi.odbc.connection_handle import ConnectionHandle
 from odbcffi.odbc.driver_manager import DriverManager
 from odbcffi.odbc.environment_handle import EnvironmentHandle
+from odbcffi.odbc.statement_handle import StatementHandle
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -312,3 +313,11 @@ def isolated_open_connection_handle(
     with ConnectionHandle(environment_handle=environment_handle) as hdbc:
         hdbc.open(connection_string=connection_string)
         yield hdbc
+
+
+@pytest.fixture
+def statement_handle(open_connection_handle: ConnectionHandle) -> Generator[StatementHandle]:
+    """A statement handle bound to an open connection."""
+
+    with StatementHandle(connection_handle=open_connection_handle) as hstmt:
+        yield hstmt
