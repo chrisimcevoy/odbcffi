@@ -2423,7 +2423,12 @@ class TestSQLGetTypeInfoW:
 
         # TODO: Should really break this out into a SQL Server specific test (along with PostgreSQL and MySQL tests),
         #  but that's a different PR.
-        if connection_info.dbms_name == "Microsoft SQL Server":
+
+        if (
+            connection_info.dbms_name == "Microsoft SQL Server"
+            # TODO: MDAC's result set differs from those of mssqlodbc and FreeTDS
+            and connection_info.driver != "SQL Server"
+        ):
             assert results == [
                 {
                     "AUTO_UNIQUE_VALUE": None,
