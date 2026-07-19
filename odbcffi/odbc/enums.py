@@ -10,6 +10,7 @@ from __future__ import annotations
 from enum import Enum, IntEnum, IntFlag
 
 __all__ = [
+    "CDataType",
     "ConnectionAttribute",
     "DriverCompletion",
     "EnvironmentAttribute",
@@ -50,6 +51,7 @@ __all__ = [
     "SQLCursorCommitBehavior",
     "SQLCursorRollbackBehavior",
     "SQLCursorSensitivity",
+    "SQLDataType",
     "SQLDatetimeLiterals",
     "SQLDdlIndex",
     "SQLDriverAwarePoolingSupported",
@@ -68,6 +70,7 @@ __all__ = [
     "SQLIndexKeywords",
     "SQLInfoSchemaViews",
     "SQLInsertStatement",
+    "SQLLenIndicator",
     "SQLNonNullableColumns",
     "SQLNullCollation",
     "SQLNumericFunctions",
@@ -1808,6 +1811,34 @@ class SQLCatalogUsage(IntFlag):
     """Catalogs are supported in all privilege definition statements: GRANT and REVOKE."""
 
 
+class CDataType(IntEnum):
+    """ODBC C data types indicating the data type of C buffers used to store data in the application.
+
+    https://learn.microsoft.com/en-us/sql/odbc/reference/appendixes/c-data-types
+    """
+
+    SQL_C_WLONGVARCHAR = -10
+    SQL_C_WVARCHAR = -9
+    SQL_C_WCHAR = -8
+    SQL_C_CHAR = 1
+    SQL_C_SSHORT = 5 + -20
+    SQL_C_USHORT = 5 + -22
+    SQL_C_SLONG = 4 + -20
+    SQL_C_ULONG = 4 + -22
+    SQL_C_STINYINT = -6 + -20
+    SQL_C_UTINYINT = -6 + -22
+    SQL_C_FLOAT = 7
+    SQL_C_DOUBLE = 8
+    SQL_C_BIT = -7
+    SQL_C_SBIGINT = -5 + -20
+    SQL_C_UBIGINT = -5 + -22
+    SQL_C_BINARY = -2
+    SQL_C_GUID = -11
+    # TODO: moar, like...
+    #  SQL_C_BOOKMARK
+    #  SQL_C_VARBOOKMARK
+
+
 class SQLConcatNullBehavior(IntEnum):
     """Indicates how the data source handles the concatenation of NULL & non-NULL valued character data type columns."""
 
@@ -2296,6 +2327,72 @@ class SQLCursorSensitivity(IntEnum):
     """Cursors are sensitive to changes that were made by other cursors within the same transaction."""
 
 
+class SQLDataType(IntEnum):
+    """SQL type identifiers for SQL data types.
+
+    https://learn.microsoft.com/en-us/sql/odbc/reference/appendixes/sql-data-types
+    """
+
+    SQL_GUID = -11
+    SQL_WLONGVARCHAR = -10
+    SQL_WVARCHAR = -9
+    SQL_WCHAR = -8
+    SQL_BIT = -7
+    SQL_TINYINT = -6
+    SQL_BIGINT = -5
+    SQL_LONGVARBINARY = -4
+    SQL_VARBINARY = -3
+    SQL_BINARY = -2
+    SQL_LONGVARCHAR = -1
+    SQL_UNKNOWN_TYPE = 0
+    SQL_CHAR = 1
+    SQL_NUMERIC = 2
+    SQL_DECIMAL = 3
+    SQL_INTEGER = 4
+    SQL_SMALLINT = 5
+    SQL_FLOAT = 6
+    SQL_REAL = 7
+    SQL_DOUBLE = 8
+    SQL_DATETIME = 9
+    SQL_INTERVAL = 10
+    SQL_TIMESTAMP = 11
+    SQL_VARCHAR = 12
+    SQL_TYPE_DATE = 91
+    SQL_TYPE_TIME = 92
+    SQL_TYPE_TIMESTAMP = 93
+    SQL_TYPE_TIME_WITH_TIMEZONE = 94
+    SQL_TYPE_TIMESTAMP_WITH_TIMEZONE = 95
+    SQL_SS_VARIANT = -150
+    SQL_SS_UDT = -151
+    SQL_SS_XML = -152
+    SQL_SS_TABLE = -153
+    SQL_SS_TIME2 = -154
+    SQL_SS_TIMESTAMPOFFSET = -155
+
+    def to_c_data_type(self) -> CDataType:
+        """Return the CDataType for this SQLDataType.
+
+        :return: The CDataType which corresponds to this SQLDataType.
+        :raise NotImplementedError: A mapping from this SQLDataType to a CDataType is not yet implemented.
+        """
+        try:
+            return {
+                SQLDataType.SQL_BIGINT: CDataType.SQL_C_SBIGINT,
+                SQLDataType.SQL_INTEGER: CDataType.SQL_C_SLONG,
+                SQLDataType.SQL_SMALLINT: CDataType.SQL_C_SSHORT,
+                SQLDataType.SQL_TINYINT: CDataType.SQL_C_STINYINT,
+                SQLDataType.SQL_CHAR: CDataType.SQL_C_CHAR,
+                SQLDataType.SQL_VARCHAR: CDataType.SQL_C_CHAR,
+                SQLDataType.SQL_LONGVARCHAR: CDataType.SQL_C_CHAR,
+                SQLDataType.SQL_WCHAR: CDataType.SQL_C_WCHAR,
+                SQLDataType.SQL_WVARCHAR: CDataType.SQL_C_WCHAR,
+                SQLDataType.SQL_WLONGVARCHAR: CDataType.SQL_C_WCHAR,
+                # TODO: moar
+            }[self]
+        except KeyError as e:
+            raise NotImplementedError(f"No SQL->C data type mapping declared for {self}") from e
+
+
 class SQLDatetimeLiterals(IntFlag):
     """An SQLUINTEGER bitmask enumerating the SQL-92 datetime literals supported by the data source.
 
@@ -2646,6 +2743,51 @@ class SQLInsertStatement(IntFlag):
 
     SQL_IS_SELECT_INTO = 0x00000004
     """The SELECT INTO statement is supported."""
+
+
+class SQLLenIndicator(IntEnum):
+    """Special values used in ODBC length/indicator buffers (SQLLEN).
+
+    These values may be written to output length/indicator pointers
+    (for example ``StrLen_or_IndPtr`` in ``SQLGetData``) or supplied
+    as input length indicators to certain APIs.
+
+    Values >= 0 generally represent a length in bytes. Negative values
+    are special sentinels defined by ODBC.
+    """
+
+    SQL_NULL_DATA = -1
+    """The column value is NULL.
+
+    Returned in output indicator buffers to indicate that the retrieved value is SQL NULL. No data bytes should be read
+    from the buffer.
+    """
+
+    SQL_DATA_AT_EXEC = -2
+    """Parameter data will be supplied at execution time.
+
+    Used with parameter binding APIs to indicate that parameter values
+    will be provided later via ``SQLPutData`` after execution begins.
+
+    This value is generally not expected when retrieving result set data.
+    """
+
+    SQL_NTS = -3
+    """The string is NUL-terminated.
+
+    Primarily used as an input length indicator when passing strings to ODBC APIs, allowing the driver manager or driver
+    to determine the length by scanning for the terminating NUL character.
+
+    This value is not normally returned when retrieving result data.
+    """
+
+    SQL_NO_TOTAL = -4
+    """The total length of the value is unknown.
+
+    Returned when the driver cannot determine the total length of the
+    remaining data. Common when retrieving large values in chunks via
+    ``SQLGetData``.
+    """
 
 
 class SQLNonNullableColumns(IntEnum):

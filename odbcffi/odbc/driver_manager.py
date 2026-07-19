@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 from cffi import FFI
 
-from .dto import DriverInfo
+from .dto import ColumnDescription, DriverInfo
 from .enums import *
 from .errors import ODBCError
 
@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from .connection_handle import ConnectionHandle
     from .environment_handle import EnvironmentHandle
     from .handle import Handle
+    from .statement_handle import StatementHandle
 
 __all__ = ["DriverManager"]
 
@@ -38,7 +39,9 @@ typedef unsigned char       SQLCHAR;
 typedef void*               SQLHANDLE;
 typedef SQLHANDLE           SQLHENV;
 typedef SQLHANDLE           SQLHDBC;
+typedef SQLHANDLE           SQLHSTMT;
 typedef void *              SQLPOINTER;
+typedef signed long long    SQLBIGINT;
 typedef signed short int    SQLSMALLINT;
 typedef signed int          SQLINTEGER;
 typedef unsigned short int  SQLUSMALLINT;
@@ -46,11 +49,23 @@ typedef unsigned short int  SQLWCHAR;
 typedef SQLSMALLINT         SQLRETURN;
 typedef void*               SQLHWND;
 typedef uintptr_t           SQLULEN;
+typedef intptr_t            SQLLEN;
 
 SQLRETURN SQLAllocHandle(
       SQLSMALLINT   HandleType,
       SQLHANDLE     InputHandle,
       SQLHANDLE *   OutputHandlePtr);
+
+SQLRETURN SQLDescribeColW(
+      SQLHSTMT       StatementHandle,
+      SQLUSMALLINT   ColumnNumber,
+      SQLWCHAR *     ColumnName,
+      SQLSMALLINT    BufferLength,
+      SQLSMALLINT *  NameLengthPtr,
+      SQLSMALLINT *  DataTypePtr,
+      SQLULEN *      ColumnSizePtr,
+      SQLSMALLINT *  DecimalDigitsPtr,
+      SQLSMALLINT *  NullablePtr);
 
 SQLRETURN SQLDisconnect(
      SQLHDBC        ConnectionHandle);
@@ -75,6 +90,9 @@ SQLRETURN SQLDriversW(
      SQLSMALLINT     BufferLength2,
      SQLSMALLINT *   AttributesLengthPtr);
 
+SQLRETURN SQLFetch(
+     SQLHSTMT     StatementHandle);
+
 SQLRETURN SQLFreeHandle(
      SQLSMALLINT   HandleType,
      SQLHANDLE     Handle);
@@ -85,6 +103,14 @@ SQLRETURN SQLGetConnectAttrW(
      SQLPOINTER     ValuePtr,
      SQLINTEGER     BufferLength,
      SQLINTEGER *   StringLengthPtr);
+
+SQLRETURN SQLGetData(
+      SQLHSTMT       StatementHandle,
+      SQLUSMALLINT   Col_or_Param_Num,
+      SQLSMALLINT    TargetType,
+      SQLPOINTER     TargetValuePtr,
+      SQLLEN         BufferLength,
+      SQLLEN *       StrLen_or_IndPtr);
 
 SQLRETURN SQLGetDiagRecA(
      SQLSMALLINT     HandleType,
@@ -119,6 +145,14 @@ SQLRETURN SQLGetInfoW(
      SQLPOINTER      InfoValuePtr,
      SQLSMALLINT     BufferLength,
      SQLSMALLINT *   StringLengthPtr);
+
+SQLRETURN SQLGetTypeInfoW(
+     SQLHSTMT      StatementHandle,
+     SQLSMALLINT   DataType);
+
+SQLRETURN SQLNumResultCols(
+     SQLHSTMT        StatementHandle,
+     SQLSMALLINT *   ColumnCountPtr);
 
 SQLRETURN SQLSetConnectAttrW(
      SQLHDBC      ConnectionHandle,
@@ -717,6 +751,74 @@ class DriverManager:
         )
         return output_handle_ptr[0]
 
+    def sql_describe_col_w(self, statement_handle: StatementHandle, column_number: int) -> ColumnDescription:
+        """Return the result descriptor for one column in the result set.
+
+        A result descriptor contains the column name, type, column size, decimal digits, and nullability of the column.
+
+        This information also is available in the fields of the IRD.
+
+        :param statement_handle: The statement handle.
+        :param column_number: Column number of result data, ordered sequentially in increasing column order, starting at
+            1. The ColumnNumber argument can also be set to 0 to describe the bookmark column.
+        :return: A ColumnDescription object describing the column name, type, column size, decimal digits, and
+            nullability of the column.
+        """
+        column_name = self._ffi.new("SQLWCHAR[]", 128)
+        name_length_ptr = self._ffi.new("SQLSMALLINT *")
+        data_type_ptr = self._ffi.new("SQLSMALLINT *")
+        column_size_ptr = self._ffi.new("SQLULEN *")
+        decimal_digits_ptr = self._ffi.new("SQLSMALLINT *")
+        nullable_ptr = self._ffi.new("SQLSMALLINT *")
+
+        while True:
+            rc = self._lib.SQLDescribeColW(
+                statement_handle.handle,
+                column_number,
+                column_name,
+                len(column_name),
+                name_length_ptr,
+                data_type_ptr,
+                column_size_ptr,
+                decimal_digits_ptr,
+                nullable_ptr,
+            )
+
+            rc_enum = self._raise_for_fatal_return_code(
+                return_code=rc,
+                what="SQLDescribeColW",
+                handle=statement_handle,
+            )
+
+            column_name_len = name_length_ptr[0]
+
+            if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+                diagnostics = self.sql_get_diag_rec_w(handle=statement_handle)
+
+                if any(sql_state == "01004" for sql_state, native_error, message in diagnostics):
+                    column_name = self._ffi.new("SQLWCHAR[]", column_name_len + 1)
+                    continue
+
+                if diagnostics:
+                    for sql_state, native_error, message in diagnostics:
+                        logger.warning(
+                            "SQLDescribeColW returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                            sql_state,
+                            native_error,
+                            message,
+                        )
+
+            break
+
+        return ColumnDescription(
+            column_number=column_number,
+            column_name=self._decode_sqlwchar_buffer(column_name, num_chars=column_name_len),
+            data_type=SQLDataType(data_type_ptr[0]),
+            column_size=column_size_ptr[0],
+            decimal_digits=decimal_digits_ptr[0],
+            nullable=nullable_ptr[0],
+        )
+
     def sql_disconnect(self, connection_handle: ConnectionHandle) -> None:
         """Close the connection associated with a specific connection handle.
 
@@ -870,6 +972,32 @@ class DriverManager:
 
         return driver_infos
 
+    def sql_fetch(self, statement_handle: StatementHandle) -> bool:
+        """Fetch the next rowset of data from the result set, and write data for any bound columns.
+
+        This method should only be called after a call that creates a result set and before the cursor over that result
+        set is closed.
+
+        When the result set is created, the cursor is positioned before the start of the result set. SQLFetch fetches
+        the next rowset. It is equivalent to calling SQLFetchScroll with FetchOrientation set to SQL_FETCH_NEXT.
+
+        Calls to SQLFetch can be mixed with calls to SQLFetchScroll but cannot be mixed with calls to SQLExtendedFetch.
+
+        :param statement_handle: The statement handle.
+        :return: True if the next rowset was fetched from the result set; False if there are no more rowsets to fetch.
+        """
+        rc = self._lib.SQLFetch(statement_handle.handle)
+
+        rc_enum = self._raise_for_fatal_return_code(
+            return_code=rc,
+            what="SQLFetch",
+            handle=statement_handle,
+        )
+
+        # TODO: Handle return codes
+
+        return rc_enum != SQLReturn.SQL_NO_DATA
+
     def sql_free_handle(self, handle: Handle) -> None:
         """Free resources associated with a specific environment, connection, statement, or descriptor handle.
 
@@ -945,6 +1073,111 @@ class DriverManager:
         if attribute == ConnectionAttribute.SQL_ATTR_TRACE:
             return SQLAttrTrace(ret)
         raise RuntimeError(f"Unsupported connection attribute: {attribute}")
+
+    # TODO: overloads indicating return types based on target_type?
+    def sql_get_data(self, statement_handle: StatementHandle, col_or_param_num: int, target_type: CDataType) -> Any:
+        """Retrieve data for a single column in the result set.
+
+        SQLGetData can be called only after one or more rows have been fetched from the result set by SQLFetch,
+        SQLFetchScroll, or SQLExtendedFetch. If variable-length data is too large to be returned in a single call to
+        SQLGetData (due to a limitation in the application), SQLGetData can retrieve it in parts. It is possible to bind
+        some columns in a row and call SQLGetData for others, although this is subject to some restrictions.
+
+        Can retrieve data for a single parameter after SQLParamData returns SQL_PARAM_DATA_AVAILABLE. It can be called
+        multiple times to retrieve variable-length data in parts.
+
+        :param statement_handle: The statement handle.
+        :param col_or_param_num: For retrieving column data, it is the number of the column for which to return data.
+            Result set columns are numbered in increasing column order starting at 1. The bookmark column is column
+            number 0; this can be specified only if bookmarks are enabled. For retrieving parameter data, it is the
+            ordinal of the parameter, which starts at 1.
+        :param target_type: The type identifier of the C data type of the *TargetValuePtr buffer. If TargetType is
+            SQL_ARD_TYPE, the driver uses the type identifier specified in the SQL_DESC_CONCISE_TYPE field of the ARD.
+            If TargetType is SQL_APD_TYPE, SQLGetData will use the same C data type that was specified in
+            SQLBindParameter. Otherwise, the C data type specified in SQLGetData overrides the C data type specified in
+            SQLBindParameter. If it is SQL_C_DEFAULT, the driver selects the default C data type based on the SQL data
+            type of the source. You can also specify an extended C data type.
+        :return: The data for a single column in the result set.
+        """
+        # Refer to the table on the following page:
+        # https://learn.microsoft.com/en-us/sql/odbc/reference/appendixes/c-data-types
+        if target_type == CDataType.SQL_C_CHAR:
+            target_value_ptr = self._ffi.new("SQLCHAR[]", 512)
+            buffer_len = len(target_value_ptr)
+        elif target_type == CDataType.SQL_C_SBIGINT:
+            target_value_ptr = self._ffi.new("SQLBIGINT *")
+            buffer_len = 0
+        elif target_type == CDataType.SQL_C_SLONG:
+            target_value_ptr = self._ffi.new("SQLINTEGER *")
+            buffer_len = 0
+        elif target_type == CDataType.SQL_C_SSHORT:
+            target_value_ptr = self._ffi.new("SQLSMALLINT *")
+            buffer_len = 0
+        elif target_type == CDataType.SQL_C_WCHAR:
+            target_value_ptr = self._ffi.new("SQLWCHAR[]", 512)
+            buffer_len = len(target_value_ptr)
+        else:
+            # TODO: Expand upon SQLGetData type support
+            raise NotImplementedError(f"Unsupported target type: {target_type.name}")
+
+        str_len_or_ind_ptr = self._ffi.new("SQLLEN *")
+
+        while True:
+            rc = self._lib.SQLGetData(
+                statement_handle.handle,
+                col_or_param_num,
+                int(target_type),
+                target_value_ptr,
+                buffer_len,
+                str_len_or_ind_ptr,
+            )
+
+            return_code = self._raise_for_fatal_return_code(
+                return_code=rc,
+                what="SQLGetData",
+                handle=statement_handle,
+            )
+
+            # References:
+            # https://learn.microsoft.com/en-us/sql/odbc/reference/develop-app/getting-long-data
+            # https://learn.microsoft.com/en-us/sql/odbc/reference/syntax/sqlgetdata-function#retrieving-variable-length-data-in-parts
+            if return_code == SQLReturn.SQL_SUCCESS_WITH_INFO:
+                diagnostics = self.sql_get_diag_rec_w(handle=statement_handle)
+
+                if any(sql_state == "01004" for sql_state, native_error, message in diagnostics):
+                    raise NotImplementedError("Truncation in SQLGetData")
+
+                raise NotImplementedError("General warning in SQLGetData")
+
+            if return_code != SQLReturn.SQL_SUCCESS:
+                raise NotImplementedError("Handle return codes other than SQL_SUCCESS in SQLGetData")
+
+            if (str_len_or_ind := str_len_or_ind_ptr[0]) < 0:
+                sql_len_indicator = SQLLenIndicator(str_len_or_ind)
+
+                if sql_len_indicator == SQLLenIndicator.SQL_NULL_DATA:
+                    return None
+
+                if sql_len_indicator == SQLLenIndicator.SQL_NO_TOTAL:
+                    raise NotImplementedError("Handle SQL_NO_TOTAL for SQLGetData")
+
+                raise RuntimeError(f"Unsupported SQLLenIndicator encountered: {sql_len_indicator.name}")
+
+            if target_type in (
+                CDataType.SQL_C_SBIGINT,
+                CDataType.SQL_C_SLONG,
+                CDataType.SQL_C_SSHORT,
+            ):
+                return target_value_ptr[0]
+
+            if target_type == CDataType.SQL_C_WCHAR:
+                return self._decode_sqlwchar_buffer(target_value_ptr, num_bytes=str_len_or_ind)
+
+            if target_type == CDataType.SQL_C_CHAR:
+                raw = bytes(target_value_ptr[0:str_len_or_ind])
+                return raw.decode()
+
+            raise NotImplementedError(f"Unsupported target type: {target_type.name}")
 
     def sql_get_diag_rec_a(
         self,
@@ -1992,6 +2225,64 @@ class DriverManager:
             return enum_type(ret)
 
         return ret
+
+    def sql_get_type_info_w(self, statement_handle: StatementHandle, data_type: SQLDataType) -> None:
+        """Return information about data types supported by the data source in the form of a SQL result set.
+
+        The data types are intended for use in Data Definition Language (DDL) statements.
+
+        :param statement_handle: The statement handle for the result set.
+        :param data_type: The SQL data type. May be a driver-specific data type. SQL_ALL_TYPES specifies that
+            information about all data types should be returned.
+        """
+        rc = self._lib.SQLGetTypeInfoW(
+            statement_handle.handle,
+            int(data_type),
+        )
+
+        rc_enum = self._raise_for_fatal_return_code(rc, what="SQLGetTypeInfoW", handle=statement_handle)
+
+        if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+            diagnostics = self.sql_get_diag_rec_w(statement_handle)
+            if diagnostics:
+                for sql_state, native_error, message in diagnostics:
+                    logger.warning(
+                        "SQLGetTypeInfoW returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                        sql_state,
+                        native_error,
+                        message,
+                    )
+
+    def sql_num_result_cols(self, statement_handle: StatementHandle) -> int:
+        """Return the number of columns in a result set.
+
+        Can be called successfully only when the statement is in the prepared, executed, or positioned state.
+
+        If the statement associated with the statement handle does not return columns, the return value from this method
+        will be 0.
+
+        :param statement_handle: The statement handle for the result set.
+        :return: The number of columns in a result set. (0 If the statement associated with StatementHandle does not
+            return columns.)
+        """
+        buffer = self._ffi.new("SQLSMALLINT *")
+
+        rc = self._lib.SQLNumResultCols(statement_handle.handle, buffer)
+
+        rc_enum = self._raise_for_fatal_return_code(rc, what="SQLNumResultCols", handle=statement_handle)
+
+        if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+            diagnostics = self.sql_get_diag_rec_w(statement_handle)
+            if diagnostics:
+                for sql_state, native_error, message in diagnostics:
+                    logger.warning(
+                        "SQLNumResultCols returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                        sql_state,
+                        native_error,
+                        message,
+                    )
+
+        return int(buffer[0])  # type narrowing
 
     @overload
     def sql_set_connect_attr_w(
