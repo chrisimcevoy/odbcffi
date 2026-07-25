@@ -3025,51 +3025,51 @@ class SQLReturn(IntEnum):
 class SQLScrollConcurrency(IntFlag):
     """A 32-bit bitmask enumerating the concurrency control options supported for scrollable cursors."""
 
-    SQL_SCCO_READ_ONLY = 1
+    SQL_SCCO_READ_ONLY = 0x00000001
     """Cursor is read only.
 
     No updates are allowed.
     """
 
-    SQL_SCCO_LOCK = 2
+    SQL_SCCO_LOCK = 0x00000002
     """Cursor uses the lowest level of locking sufficient to ensure that the row can be updated."""
 
-    SQL_SCCO_OPT_ROWVER = 4
+    SQL_SCCO_OPT_ROWVER = 0x00000004
     """Cursor uses optimistic concurrency control, comparing row versions, such as SQLBases ROWID or Sybase
     TIMESTAMP."""
 
-    SQL_SCCO_OPT_VALUES = 8
+    SQL_SCCO_OPT_VALUES = 0x00000008
     """Cursor uses optimistic concurrency control, comparing values."""
 
 
 class SQLScrollOptions(IntFlag):
     """An SQLUINTEGER bitmask enumerating the scroll options supported for scrollable cursors."""
 
-    SQL_SO_FORWARD_ONLY = 1
+    SQL_SO_FORWARD_ONLY = 0x00000001
     """The cursor only scrolls forward.
 
     (ODBC 1.0)
     """
 
-    SQL_SO_KEYSET_DRIVEN = 2
+    SQL_SO_KEYSET_DRIVEN = 0x00000002
     """The driver saves and uses the keys for every row in the result set.
 
     (ODBC 1.0)
     """
 
-    SQL_SO_DYNAMIC = 4
+    SQL_SO_DYNAMIC = 0x00000004
     """The driver keeps the keys for every row in the rowset (the keyset size is the same as the rowset size).
 
     (ODBC 1.0)
     """
 
-    SQL_SO_MIXED = 8
+    SQL_SO_MIXED = 0x00000008
     """The driver keeps the keys for every row in the keyset, and the keyset size is greater than the rowset size.
 
     The cursor is keyset-driven inside the keyset and dynamic outside the keyset. (ODBC 1.0)
     """
 
-    SQL_SO_STATIC = 10
+    SQL_SO_STATIC = 0x00000010
     """The data in the result set is static.
 
     (ODBC 2.0)
@@ -3960,6 +3960,15 @@ class SQLTxnIsolationOption(IntFlag):
     """Transactions are serializable.
 
     Serializable transactions do not allow dirty reads, non-repeatable reads, or phantoms.
+    """
+
+    # TODO: This one does not appear to be documented anywhere - seems to be deprecated?
+    #  SQL_TXN_VERSIONING = 0x00000010
+
+    SQL_TXN_SS_SNAPSHOT = 0x00000020
+    """Snapshot transaction isolation level.
+
+    This option is exclusive to Microsoft SQL Server.
     """
 
 
