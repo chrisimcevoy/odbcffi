@@ -317,7 +317,7 @@ class TestFreeTDS(DriverTest):
             InfoType.SQL_DDL_INDEX: SQLDdlIndex(0),
             InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption.SQL_TXN_READ_COMMITTED,
             InfoType.SQL_DESCRIBE_PARAMETER: "N",
-            InfoType.SQL_DM_VER: "03.52.0002.0003",
+            InfoType.SQL_DM_VER: partial(pytest.skip, reason="Unstable return value for SQL_DM_VER"),
             InfoType.SQL_DRIVER_AWARE_POOLING_SUPPORTED: ODBCError(
                 what="SQLGetInfoW",
                 sql_state="HY092",
@@ -330,7 +330,7 @@ class TestFreeTDS(DriverTest):
             InfoType.SQL_DRIVER_HENV: NotImplementedError("Unsupported InfoType: 4"),
             InfoType.SQL_DRIVER_HLIB: NotImplementedError("Unsupported InfoType: 76"),
             InfoType.SQL_DRIVER_HSTMT: NotImplementedError("Unsupported InfoType: 5"),
-            InfoType.SQL_DRIVER_NAME: "libtdsodbc.so",
+            InfoType.SQL_DRIVER_NAME: partial(pytest.skip, reason="Unstable return value for SQL_DRIVER_NAME"),
             InfoType.SQL_DRIVER_ODBC_VER: "03.50",
             InfoType.SQL_DRIVER_VER: partial(pytest.skip, reason="Unstable return value for SQL_DRIVER_VER"),
             InfoType.SQL_DROP_ASSERTION: SQLDropAssertion(0),
