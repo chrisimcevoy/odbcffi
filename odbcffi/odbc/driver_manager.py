@@ -2467,6 +2467,13 @@ class DriverManager:
         info_type: Literal[InfoType.SQL_UNION],
     ) -> SQLUnion: ...
 
+    @overload
+    def sql_get_info_w(
+        self,
+        connection_handle: ConnectionHandle,
+        info_type: InfoType,
+    ) -> Any: ...
+
     def sql_get_info_w(
         self,
         connection_handle: ConnectionHandle,

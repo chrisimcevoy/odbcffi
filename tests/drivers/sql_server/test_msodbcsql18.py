@@ -1,0 +1,2322 @@
+from collections.abc import Mapping
+from functools import partial
+from typing import Any
+
+import pytest
+
+from odbcffi.odbc.enums import *
+from odbcffi.odbc.errors import ODBCError
+from tests.drivers.base import DriverTest
+
+
+@pytest.fixture(scope="module")
+def driver() -> str:
+    return "ODBC Driver 18 for SQL Server"
+
+
+@pytest.fixture(scope="module")
+def suffix() -> str:
+    return "TrustServerCertificate=yes;"
+
+
+class TestMsOdbcSql18(DriverTest):
+    @property
+    def expected_sql_get_info_w_return_values(self) -> Mapping[InfoType, Any]:
+        return {
+            InfoType.SQL_ACCESSIBLE_PROCEDURES: "Y",
+            InfoType.SQL_ACCESSIBLE_TABLES: "Y",
+            InfoType.SQL_ACTIVE_ENVIRONMENTS: 0,
+            InfoType.SQL_AGGREGATE_FUNCTIONS: SQLAggregateFunctions.SQL_AF_ALL,
+            InfoType.SQL_ALTER_DOMAIN: SQLAlterDomain(0),
+            InfoType.SQL_ALTER_TABLE: SQLAlterTable.SQL_AT_ADD_COLUMN
+            | SQLAlterTable.SQL_AT_ADD_CONSTRAINT
+            | SQLAlterTable.SQL_AT_ADD_COLUMN_SINGLE
+            | SQLAlterTable.SQL_AT_ADD_COLUMN_DEFAULT
+            | SQLAlterTable.SQL_AT_DROP_COLUMN_RESTRICT
+            | SQLAlterTable.SQL_AT_ADD_TABLE_CONSTRAINT
+            | SQLAlterTable.SQL_AT_CONSTRAINT_NAME_DEFINITION,
+            InfoType.SQL_ASYNC_DBC_FUNCTIONS: SQLAsyncDbcFunctions.SQL_ASYNC_DBC_NOT_CAPABLE,
+            InfoType.SQL_ASYNC_MODE: SQLAsyncMode.SQL_AM_STATEMENT,
+            InfoType.SQL_ASYNC_NOTIFICATION: ODBCError(
+                what="SQLGetInfoW",
+                sql_state="HY096",
+                native_error=0,
+                message_text="[Microsoft][ODBC Driver 18 for SQL Server]Invalid information type",
+                return_code=SQLReturn.SQL_ERROR,
+            ),
+            InfoType.SQL_BATCH_ROW_COUNT: SQLBatchRowCount.SQL_BRC_EXPLICIT,
+            InfoType.SQL_BATCH_SUPPORT: SQLBatchSupport.SQL_BS_ROW_COUNT_PROC
+            | SQLBatchSupport.SQL_BS_SELECT_PROC
+            | SQLBatchSupport.SQL_BS_ROW_COUNT_EXPLICIT
+            | SQLBatchSupport.SQL_BS_SELECT_EXPLICIT,
+            InfoType.SQL_BOOKMARK_PERSISTENCE: SQLBookmarkPersistence.SQL_BP_DELETE
+            | SQLBookmarkPersistence.SQL_BP_UPDATE
+            | SQLBookmarkPersistence.SQL_BP_SCROLL,
+            InfoType.SQL_CATALOG_LOCATION: SQLCatalogLocation.SQL_CL_START,
+            InfoType.SQL_CATALOG_NAME: "Y",
+            InfoType.SQL_CATALOG_NAME_SEPARATOR: ".",
+            InfoType.SQL_CATALOG_TERM: "database",
+            InfoType.SQL_CATALOG_USAGE: SQLCatalogUsage.SQL_CU_DML_STATEMENTS
+            | SQLCatalogUsage.SQL_CU_PROCEDURE_INVOCATION
+            | SQLCatalogUsage.SQL_CU_TABLE_DEFINITION,
+            InfoType.SQL_COLLATION_SEQ: "ISO 8859-1",
+            InfoType.SQL_COLUMN_ALIAS: "Y",
+            InfoType.SQL_CONCAT_NULL_BEHAVIOR: SQLConcatNullBehavior.SQL_CB_NULL,
+            InfoType.SQL_CONVERT_BIGINT: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_BINARY: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_BIT: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_CHAR: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_LONGVARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_DATE: SQLConvert(0),
+            InfoType.SQL_CONVERT_DECIMAL: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_DOUBLE: SQLConvert(0),
+            InfoType.SQL_CONVERT_FLOAT: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_FUNCTIONS: SQLConvertFunctions.SQL_FN_CVT_CONVERT
+            | SQLConvertFunctions.SQL_FN_CVT_CAST,
+            InfoType.SQL_CONVERT_GUID: SQLConvert.SQL_CVT_CHAR | SQLConvert.SQL_CVT_VARCHAR,
+            InfoType.SQL_CONVERT_INTEGER: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_INTERVAL_DAY_TIME: SQLConvert(0),
+            InfoType.SQL_CONVERT_INTERVAL_YEAR_MONTH: SQLConvert(0),
+            InfoType.SQL_CONVERT_LONGVARBINARY: SQLConvert.SQL_CVT_BINARY | SQLConvert.SQL_CVT_VARBINARY,
+            InfoType.SQL_CONVERT_LONGVARCHAR: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_LONGVARCHAR,
+            InfoType.SQL_CONVERT_NUMERIC: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_REAL: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_SMALLINT: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_TIME: SQLConvert(0),
+            InfoType.SQL_CONVERT_TIMESTAMP: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY,
+            InfoType.SQL_CONVERT_TINYINT: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_VARBINARY: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_VARCHAR: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_LONGVARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_WCHAR: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_LONGVARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CONVERT_WLONGVARCHAR: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_LONGVARCHAR,
+            InfoType.SQL_CONVERT_WVARCHAR: SQLConvert.SQL_CVT_CHAR
+            | SQLConvert.SQL_CVT_NUMERIC
+            | SQLConvert.SQL_CVT_DECIMAL
+            | SQLConvert.SQL_CVT_INTEGER
+            | SQLConvert.SQL_CVT_SMALLINT
+            | SQLConvert.SQL_CVT_FLOAT
+            | SQLConvert.SQL_CVT_REAL
+            | SQLConvert.SQL_CVT_VARCHAR
+            | SQLConvert.SQL_CVT_LONGVARCHAR
+            | SQLConvert.SQL_CVT_BINARY
+            | SQLConvert.SQL_CVT_VARBINARY
+            | SQLConvert.SQL_CVT_BIT
+            | SQLConvert.SQL_CVT_TINYINT
+            | SQLConvert.SQL_CVT_BIGINT,
+            InfoType.SQL_CORRELATION_NAME: SQLCorrelationName.SQL_CN_ANY,
+            InfoType.SQL_CREATE_ASSERTION: SQLCreateAssertion(0),
+            InfoType.SQL_CREATE_CHARACTER_SET: SQLCreateCharacterSet(0),
+            InfoType.SQL_CREATE_COLLATION: SQLCreateCollation(0),
+            InfoType.SQL_CREATE_DOMAIN: SQLCreateDomain(0),
+            InfoType.SQL_CREATE_SCHEMA: SQLCreateSchema.SQL_CS_CREATE_SCHEMA | SQLCreateSchema.SQL_CS_AUTHORIZATION,
+            InfoType.SQL_CREATE_TABLE: SQLCreateTable.SQL_CT_CREATE_TABLE,
+            InfoType.SQL_CREATE_TRANSLATION: SQLCreateTranslation(0),
+            InfoType.SQL_CREATE_VIEW: SQLCreateView.SQL_CV_CREATE_VIEW | SQLCreateView.SQL_CV_CHECK_OPTION,
+            InfoType.SQL_CURSOR_COMMIT_BEHAVIOR: SQLCursorCommitBehavior.SQL_CB_CLOSE,
+            InfoType.SQL_CURSOR_ROLLBACK_BEHAVIOR: SQLCursorRollbackBehavior.SQL_CB_CLOSE,
+            InfoType.SQL_CURSOR_SENSITIVITY: SQLCursorSensitivity.SQL_SENSITIVE,
+            InfoType.SQL_DATABASE_NAME: "master",
+            InfoType.SQL_DATA_SOURCE_NAME: "",
+            InfoType.SQL_DATA_SOURCE_READ_ONLY: "N",
+            InfoType.SQL_DATETIME_LITERALS: SQLDatetimeLiterals(0),
+            InfoType.SQL_DBMS_NAME: "Microsoft SQL Server",
+            InfoType.SQL_DBMS_VER: "17.00.4025",
+            InfoType.SQL_DDL_INDEX: SQLDdlIndex.SQL_DI_DROP_INDEX | SQLDdlIndex.SQL_DI_CREATE_INDEX,
+            InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption.SQL_TXN_READ_COMMITTED,
+            InfoType.SQL_DESCRIBE_PARAMETER: "Y",
+            InfoType.SQL_DM_VER: "03.52.0002.0003",
+            InfoType.SQL_DRIVER_AWARE_POOLING_SUPPORTED: ODBCError(
+                what="SQLGetInfoW",
+                sql_state="HY096",
+                native_error=0,
+                message_text="[Microsoft][ODBC Driver 18 for SQL Server]Invalid information type",
+                return_code=SQLReturn.SQL_ERROR,
+            ),
+            InfoType.SQL_DRIVER_HDBC: NotImplementedError("Unsupported InfoType: 3"),
+            InfoType.SQL_DRIVER_HDESC: NotImplementedError("Unsupported InfoType: 135"),
+            InfoType.SQL_DRIVER_HENV: NotImplementedError("Unsupported InfoType: 4"),
+            InfoType.SQL_DRIVER_HLIB: NotImplementedError("Unsupported InfoType: 76"),
+            InfoType.SQL_DRIVER_HSTMT: NotImplementedError("Unsupported InfoType: 5"),
+            InfoType.SQL_DRIVER_NAME: "libmsodbcsql-18.6.so.2.1",
+            InfoType.SQL_DRIVER_ODBC_VER: "03.52",
+            InfoType.SQL_DRIVER_VER: "18.06.0002",
+            InfoType.SQL_DROP_ASSERTION: SQLDropAssertion(0),
+            InfoType.SQL_DROP_CHARACTER_SET: SQLDropCharacterSet(0),
+            InfoType.SQL_DROP_COLLATION: SQLDropCollation(0),
+            InfoType.SQL_DROP_DOMAIN: SQLDropDomain(0),
+            InfoType.SQL_DROP_SCHEMA: SQLDropSchema(0),
+            InfoType.SQL_DROP_TABLE: SQLDropTable.SQL_DT_DROP_TABLE,
+            InfoType.SQL_DROP_TRANSLATION: SQLDropTranslation(0),
+            InfoType.SQL_DROP_VIEW: SQLDropView.SQL_DV_DROP_VIEW,
+            InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES1: SQLCursorAttributes1.SQL_CA1_NEXT
+            | SQLCursorAttributes1.SQL_CA1_ABSOLUTE
+            | SQLCursorAttributes1.SQL_CA1_RELATIVE
+            | SQLCursorAttributes1.SQL_CA1_LOCK_NO_CHANGE
+            | SQLCursorAttributes1.SQL_CA1_POS_POSITION
+            | SQLCursorAttributes1.SQL_CA1_POS_UPDATE
+            | SQLCursorAttributes1.SQL_CA1_POS_DELETE
+            | SQLCursorAttributes1.SQL_CA1_POS_REFRESH
+            | SQLCursorAttributes1.SQL_CA1_POSITIONED_UPDATE
+            | SQLCursorAttributes1.SQL_CA1_POSITIONED_DELETE
+            | SQLCursorAttributes1.SQL_CA1_SELECT_FOR_UPDATE,
+            InfoType.SQL_DYNAMIC_CURSOR_ATTRIBUTES2: SQLCursorAttributes2.SQL_CA2_READ_ONLY_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_LOCK_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_OPT_ROWVER_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_OPT_VALUES_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_SENSITIVITY_ADDITIONS
+            | SQLCursorAttributes2.SQL_CA2_SENSITIVITY_UPDATES
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_SELECT
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_INSERT
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_DELETE
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_UPDATE
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_CATALOG,
+            InfoType.SQL_EXPRESSIONS_IN_ORDERBY: "Y",
+            InfoType.SQL_FETCH_DIRECTION: NotImplementedError("Unsupported InfoType: 8"),
+            InfoType.SQL_FILE_USAGE: SQLFileUsage.SQL_FILE_NOT_SUPPORTED,
+            InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1: SQLCursorAttributes1.SQL_CA1_NEXT
+            | SQLCursorAttributes1.SQL_CA1_POSITIONED_UPDATE
+            | SQLCursorAttributes1.SQL_CA1_POSITIONED_DELETE
+            | SQLCursorAttributes1.SQL_CA1_SELECT_FOR_UPDATE,
+            InfoType.SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2: SQLCursorAttributes2.SQL_CA2_READ_ONLY_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_LOCK_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_OPT_ROWVER_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_OPT_VALUES_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_SELECT
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_INSERT
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_DELETE
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_UPDATE
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_CATALOG,
+            InfoType.SQL_GETDATA_EXTENSIONS: SQLGetDataExtensions.SQL_GD_BLOCK,
+            InfoType.SQL_GROUP_BY: SQLGroupBy.SQL_GB_GROUP_BY_CONTAINS_SELECT,
+            InfoType.SQL_IDENTIFIER_CASE: SQLIdentifierCase.SQL_IC_MIXED,
+            InfoType.SQL_IDENTIFIER_QUOTE_CHAR: '"',
+            InfoType.SQL_INDEX_KEYWORDS: SQLIndexKeywords.SQL_IK_ALL,
+            InfoType.SQL_INFO_SCHEMA_VIEWS: SQLInfoSchemaViews.SQL_ISV_CHECK_CONSTRAINTS
+            | SQLInfoSchemaViews.SQL_ISV_COLUMN_DOMAIN_USAGE
+            | SQLInfoSchemaViews.SQL_ISV_COLUMN_PRIVILEGES
+            | SQLInfoSchemaViews.SQL_ISV_COLUMNS
+            | SQLInfoSchemaViews.SQL_ISV_CONSTRAINT_COLUMN_USAGE
+            | SQLInfoSchemaViews.SQL_ISV_CONSTRAINT_TABLE_USAGE
+            | SQLInfoSchemaViews.SQL_ISV_DOMAIN_CONSTRAINTS
+            | SQLInfoSchemaViews.SQL_ISV_DOMAINS
+            | SQLInfoSchemaViews.SQL_ISV_KEY_COLUMN_USAGE
+            | SQLInfoSchemaViews.SQL_ISV_REFERENTIAL_CONSTRAINTS
+            | SQLInfoSchemaViews.SQL_ISV_SCHEMATA
+            | SQLInfoSchemaViews.SQL_ISV_TABLE_CONSTRAINTS,
+            InfoType.SQL_INSERT_STATEMENT: SQLInsertStatement.SQL_IS_SELECT_INTO
+            | SQLInsertStatement.SQL_IS_INSERT_SEARCHED
+            | SQLInsertStatement.SQL_IS_INSERT_LITERALS,
+            InfoType.SQL_INTEGRITY: "Y",
+            InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES1: SQLCursorAttributes1.SQL_CA1_NEXT
+            | SQLCursorAttributes1.SQL_CA1_ABSOLUTE
+            | SQLCursorAttributes1.SQL_CA1_RELATIVE
+            | SQLCursorAttributes1.SQL_CA1_BOOKMARK
+            | SQLCursorAttributes1.SQL_CA1_LOCK_NO_CHANGE
+            | SQLCursorAttributes1.SQL_CA1_POS_POSITION
+            | SQLCursorAttributes1.SQL_CA1_POS_UPDATE
+            | SQLCursorAttributes1.SQL_CA1_POS_DELETE
+            | SQLCursorAttributes1.SQL_CA1_POS_REFRESH
+            | SQLCursorAttributes1.SQL_CA1_POSITIONED_UPDATE
+            | SQLCursorAttributes1.SQL_CA1_POSITIONED_DELETE
+            | SQLCursorAttributes1.SQL_CA1_SELECT_FOR_UPDATE,
+            InfoType.SQL_KEYSET_CURSOR_ATTRIBUTES2: SQLCursorAttributes2.SQL_CA2_READ_ONLY_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_LOCK_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_OPT_ROWVER_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_OPT_VALUES_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_SENSITIVITY_ADDITIONS
+            | SQLCursorAttributes2.SQL_CA2_SENSITIVITY_UPDATES
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_SELECT
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_INSERT
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_DELETE
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_UPDATE
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_CATALOG
+            | SQLCursorAttributes2.SQL_CA2_CRC_EXACT,
+            InfoType.SQL_KEYWORDS: (
+                "BACKUP,BREAK,BROWSE,BULK,CHECKPOINT,CLUSTERED,COMMITTED,COMPUTE,CONFIRM,CONTROLROW,DATABASE,DBCC,DISK,DISTRIBUTED,DUMMY,ERRLVL,ERROREXIT,EXIT,FILE,FILLFACTOR,FLOPPY,HOLDLOCK,IDENTITY_INSERT,IDENTITYCOL,IF,KILL,LINENO,MERGE,MIRROREXIT,NONCLUSTERED,OFF,OFFSETS,ONCE,OVER,PERCENT,PERM,PERMANENT,PLAN,PRINT,PROC,PROCESSEXIT,RAISERROR,READ,READTEXT,RECONFIGURE,REPEATABLE,RESTORE,RETURN,ROWCOUNT,RULE,SAVE,SERIALIZABLE,SETUSER,SHUTDOWN,STATISTICS,TAPE,TEMP,TEXTSIZE,TOP,TRAN,TRIGGER,TRUNCATE,TSEQUEL,UNCOMMITTED,UPDATETEXT,USE,WAITFOR,WHILE,WRITETEXT"
+            ),
+            InfoType.SQL_LIKE_ESCAPE_CLAUSE: "Y",
+            InfoType.SQL_LOCK_TYPES: NotImplementedError("Unsupported InfoType: 78"),
+            InfoType.SQL_MAX_ASYNC_CONCURRENT_STATEMENTS: 1,
+            InfoType.SQL_MAX_BINARY_LITERAL_LEN: 0,
+            InfoType.SQL_MAX_CATALOG_NAME_LEN: 128,
+            InfoType.SQL_MAX_CHAR_LITERAL_LEN: 0,
+            InfoType.SQL_MAX_COLUMNS_IN_GROUP_BY: 0,
+            InfoType.SQL_MAX_COLUMNS_IN_INDEX: 16,
+            InfoType.SQL_MAX_COLUMNS_IN_ORDER_BY: 0,
+            InfoType.SQL_MAX_COLUMNS_IN_SELECT: 4096,
+            InfoType.SQL_MAX_COLUMNS_IN_TABLE: 1024,
+            InfoType.SQL_MAX_COLUMN_NAME_LEN: 128,
+            InfoType.SQL_MAX_CONCURRENT_ACTIVITIES: 1,
+            InfoType.SQL_MAX_CURSOR_NAME_LEN: 128,
+            InfoType.SQL_MAX_DRIVER_CONNECTIONS: 0,
+            InfoType.SQL_MAX_IDENTIFIER_LEN: 128,
+            InfoType.SQL_MAX_INDEX_SIZE: 900,
+            InfoType.SQL_MAX_PROCEDURE_NAME_LEN: 134,
+            InfoType.SQL_MAX_ROW_SIZE: 8060,
+            InfoType.SQL_MAX_ROW_SIZE_INCLUDES_LONG: "N",
+            InfoType.SQL_MAX_SCHEMA_NAME_LEN: 128,
+            InfoType.SQL_MAX_STATEMENT_LEN: 0,
+            InfoType.SQL_MAX_TABLES_IN_SELECT: 32,
+            InfoType.SQL_MAX_TABLE_NAME_LEN: 128,
+            InfoType.SQL_MAX_USER_NAME_LEN: 128,
+            InfoType.SQL_MULTIPLE_ACTIVE_TXN: "Y",
+            InfoType.SQL_MULT_RESULT_SETS: "Y",
+            InfoType.SQL_NEED_LONG_DATA_LEN: "Y",
+            InfoType.SQL_NON_NULLABLE_COLUMNS: SQLNonNullableColumns.SQL_NNC_NON_NULL,
+            InfoType.SQL_NULL_COLLATION: SQLNullCollation.SQL_NC_LOW,
+            InfoType.SQL_NUMERIC_FUNCTIONS: SQLNumericFunctions.SQL_FN_NUM_ABS
+            | SQLNumericFunctions.SQL_FN_NUM_ACOS
+            | SQLNumericFunctions.SQL_FN_NUM_ASIN
+            | SQLNumericFunctions.SQL_FN_NUM_ATAN
+            | SQLNumericFunctions.SQL_FN_NUM_ATAN2
+            | SQLNumericFunctions.SQL_FN_NUM_CEILING
+            | SQLNumericFunctions.SQL_FN_NUM_COS
+            | SQLNumericFunctions.SQL_FN_NUM_COT
+            | SQLNumericFunctions.SQL_FN_NUM_EXP
+            | SQLNumericFunctions.SQL_FN_NUM_FLOOR
+            | SQLNumericFunctions.SQL_FN_NUM_LOG
+            | SQLNumericFunctions.SQL_FN_NUM_MOD
+            | SQLNumericFunctions.SQL_FN_NUM_SIGN
+            | SQLNumericFunctions.SQL_FN_NUM_SIN
+            | SQLNumericFunctions.SQL_FN_NUM_SQRT
+            | SQLNumericFunctions.SQL_FN_NUM_TAN,
+            InfoType.SQL_ODBC_API_CONFORMANCE: NotImplementedError("Unsupported InfoType: 9"),
+            InfoType.SQL_ODBC_INTERFACE_CONFORMANCE: SQLOdbcInterfaceConformance.SQL_OIC_LEVEL2,
+            InfoType.SQL_ODBC_SAG_CLI_CONFORMANCE: SQLOdbcSagCliConformance.SQL_OSCC_NOT_COMPLIANT,
+            InfoType.SQL_ODBC_SQL_CONFORMANCE: SQLOdbcSqlConformance.SQL_OSC_CORE,
+            InfoType.SQL_ODBC_VER: "03.52",
+            InfoType.SQL_OJ_CAPABILITIES: SQLOuterJoinCapabilities.SQL_OJ_ALL_COMPARISON_OPS
+            | SQLOuterJoinCapabilities.SQL_OJ_INNER
+            | SQLOuterJoinCapabilities.SQL_OJ_NOT_ORDERED
+            | SQLOuterJoinCapabilities.SQL_OJ_NESTED
+            | SQLOuterJoinCapabilities.SQL_OJ_FULL
+            | SQLOuterJoinCapabilities.SQL_OJ_RIGHT
+            | SQLOuterJoinCapabilities.SQL_OJ_LEFT,
+            InfoType.SQL_ORDER_BY_COLUMNS_IN_SELECT: "N",
+            InfoType.SQL_OUTER_JOINS: SQLOuterJoins.FULL,
+            InfoType.SQL_PARAM_ARRAY_ROW_COUNTS: SQLParamArrayRowCounts.SQL_PARC_BATCH,
+            InfoType.SQL_PARAM_ARRAY_SELECTS: SQLParamArraySelects.SQL_PAS_BATCH,
+            InfoType.SQL_POSITIONED_STATEMENTS: NotImplementedError("Unsupported InfoType: 80"),
+            InfoType.SQL_POS_OPERATIONS: NotImplementedError("Unsupported InfoType: 79"),
+            InfoType.SQL_PROCEDURES: "Y",
+            InfoType.SQL_PROCEDURE_TERM: "stored procedure",
+            InfoType.SQL_QUOTED_IDENTIFIER_CASE: SQLIdentifierCase.SQL_IC_MIXED,
+            InfoType.SQL_ROW_UPDATES: "N",
+            InfoType.SQL_SCHEMA_TERM: "owner",
+            InfoType.SQL_SCHEMA_USAGE: SQLSchemaUsage.SQL_SU_PRIVILEGE_DEFINITION
+            | SQLSchemaUsage.SQL_SU_INDEX_DEFINITION
+            | SQLSchemaUsage.SQL_SU_TABLE_DEFINITION
+            | SQLSchemaUsage.SQL_SU_PROCEDURE_INVOCATION
+            | SQLSchemaUsage.SQL_SU_DML_STATEMENTS,
+            InfoType.SQL_SCROLL_CONCURRENCY: SQLScrollConcurrency.SQL_SCCO_READ_ONLY
+            | SQLScrollConcurrency.SQL_SCCO_LOCK
+            | SQLScrollConcurrency.SQL_SCCO_OPT_VALUES
+            | SQLScrollConcurrency.SQL_SCCO_OPT_ROWVER,
+            InfoType.SQL_SCROLL_OPTIONS: SQLScrollOptions.SQL_SO_FORWARD_ONLY
+            | SQLScrollOptions.SQL_SO_KEYSET_DRIVEN
+            | SQLScrollOptions.SQL_SO_DYNAMIC
+            | SQLScrollOptions.SQL_SO_STATIC,
+            InfoType.SQL_SEARCH_PATTERN_ESCAPE: "\\",
+            InfoType.SQL_SERVER_NAME: partial(pytest.skip, reason="Unstable return value for SQL_SERVER_NAME"),
+            InfoType.SQL_SPECIAL_CHARACTERS: "#$ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ",
+            InfoType.SQL_SQL92_DATETIME_FUNCTIONS: SQLSql92DatetimeFunctions(0),
+            InfoType.SQL_SQL92_FOREIGN_KEY_DELETE_RULE: SQLSql92ForeignKeyDeleteRule(0),
+            InfoType.SQL_SQL92_FOREIGN_KEY_UPDATE_RULE: SQLSql92ForeignKeyUpdateRule(0),
+            InfoType.SQL_SQL92_GRANT: SQLSql92Grant.SQL_SG_WITH_GRANT_OPTION,
+            InfoType.SQL_SQL92_NUMERIC_VALUE_FUNCTIONS: SQLSql92NumericValueFunctions(0),
+            InfoType.SQL_SQL92_PREDICATES: SQLSql92Predicates.SQL_SP_EXISTS
+            | SQLSql92Predicates.SQL_SP_ISNOTNULL
+            | SQLSql92Predicates.SQL_SP_ISNULL
+            | SQLSql92Predicates.SQL_SP_LIKE
+            | SQLSql92Predicates.SQL_SP_IN
+            | SQLSql92Predicates.SQL_SP_BETWEEN
+            | SQLSql92Predicates.SQL_SP_COMPARISON
+            | SQLSql92Predicates.SQL_SP_QUANTIFIED_COMPARISON,
+            InfoType.SQL_SQL92_RELATIONAL_JOIN_OPERATORS: SQLSql92RelationalJoinOperators.SQL_SRJO_CROSS_JOIN
+            | SQLSql92RelationalJoinOperators.SQL_SRJO_FULL_OUTER_JOIN
+            | SQLSql92RelationalJoinOperators.SQL_SRJO_INNER_JOIN
+            | SQLSql92RelationalJoinOperators.SQL_SRJO_LEFT_OUTER_JOIN
+            | SQLSql92RelationalJoinOperators.SQL_SRJO_RIGHT_OUTER_JOIN
+            | SQLSql92RelationalJoinOperators.SQL_SRJO_UNION_JOIN,
+            InfoType.SQL_SQL92_REVOKE: SQLSql92Revoke.SQL_SR_GRANT_OPTION_FOR,
+            InfoType.SQL_SQL92_ROW_VALUE_CONSTRUCTOR: SQLSql92RowValueConstructor.SQL_SRVC_VALUE_EXPRESSION
+            | SQLSql92RowValueConstructor.SQL_SRVC_NULL
+            | SQLSql92RowValueConstructor.SQL_SRVC_DEFAULT
+            | SQLSql92RowValueConstructor.SQL_SRVC_ROW_SUBQUERY,
+            InfoType.SQL_SQL92_STRING_FUNCTIONS: SQLSql92StringFunctions.SQL_SSF_LOWER
+            | SQLSql92StringFunctions.SQL_SSF_UPPER,
+            InfoType.SQL_SQL92_VALUE_EXPRESSIONS: SQLSql92ValueExpressions.SQL_SVE_NULLIF
+            | SQLSql92ValueExpressions.SQL_SVE_COALESCE
+            | SQLSql92ValueExpressions.SQL_SVE_CAST
+            | SQLSql92ValueExpressions.SQL_SVE_CASE,
+            InfoType.SQL_SQL_CONFORMANCE: SQLSqlConformance.SQL_SC_SQL92_ENTRY,
+            InfoType.SQL_STANDARD_CLI_CONFORMANCE: SQLStandardCliConformance.SQL_SCC_ISO92_CLI,
+            InfoType.SQL_STATIC_CURSOR_ATTRIBUTES1: SQLCursorAttributes1.SQL_CA1_NEXT
+            | SQLCursorAttributes1.SQL_CA1_ABSOLUTE
+            | SQLCursorAttributes1.SQL_CA1_RELATIVE
+            | SQLCursorAttributes1.SQL_CA1_BOOKMARK
+            | SQLCursorAttributes1.SQL_CA1_LOCK_NO_CHANGE
+            | SQLCursorAttributes1.SQL_CA1_POS_POSITION
+            | SQLCursorAttributes1.SQL_CA1_POS_REFRESH,
+            InfoType.SQL_STATIC_CURSOR_ATTRIBUTES2: SQLCursorAttributes2.SQL_CA2_READ_ONLY_CONCURRENCY
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_SELECT
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_INSERT
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_DELETE
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_UPDATE
+            | SQLCursorAttributes2.SQL_CA2_MAX_ROWS_CATALOG
+            | SQLCursorAttributes2.SQL_CA2_CRC_EXACT,
+            InfoType.SQL_STATIC_SENSITIVITY: NotImplementedError("Unsupported InfoType: 83"),
+            InfoType.SQL_STRING_FUNCTIONS: SQLStringFunctions.SQL_FN_STR_CONCAT
+            | SQLStringFunctions.SQL_FN_STR_INSERT
+            | SQLStringFunctions.SQL_FN_STR_LEFT
+            | SQLStringFunctions.SQL_FN_STR_LTRIM
+            | SQLStringFunctions.SQL_FN_STR_LENGTH
+            | SQLStringFunctions.SQL_FN_STR_LOCATE
+            | SQLStringFunctions.SQL_FN_STR_LCASE
+            | SQLStringFunctions.SQL_FN_STR_REPEAT
+            | SQLStringFunctions.SQL_FN_STR_REPLACE
+            | SQLStringFunctions.SQL_FN_STR_RIGHT
+            | SQLStringFunctions.SQL_FN_STR_RTRIM
+            | SQLStringFunctions.SQL_FN_STR_SUBSTRING
+            | SQLStringFunctions.SQL_FN_STR_UCASE
+            | SQLStringFunctions.SQL_FN_STR_ASCII
+            | SQLStringFunctions.SQL_FN_STR_CHAR
+            | SQLStringFunctions.SQL_FN_STR_DIFFERENCE,
+            InfoType.SQL_SUBQUERIES: SQLSubqueries.SQL_SQ_CORRELATED_SUBQUERIES
+            | SQLSubqueries.SQL_SQ_QUANTIFIED
+            | SQLSubqueries.SQL_SQ_IN
+            | SQLSubqueries.SQL_SQ_EXISTS
+            | SQLSubqueries.SQL_SQ_COMPARISON,
+            InfoType.SQL_SYSTEM_FUNCTIONS: SQLSystemFunctions.SQL_FN_SYS_USERNAME
+            | SQLSystemFunctions.SQL_FN_SYS_IFNULL
+            | SQLSystemFunctions.SQL_FN_SYS_DBNAME,
+            InfoType.SQL_TABLE_TERM: "table",
+            InfoType.SQL_TIMEDATE_ADD_INTERVALS: SQLTimestampIntervals.SQL_FN_TSI_YEAR
+            | SQLTimestampIntervals.SQL_FN_TSI_QUARTER
+            | SQLTimestampIntervals.SQL_FN_TSI_MONTH
+            | SQLTimestampIntervals.SQL_FN_TSI_WEEK
+            | SQLTimestampIntervals.SQL_FN_TSI_DAY
+            | SQLTimestampIntervals.SQL_FN_TSI_HOUR
+            | SQLTimestampIntervals.SQL_FN_TSI_MINUTE
+            | SQLTimestampIntervals.SQL_FN_TSI_SECOND
+            | SQLTimestampIntervals.SQL_FN_TSI_FRAC_SECOND,
+            InfoType.SQL_TIMEDATE_DIFF_INTERVALS: SQLTimestampIntervals.SQL_FN_TSI_YEAR
+            | SQLTimestampIntervals.SQL_FN_TSI_QUARTER
+            | SQLTimestampIntervals.SQL_FN_TSI_MONTH
+            | SQLTimestampIntervals.SQL_FN_TSI_WEEK
+            | SQLTimestampIntervals.SQL_FN_TSI_DAY
+            | SQLTimestampIntervals.SQL_FN_TSI_HOUR
+            | SQLTimestampIntervals.SQL_FN_TSI_MINUTE
+            | SQLTimestampIntervals.SQL_FN_TSI_SECOND
+            | SQLTimestampIntervals.SQL_FN_TSI_FRAC_SECOND,
+            InfoType.SQL_TIMEDATE_FUNCTIONS: SQLTimeDateFunctions.SQL_FN_TD_NOW
+            | SQLTimeDateFunctions.SQL_FN_TD_CURDATE
+            | SQLTimeDateFunctions.SQL_FN_TD_DAYOFMONTH
+            | SQLTimeDateFunctions.SQL_FN_TD_DAYOFWEEK
+            | SQLTimeDateFunctions.SQL_FN_TD_DAYOFYEAR
+            | SQLTimeDateFunctions.SQL_FN_TD_MONTH
+            | SQLTimeDateFunctions.SQL_FN_TD_QUARTER
+            | SQLTimeDateFunctions.SQL_FN_TD_WEEK
+            | SQLTimeDateFunctions.SQL_FN_TD_YEAR
+            | SQLTimeDateFunctions.SQL_FN_TD_CURTIME
+            | SQLTimeDateFunctions.SQL_FN_TD_HOUR
+            | SQLTimeDateFunctions.SQL_FN_TD_MINUTE
+            | SQLTimeDateFunctions.SQL_FN_TD_SECOND
+            | SQLTimeDateFunctions.SQL_FN_TD_TIMESTAMPADD
+            | SQLTimeDateFunctions.SQL_FN_TD_TIMESTAMPDIFF
+            | SQLTimeDateFunctions.SQL_FN_TD_DAYNAME,
+            InfoType.SQL_TXN_CAPABLE: SQLTxnCapable.SQL_TC_ALL,
+            InfoType.SQL_TXN_ISOLATION_OPTION: SQLTxnIsolationOption.SQL_TXN_READ_UNCOMMITTED
+            | SQLTxnIsolationOption.SQL_TXN_READ_COMMITTED
+            | SQLTxnIsolationOption.SQL_TXN_REPEATABLE_READ
+            | SQLTxnIsolationOption.SQL_TXN_SERIALIZABLE
+            | SQLTxnIsolationOption.SQL_TXN_SS_SNAPSHOT,
+            InfoType.SQL_UNION: SQLUnion.SQL_U_UNION | SQLUnion.SQL_U_UNION_ALL,
+            InfoType.SQL_USER_NAME: "dbo",
+            InfoType.SQL_XOPEN_CLI_YEAR: "1994",
+        }
+
+    @property
+    def expected_sql_get_type_info_w_return_values(self) -> Mapping[SQLDataType, list[dict[str, Any]] | Exception]:
+        return {
+            SQLDataType.SQL_BIGINT: [
+                {
+                    "TYPE_NAME": "bigint",
+                    "DATA_TYPE": SQLDataType.SQL_BIGINT,
+                    "COLUMN_SIZE": 19,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "bigint",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -5,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "bigint identity",
+                    "DATA_TYPE": SQLDataType.SQL_BIGINT,
+                    "COLUMN_SIZE": 19,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "bigint identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -5,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+            ],
+            SQLDataType.SQL_BINARY: [
+                {
+                    "TYPE_NAME": "binary",
+                    "DATA_TYPE": SQLDataType.SQL_BINARY,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": "0x",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "binary",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -2,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 3,
+                },
+                {
+                    "TYPE_NAME": "timestamp",
+                    "DATA_TYPE": SQLDataType.SQL_BINARY,
+                    "COLUMN_SIZE": 8,
+                    "LITERAL_PREFIX": "0x",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "timestamp",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -2,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 80,
+                },
+            ],
+            SQLDataType.SQL_BIT: [
+                {
+                    "TYPE_NAME": "bit",
+                    "DATA_TYPE": SQLDataType.SQL_BIT,
+                    "COLUMN_SIZE": 1,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "bit",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -7,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 16,
+                }
+            ],
+            SQLDataType.SQL_CHAR: [
+                {
+                    "TYPE_NAME": "char",
+                    "DATA_TYPE": SQLDataType.SQL_CHAR,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "char",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": 1,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 1,
+                }
+            ],
+            SQLDataType.SQL_DATETIME: [],
+            SQLDataType.SQL_DECIMAL: [
+                {
+                    "TYPE_NAME": "decimal",
+                    "DATA_TYPE": SQLDataType.SQL_DECIMAL,
+                    "COLUMN_SIZE": 38,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "precision,scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "decimal",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 38,
+                    "SQL_DATA_TYPE": 3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 24,
+                },
+                {
+                    "TYPE_NAME": "money",
+                    "DATA_TYPE": SQLDataType.SQL_DECIMAL,
+                    "COLUMN_SIZE": 19,
+                    "LITERAL_PREFIX": "$",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 1,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "money",
+                    "MINIMUM_SCALE": 4,
+                    "MAXIMUM_SCALE": 4,
+                    "SQL_DATA_TYPE": 3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 11,
+                },
+                {
+                    "TYPE_NAME": "smallmoney",
+                    "DATA_TYPE": SQLDataType.SQL_DECIMAL,
+                    "COLUMN_SIZE": 10,
+                    "LITERAL_PREFIX": "$",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 1,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "smallmoney",
+                    "MINIMUM_SCALE": 4,
+                    "MAXIMUM_SCALE": 4,
+                    "SQL_DATA_TYPE": 3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 21,
+                },
+                {
+                    "TYPE_NAME": "decimal() identity",
+                    "DATA_TYPE": SQLDataType.SQL_DECIMAL,
+                    "COLUMN_SIZE": 38,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "precision",
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "decimal() identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 24,
+                },
+            ],
+            SQLDataType.SQL_DOUBLE: [],
+            SQLDataType.SQL_FLOAT: [
+                {
+                    "TYPE_NAME": "float",
+                    "DATA_TYPE": SQLDataType.SQL_FLOAT,
+                    "COLUMN_SIZE": 53,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "float",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": 6,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 2,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 8,
+                }
+            ],
+            SQLDataType.SQL_GUID: [
+                {
+                    "TYPE_NAME": "uniqueidentifier",
+                    "DATA_TYPE": SQLDataType.SQL_GUID,
+                    "COLUMN_SIZE": 36,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "uniqueidentifier",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -11,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                }
+            ],
+            SQLDataType.SQL_INTEGER: [
+                {
+                    "TYPE_NAME": "int",
+                    "DATA_TYPE": SQLDataType.SQL_INTEGER,
+                    "COLUMN_SIZE": 10,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "int",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 4,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 7,
+                },
+                {
+                    "TYPE_NAME": "int identity",
+                    "DATA_TYPE": SQLDataType.SQL_INTEGER,
+                    "COLUMN_SIZE": 10,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "int identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 4,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 7,
+                },
+            ],
+            SQLDataType.SQL_INTERVAL: [],
+            SQLDataType.SQL_LONGVARBINARY: [
+                {
+                    "TYPE_NAME": "image",
+                    "DATA_TYPE": SQLDataType.SQL_LONGVARBINARY,
+                    "COLUMN_SIZE": 2147483647,
+                    "LITERAL_PREFIX": "0x",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 0,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "image",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -4,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 20,
+                }
+            ],
+            SQLDataType.SQL_LONGVARCHAR: [
+                {
+                    "TYPE_NAME": "text",
+                    "DATA_TYPE": SQLDataType.SQL_LONGVARCHAR,
+                    "COLUMN_SIZE": 2147483647,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 1,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "text",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -1,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 19,
+                }
+            ],
+            SQLDataType.SQL_NUMERIC: [
+                {
+                    "TYPE_NAME": "numeric",
+                    "DATA_TYPE": SQLDataType.SQL_NUMERIC,
+                    "COLUMN_SIZE": 38,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "precision,scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "numeric",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 38,
+                    "SQL_DATA_TYPE": 2,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 10,
+                },
+                {
+                    "TYPE_NAME": "numeric() identity",
+                    "DATA_TYPE": SQLDataType.SQL_NUMERIC,
+                    "COLUMN_SIZE": 38,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "precision",
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "numeric() identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 2,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 10,
+                },
+            ],
+            SQLDataType.SQL_REAL: [
+                {
+                    "TYPE_NAME": "real",
+                    "DATA_TYPE": SQLDataType.SQL_REAL,
+                    "COLUMN_SIZE": 24,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "real",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": 7,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 2,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 23,
+                }
+            ],
+            SQLDataType.SQL_SMALLINT: [
+                {
+                    "TYPE_NAME": "smallint",
+                    "DATA_TYPE": SQLDataType.SQL_SMALLINT,
+                    "COLUMN_SIZE": 5,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "smallint",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 5,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 6,
+                },
+                {
+                    "TYPE_NAME": "smallint identity",
+                    "DATA_TYPE": SQLDataType.SQL_SMALLINT,
+                    "COLUMN_SIZE": 5,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "smallint identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 5,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 6,
+                },
+            ],
+            SQLDataType.SQL_SS_TABLE: ODBCError(
+                what="SQLGetTypeInfoW",
+                sql_state="HY004",
+                native_error=0,
+                return_code=SQLReturn.SQL_ERROR,
+                message_text="[Microsoft][ODBC Driver 18 for SQL Server]Invalid SQL data type",
+            ),
+            SQLDataType.SQL_SS_TIME2: [
+                {
+                    "TYPE_NAME": "time",
+                    "DATA_TYPE": SQLDataType.SQL_SS_TIME2,
+                    "COLUMN_SIZE": 16,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "time",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 7,
+                    "SQL_DATA_TYPE": -154,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_UNKNOWN_TYPE,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                }
+            ],
+            SQLDataType.SQL_SS_TIMESTAMPOFFSET: [
+                {
+                    "TYPE_NAME": "datetimeoffset",
+                    "DATA_TYPE": SQLDataType.SQL_SS_TIMESTAMPOFFSET,
+                    "COLUMN_SIZE": 34,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "datetimeoffset",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 7,
+                    "SQL_DATA_TYPE": -155,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_UNKNOWN_TYPE,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                }
+            ],
+            SQLDataType.SQL_SS_UDT: ODBCError(
+                what="SQLGetTypeInfoW",
+                sql_state="HYC00",
+                native_error=0,
+                return_code=SQLReturn.SQL_ERROR,
+                message_text="[Microsoft][ODBC Driver 18 for SQL Server]Optional feature not implemented",
+            ),
+            SQLDataType.SQL_SS_VARIANT: [
+                {
+                    "TYPE_NAME": "sql_variant",
+                    "DATA_TYPE": SQLDataType.SQL_SS_VARIANT,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "sql_variant",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -150,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                }
+            ],
+            SQLDataType.SQL_SS_XML: [
+                {
+                    "TYPE_NAME": "xml",
+                    "DATA_TYPE": SQLDataType.SQL_SS_XML,
+                    "COLUMN_SIZE": 0,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 1,
+                    "SEARCHABLE": 0,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "xml",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -152,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                }
+            ],
+            SQLDataType.SQL_TIMESTAMP: [],
+            SQLDataType.SQL_TINYINT: [
+                {
+                    "TYPE_NAME": "tinyint",
+                    "DATA_TYPE": SQLDataType.SQL_TINYINT,
+                    "COLUMN_SIZE": 3,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 1,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "tinyint",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -6,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 5,
+                },
+                {
+                    "TYPE_NAME": "tinyint identity",
+                    "DATA_TYPE": SQLDataType.SQL_TINYINT,
+                    "COLUMN_SIZE": 3,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 1,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "tinyint identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -6,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 5,
+                },
+            ],
+            SQLDataType.SQL_TYPE_DATE: [
+                {
+                    "TYPE_NAME": "date",
+                    "DATA_TYPE": SQLDataType.SQL_TYPE_DATE,
+                    "COLUMN_SIZE": 10,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "date",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 9,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_CHAR,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                }
+            ],
+            SQLDataType.SQL_TYPE_TIME: [],
+            SQLDataType.SQL_TYPE_TIME_WITH_TIMEZONE: ODBCError(
+                what="SQLGetTypeInfoW",
+                sql_state="HY004",
+                native_error=0,
+                return_code=SQLReturn.SQL_ERROR,
+                message_text="[Microsoft][ODBC Driver 18 for SQL Server]Invalid SQL data type",
+            ),
+            SQLDataType.SQL_TYPE_TIMESTAMP: [
+                {
+                    "TYPE_NAME": "datetime2",
+                    "DATA_TYPE": SQLDataType.SQL_TYPE_TIMESTAMP,
+                    "COLUMN_SIZE": 27,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "datetime2",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 7,
+                    "SQL_DATA_TYPE": 9,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_DECIMAL,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "datetime",
+                    "DATA_TYPE": SQLDataType.SQL_TYPE_TIMESTAMP,
+                    "COLUMN_SIZE": 23,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "datetime",
+                    "MINIMUM_SCALE": 3,
+                    "MAXIMUM_SCALE": 3,
+                    "SQL_DATA_TYPE": 9,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_DECIMAL,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 12,
+                },
+                {
+                    "TYPE_NAME": "smalldatetime",
+                    "DATA_TYPE": SQLDataType.SQL_TYPE_TIMESTAMP,
+                    "COLUMN_SIZE": 16,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "smalldatetime",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 9,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_DECIMAL,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 22,
+                },
+            ],
+            SQLDataType.SQL_TYPE_TIMESTAMP_WITH_TIMEZONE: ODBCError(
+                what="SQLGetTypeInfoW",
+                sql_state="HY004",
+                native_error=0,
+                return_code=SQLReturn.SQL_ERROR,
+                message_text="[Microsoft][ODBC Driver 18 for SQL Server]Invalid SQL data type",
+            ),
+            SQLDataType.SQL_UNKNOWN_TYPE: [
+                {
+                    "TYPE_NAME": "datetimeoffset",
+                    "DATA_TYPE": SQLDataType.SQL_SS_TIMESTAMPOFFSET,
+                    "COLUMN_SIZE": 34,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "datetimeoffset",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 7,
+                    "SQL_DATA_TYPE": -155,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_UNKNOWN_TYPE,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "time",
+                    "DATA_TYPE": SQLDataType.SQL_SS_TIME2,
+                    "COLUMN_SIZE": 16,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "time",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 7,
+                    "SQL_DATA_TYPE": -154,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_UNKNOWN_TYPE,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "xml",
+                    "DATA_TYPE": SQLDataType.SQL_SS_XML,
+                    "COLUMN_SIZE": 0,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 1,
+                    "SEARCHABLE": 0,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "xml",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -152,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "sql_variant",
+                    "DATA_TYPE": SQLDataType.SQL_SS_VARIANT,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "sql_variant",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -150,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "uniqueidentifier",
+                    "DATA_TYPE": SQLDataType.SQL_GUID,
+                    "COLUMN_SIZE": 36,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "uniqueidentifier",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -11,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "ntext",
+                    "DATA_TYPE": SQLDataType.SQL_WLONGVARCHAR,
+                    "COLUMN_SIZE": 1073741823,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 1,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "ntext",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -10,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "nvarchar",
+                    "DATA_TYPE": SQLDataType.SQL_WVARCHAR,
+                    "COLUMN_SIZE": 4000,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "max length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "nvarchar",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -9,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "sysname",
+                    "DATA_TYPE": SQLDataType.SQL_WVARCHAR,
+                    "COLUMN_SIZE": 128,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "sysname",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -9,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 18,
+                },
+                {
+                    "TYPE_NAME": "nchar",
+                    "DATA_TYPE": SQLDataType.SQL_WCHAR,
+                    "COLUMN_SIZE": 4000,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "nchar",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -8,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "bit",
+                    "DATA_TYPE": SQLDataType.SQL_BIT,
+                    "COLUMN_SIZE": 1,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "bit",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -7,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 16,
+                },
+                {
+                    "TYPE_NAME": "tinyint",
+                    "DATA_TYPE": SQLDataType.SQL_TINYINT,
+                    "COLUMN_SIZE": 3,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 1,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "tinyint",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -6,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 5,
+                },
+                {
+                    "TYPE_NAME": "tinyint identity",
+                    "DATA_TYPE": SQLDataType.SQL_TINYINT,
+                    "COLUMN_SIZE": 3,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 1,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "tinyint identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -6,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 5,
+                },
+                {
+                    "TYPE_NAME": "bigint",
+                    "DATA_TYPE": SQLDataType.SQL_BIGINT,
+                    "COLUMN_SIZE": 19,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "bigint",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -5,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "bigint identity",
+                    "DATA_TYPE": SQLDataType.SQL_BIGINT,
+                    "COLUMN_SIZE": 19,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "bigint identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": -5,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "image",
+                    "DATA_TYPE": SQLDataType.SQL_LONGVARBINARY,
+                    "COLUMN_SIZE": 2147483647,
+                    "LITERAL_PREFIX": "0x",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 0,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "image",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -4,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 20,
+                },
+                {
+                    "TYPE_NAME": "varbinary",
+                    "DATA_TYPE": SQLDataType.SQL_VARBINARY,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": "0x",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "max length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "varbinary",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 4,
+                },
+                {
+                    "TYPE_NAME": "binary",
+                    "DATA_TYPE": SQLDataType.SQL_BINARY,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": "0x",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "binary",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -2,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 3,
+                },
+                {
+                    "TYPE_NAME": "timestamp",
+                    "DATA_TYPE": SQLDataType.SQL_BINARY,
+                    "COLUMN_SIZE": 8,
+                    "LITERAL_PREFIX": "0x",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "timestamp",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -2,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 80,
+                },
+                {
+                    "TYPE_NAME": "text",
+                    "DATA_TYPE": SQLDataType.SQL_LONGVARCHAR,
+                    "COLUMN_SIZE": 2147483647,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 1,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "text",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -1,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 19,
+                },
+                {
+                    "TYPE_NAME": "char",
+                    "DATA_TYPE": SQLDataType.SQL_CHAR,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "char",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": 1,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 1,
+                },
+                {
+                    "TYPE_NAME": "numeric",
+                    "DATA_TYPE": SQLDataType.SQL_NUMERIC,
+                    "COLUMN_SIZE": 38,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "precision,scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "numeric",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 38,
+                    "SQL_DATA_TYPE": 2,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 10,
+                },
+                {
+                    "TYPE_NAME": "numeric() identity",
+                    "DATA_TYPE": SQLDataType.SQL_NUMERIC,
+                    "COLUMN_SIZE": 38,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "precision",
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "numeric() identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 2,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 10,
+                },
+                {
+                    "TYPE_NAME": "decimal",
+                    "DATA_TYPE": SQLDataType.SQL_DECIMAL,
+                    "COLUMN_SIZE": 38,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "precision,scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "decimal",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 38,
+                    "SQL_DATA_TYPE": 3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 24,
+                },
+                {
+                    "TYPE_NAME": "money",
+                    "DATA_TYPE": SQLDataType.SQL_DECIMAL,
+                    "COLUMN_SIZE": 19,
+                    "LITERAL_PREFIX": "$",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 1,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "money",
+                    "MINIMUM_SCALE": 4,
+                    "MAXIMUM_SCALE": 4,
+                    "SQL_DATA_TYPE": 3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 11,
+                },
+                {
+                    "TYPE_NAME": "smallmoney",
+                    "DATA_TYPE": SQLDataType.SQL_DECIMAL,
+                    "COLUMN_SIZE": 10,
+                    "LITERAL_PREFIX": "$",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 1,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "smallmoney",
+                    "MINIMUM_SCALE": 4,
+                    "MAXIMUM_SCALE": 4,
+                    "SQL_DATA_TYPE": 3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 21,
+                },
+                {
+                    "TYPE_NAME": "decimal() identity",
+                    "DATA_TYPE": SQLDataType.SQL_DECIMAL,
+                    "COLUMN_SIZE": 38,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "precision",
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "decimal() identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 24,
+                },
+                {
+                    "TYPE_NAME": "int",
+                    "DATA_TYPE": SQLDataType.SQL_INTEGER,
+                    "COLUMN_SIZE": 10,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "int",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 4,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 7,
+                },
+                {
+                    "TYPE_NAME": "int identity",
+                    "DATA_TYPE": SQLDataType.SQL_INTEGER,
+                    "COLUMN_SIZE": 10,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "int identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 4,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 7,
+                },
+                {
+                    "TYPE_NAME": "smallint",
+                    "DATA_TYPE": SQLDataType.SQL_SMALLINT,
+                    "COLUMN_SIZE": 5,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "smallint",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 5,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 6,
+                },
+                {
+                    "TYPE_NAME": "smallint identity",
+                    "DATA_TYPE": SQLDataType.SQL_SMALLINT,
+                    "COLUMN_SIZE": 5,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 1,
+                    "LOCAL_TYPE_NAME": "smallint identity",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 5,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 10,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 6,
+                },
+                {
+                    "TYPE_NAME": "float",
+                    "DATA_TYPE": SQLDataType.SQL_FLOAT,
+                    "COLUMN_SIZE": 53,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "float",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": 6,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 2,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 8,
+                },
+                {
+                    "TYPE_NAME": "real",
+                    "DATA_TYPE": SQLDataType.SQL_REAL,
+                    "COLUMN_SIZE": 24,
+                    "LITERAL_PREFIX": None,
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": 0,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": 0,
+                    "LOCAL_TYPE_NAME": "real",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": 7,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": 2,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 23,
+                },
+                {
+                    "TYPE_NAME": "varchar",
+                    "DATA_TYPE": SQLDataType.SQL_VARCHAR,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "max length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "varchar",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": 12,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 2,
+                },
+                {
+                    "TYPE_NAME": "date",
+                    "DATA_TYPE": SQLDataType.SQL_TYPE_DATE,
+                    "COLUMN_SIZE": 10,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "date",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 9,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_CHAR,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "datetime2",
+                    "DATA_TYPE": SQLDataType.SQL_TYPE_TIMESTAMP,
+                    "COLUMN_SIZE": 27,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "scale",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "datetime2",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 7,
+                    "SQL_DATA_TYPE": 9,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_DECIMAL,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "datetime",
+                    "DATA_TYPE": SQLDataType.SQL_TYPE_TIMESTAMP,
+                    "COLUMN_SIZE": 23,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "datetime",
+                    "MINIMUM_SCALE": 3,
+                    "MAXIMUM_SCALE": 3,
+                    "SQL_DATA_TYPE": 9,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_DECIMAL,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 12,
+                },
+                {
+                    "TYPE_NAME": "smalldatetime",
+                    "DATA_TYPE": SQLDataType.SQL_TYPE_TIMESTAMP,
+                    "COLUMN_SIZE": 16,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "smalldatetime",
+                    "MINIMUM_SCALE": 0,
+                    "MAXIMUM_SCALE": 0,
+                    "SQL_DATA_TYPE": 9,
+                    "SQL_DATETIME_SUB": SQLDataType.SQL_DECIMAL,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 22,
+                },
+            ],
+            SQLDataType.SQL_VARBINARY: [
+                {
+                    "TYPE_NAME": "varbinary",
+                    "DATA_TYPE": SQLDataType.SQL_VARBINARY,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": "0x",
+                    "LITERAL_SUFFIX": None,
+                    "CREATE_PARAMS": "max length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 2,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "varbinary",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -3,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 4,
+                }
+            ],
+            SQLDataType.SQL_VARCHAR: [
+                {
+                    "TYPE_NAME": "varchar",
+                    "DATA_TYPE": SQLDataType.SQL_VARCHAR,
+                    "COLUMN_SIZE": 8000,
+                    "LITERAL_PREFIX": "'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "max length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "varchar",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": 12,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 2,
+                }
+            ],
+            SQLDataType.SQL_WCHAR: [
+                {
+                    "TYPE_NAME": "nchar",
+                    "DATA_TYPE": SQLDataType.SQL_WCHAR,
+                    "COLUMN_SIZE": 4000,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "nchar",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -8,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                }
+            ],
+            SQLDataType.SQL_WLONGVARCHAR: [
+                {
+                    "TYPE_NAME": "ntext",
+                    "DATA_TYPE": SQLDataType.SQL_WLONGVARCHAR,
+                    "COLUMN_SIZE": 1073741823,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 1,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "ntext",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -10,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                }
+            ],
+            SQLDataType.SQL_WVARCHAR: [
+                {
+                    "TYPE_NAME": "nvarchar",
+                    "DATA_TYPE": SQLDataType.SQL_WVARCHAR,
+                    "COLUMN_SIZE": 4000,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": "max length",
+                    "NULLABLE": 1,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "nvarchar",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -9,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 0,
+                },
+                {
+                    "TYPE_NAME": "sysname",
+                    "DATA_TYPE": SQLDataType.SQL_WVARCHAR,
+                    "COLUMN_SIZE": 128,
+                    "LITERAL_PREFIX": "N'",
+                    "LITERAL_SUFFIX": "'",
+                    "CREATE_PARAMS": None,
+                    "NULLABLE": 0,
+                    "CASE_SENSITIVE": 0,
+                    "SEARCHABLE": 3,
+                    "UNSIGNED_ATTRIBUTE": None,
+                    "FIXED_PREC_SCALE": 0,
+                    "AUTO_UNIQUE_VALUE": None,
+                    "LOCAL_TYPE_NAME": "sysname",
+                    "MINIMUM_SCALE": None,
+                    "MAXIMUM_SCALE": None,
+                    "SQL_DATA_TYPE": -9,
+                    "SQL_DATETIME_SUB": None,
+                    "NUM_PREC_RADIX": None,
+                    "INTERVAL_PRECISION": None,
+                    "USERTYPE": 18,
+                },
+            ],
+        }

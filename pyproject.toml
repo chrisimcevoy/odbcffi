@@ -50,6 +50,10 @@ filterwarnings = [
 ]
 log_cli = true
 log_cli_level = "DEBUG"
+# Make sure assert rewrite happens in all test modules,
+# not just those with a `test_*` prefix.
+# e.g. tests/drivers/base.py
+python_files = "tests/*.py"
 xfail_strict = true
 
 [tool.ruff]
