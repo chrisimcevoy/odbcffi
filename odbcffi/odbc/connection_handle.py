@@ -43,8 +43,8 @@ class ConnectionHandle(Handle):
 
     def __exit__(
         self,
-        exc_type: type[Exception] | None,
-        exc_val: Exception | None,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
         """Close the connection and free the underlying handle on context exit.
@@ -58,7 +58,6 @@ class ConnectionHandle(Handle):
             self.close()
         finally:
             super().__exit__(exc_type, exc_val, exc_tb)
-        return None
 
     def open(self, connection_string: str) -> Self:
         """Establish a connection using the given connection string.

@@ -75,12 +75,6 @@ class ConnectionInfo:
                 password="Password123",  # noqa: S106
             ),
             id="msodbcsql17",
-            marks=[
-                pytest.mark.skipif(
-                    os.getenv("SKIP_MSODBCSQL17", default=False),
-                    reason="Skipped via environment variable",
-                )
-            ],
         ),
         pytest.param(
             ConnectionInfo(
@@ -93,12 +87,6 @@ class ConnectionInfo:
                 suffix="TrustServerCertificate=yes;",
             ),
             id="msodbcsql18",
-            marks=[
-                pytest.mark.skipif(
-                    os.getenv("SKIP_MSODBCSQL18", default=False),
-                    reason="Skipped via environment variable",
-                )
-            ],
         ),
         pytest.param(
             ConnectionInfo(
@@ -111,10 +99,6 @@ class ConnectionInfo:
             ),
             id="SQL Server (MDAC)",
             marks=[
-                pytest.mark.skipif(
-                    os.getenv("SKIP_MDAC", default=False),
-                    reason="Skipped via environment variable",
-                ),
                 pytest.mark.skipif(
                     PLATFORM != "Windows",
                     reason=f"MDAC Driver not supported on {PLATFORM}.",
@@ -133,10 +117,6 @@ class ConnectionInfo:
             id="FreeTDS",
             marks=[
                 pytest.mark.skipif(
-                    os.getenv("SKIP_FREETDS", default=False),
-                    reason="Skipped via environment variable",
-                ),
-                pytest.mark.skipif(
                     PLATFORM == "Windows",
                     reason="FreeTDS driver not supported on Windows.",
                 ),
@@ -152,12 +132,6 @@ class ConnectionInfo:
                 password="Password123",  # noqa: S106
             ),
             id="PgSQL Unicode",
-            marks=[
-                pytest.mark.skipif(
-                    os.getenv("SKIP_PGSQL_W", default=False),
-                    reason="Skipped via environment variable",
-                ),
-            ],
         ),
         pytest.param(
             ConnectionInfo(
@@ -169,12 +143,6 @@ class ConnectionInfo:
                 password="Password123",  # noqa: S106
             ),
             id="PgSQL ANSI",
-            marks=[
-                pytest.mark.skipif(
-                    os.getenv("SKIP_PGSQL_A", default=False),
-                    reason="Skipped via environment variable",
-                ),
-            ],
         ),
         pytest.param(
             ConnectionInfo(
@@ -189,12 +157,6 @@ class ConnectionInfo:
                 suffix="OPTION=67108864",
             ),
             id="MySQL Unicode",
-            marks=[
-                pytest.mark.skipif(
-                    os.getenv("SKIP_MYSQL_W", default=False),
-                    reason="Skipped via environment variable",
-                ),
-            ],
         ),
         pytest.param(
             ConnectionInfo(
@@ -211,12 +173,6 @@ class ConnectionInfo:
                 ),
             ),
             id="MySQL ANSI",
-            marks=[
-                pytest.mark.skipif(
-                    os.getenv("SKIP_MYSQL_A", default=False),
-                    reason="Skipped via environment variable",
-                ),
-            ],
         ),
     ],
 )

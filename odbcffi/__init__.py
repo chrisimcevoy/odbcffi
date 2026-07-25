@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import threading
-from typing import Final, Literal
+from typing import Final
 
 from . import odbc
 from .db_api import (
@@ -46,13 +46,13 @@ __all__ = [
 
 # See https://peps.python.org/pep-0249/#module-interface
 
-apilevel: Final[Literal["2.0"]] = "2.0"
+apilevel: Final = "2.0"
 """String constant stating the supported DB API level."""
 
-threadsafety: Final[Literal[1]] = 1
+threadsafety: Final = 1
 """Integer constant stating the level of thread safety the interface supports."""
 
-paramstyle: Final[Literal["qmark"]] = "qmark"
+paramstyle: Final = "qmark"
 """String constant stating the type of parameter marker formatting expected by the interface."""
 
 __default_environment: _EnvironmentHandle | None = None

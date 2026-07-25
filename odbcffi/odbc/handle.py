@@ -38,16 +38,16 @@ class Handle(ABC):
 
     def __exit__(
         self,
-        exc_type: type[Exception] | None,
-        exc_val: Exception | None,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
         """Ensure resources are cleaned up on exit."""
         if self._handle is None or (self._parent is not None and self._parent._handle is None):
-            return None
+            return
         self._driver_manager.sql_free_handle(handle=self)
         self._handle = None
-        return None
+        return
 
     @property
     def handle(self) -> Any:
