@@ -1,4 +1,5 @@
 from collections.abc import Mapping
+from functools import partial
 from typing import Any
 
 import pytest
@@ -13,7 +14,7 @@ def driver() -> str:
     return "MySQL ODBC 9.7 ANSI Driver"
 
 
-class TestMyODBC9a(DriverTest):
+class TestMyODBCA(DriverTest):
     @property
     def expected_sql_get_info_w_return_values(self) -> Mapping[InfoType, Any]:
         return {
@@ -361,7 +362,7 @@ class TestMyODBC9a(DriverTest):
             | SQLDatetimeLiterals.SQL_DL_SQL92_TIME
             | SQLDatetimeLiterals.SQL_DL_SQL92_TIMESTAMP,
             InfoType.SQL_DBMS_NAME: "MySQL",
-            InfoType.SQL_DBMS_VER: "9.6.0",
+            InfoType.SQL_DBMS_VER: partial(pytest.skip, reason="Unstable return value for SQL_DBMS_VER"),
             InfoType.SQL_DDL_INDEX: SQLDdlIndex.SQL_DI_CREATE_INDEX | SQLDdlIndex.SQL_DI_DROP_INDEX,
             InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption(0),
             InfoType.SQL_DESCRIBE_PARAMETER: "N",
@@ -380,7 +381,7 @@ class TestMyODBC9a(DriverTest):
             InfoType.SQL_DRIVER_HSTMT: NotImplementedError("Unsupported InfoType: 5"),
             InfoType.SQL_DRIVER_NAME: "libmyodbc9a.so",
             InfoType.SQL_DRIVER_ODBC_VER: "03.80",
-            InfoType.SQL_DRIVER_VER: "09.07.0000",
+            InfoType.SQL_DRIVER_VER: partial(pytest.skip, reason="Unstable return value for SQL_DRIVER_VER"),
             InfoType.SQL_DROP_ASSERTION: SQLDropAssertion(0),
             InfoType.SQL_DROP_CHARACTER_SET: SQLDropCharacterSet(0),
             InfoType.SQL_DROP_COLLATION: SQLDropCollation(0),
@@ -512,7 +513,7 @@ class TestMyODBC9a(DriverTest):
             | SQLScrollConcurrency.SQL_SCCO_OPT_ROWVER,
             InfoType.SQL_SCROLL_OPTIONS: SQLScrollOptions.SQL_SO_FORWARD_ONLY | SQLScrollOptions.SQL_SO_STATIC,
             InfoType.SQL_SEARCH_PATTERN_ESCAPE: "\\",
-            InfoType.SQL_SERVER_NAME: "mysql via TCP/IP",
+            InfoType.SQL_SERVER_NAME: partial(pytest.skip, reason="Unstable return value for SQL_SERVER_NAME"),
             InfoType.SQL_SPECIAL_CHARACTERS: " !\"#%&'()*+,-.:;<=>?@[\\]^`{|}~",
             InfoType.SQL_SQL92_DATETIME_FUNCTIONS: SQLSql92DatetimeFunctions.SQL_SDF_CURRENT_DATE
             | SQLSql92DatetimeFunctions.SQL_SDF_CURRENT_TIME

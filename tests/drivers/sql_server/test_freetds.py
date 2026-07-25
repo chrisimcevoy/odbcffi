@@ -1,3 +1,4 @@
+import platform
 from collections.abc import Mapping
 from functools import partial
 from typing import Any
@@ -7,6 +8,8 @@ import pytest
 from odbcffi.odbc.enums import *
 from odbcffi.odbc.errors import ODBCError
 from tests.drivers.base import DriverTest
+
+pytestmark = pytest.mark.skipif(platform.system() == "Windows", reason="FreeTDS driver not supported on Windows")
 
 
 @pytest.fixture(scope="module")
@@ -310,7 +313,7 @@ class TestFreeTDS(DriverTest):
             InfoType.SQL_DATA_SOURCE_READ_ONLY: "N",
             InfoType.SQL_DATETIME_LITERALS: SQLDatetimeLiterals(0),
             InfoType.SQL_DBMS_NAME: "Microsoft SQL Server",
-            InfoType.SQL_DBMS_VER: "17.00.4025",
+            InfoType.SQL_DBMS_VER: partial(pytest.skip, reason="Unstable return value for SQL_DBMS_VER"),
             InfoType.SQL_DDL_INDEX: SQLDdlIndex(0),
             InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption.SQL_TXN_READ_COMMITTED,
             InfoType.SQL_DESCRIBE_PARAMETER: "N",
@@ -329,7 +332,7 @@ class TestFreeTDS(DriverTest):
             InfoType.SQL_DRIVER_HSTMT: NotImplementedError("Unsupported InfoType: 5"),
             InfoType.SQL_DRIVER_NAME: "libtdsodbc.so",
             InfoType.SQL_DRIVER_ODBC_VER: "03.50",
-            InfoType.SQL_DRIVER_VER: "01.03.0017",
+            InfoType.SQL_DRIVER_VER: partial(pytest.skip, reason="Unstable return value for SQL_DRIVER_VER"),
             InfoType.SQL_DROP_ASSERTION: SQLDropAssertion(0),
             InfoType.SQL_DROP_CHARACTER_SET: SQLDropCharacterSet(0),
             InfoType.SQL_DROP_COLLATION: SQLDropCollation(0),

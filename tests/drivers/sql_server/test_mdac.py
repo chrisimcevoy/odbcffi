@@ -1,5 +1,6 @@
 import platform
 from collections.abc import Mapping
+from functools import partial
 from typing import Any
 
 import pytest
@@ -82,7 +83,7 @@ class TestMDAC(DriverTest):
             InfoType.SQL_DATA_SOURCE_READ_ONLY: "",
             InfoType.SQL_DATETIME_LITERALS: "",
             InfoType.SQL_DBMS_NAME: "",
-            InfoType.SQL_DBMS_VER: "",
+            InfoType.SQL_DBMS_VER: partial(pytest.skip, reason="Unstable return value for SQL_DBMS_VER"),
             InfoType.SQL_DDL_INDEX: "",
             InfoType.SQL_DEFAULT_TXN_ISOLATION: "",
             InfoType.SQL_DESCRIBE_PARAMETER: "",
@@ -95,7 +96,7 @@ class TestMDAC(DriverTest):
             InfoType.SQL_DRIVER_HSTMT: "",
             InfoType.SQL_DRIVER_NAME: "",
             InfoType.SQL_DRIVER_ODBC_VER: "",
-            InfoType.SQL_DRIVER_VER: "",
+            InfoType.SQL_DRIVER_VER: partial(pytest.skip, reason="Unstable return value for SQL_DRIVER_VER"),
             InfoType.SQL_DROP_ASSERTION: "",
             InfoType.SQL_DROP_CHARACTER_SET: "",
             InfoType.SQL_DROP_COLLATION: "",
@@ -174,7 +175,7 @@ class TestMDAC(DriverTest):
             InfoType.SQL_SCROLL_CONCURRENCY: "",
             InfoType.SQL_SCROLL_OPTIONS: "",
             InfoType.SQL_SEARCH_PATTERN_ESCAPE: "",
-            InfoType.SQL_SERVER_NAME: "",
+            InfoType.SQL_SERVER_NAME: partial(pytest.skip, reason="Unstable return value for SQL_SERVER_NAME"),
             InfoType.SQL_SPECIAL_CHARACTERS: "",
             InfoType.SQL_SQL92_DATETIME_FUNCTIONS: "",
             InfoType.SQL_SQL92_FOREIGN_KEY_DELETE_RULE: "",

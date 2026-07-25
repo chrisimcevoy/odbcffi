@@ -1,4 +1,5 @@
 from collections.abc import Mapping
+from functools import partial
 from typing import Any
 
 import pytest
@@ -286,7 +287,7 @@ class TestOdbcPsqlA(DriverTest):
                 return_code=SQLReturn.SQL_ERROR,
             ),
             InfoType.SQL_DBMS_NAME: "PostgreSQL",
-            InfoType.SQL_DBMS_VER: "18.0.3",
+            InfoType.SQL_DBMS_VER: partial(pytest.skip, reason="Unstable return value for SQL_DBMS_VER"),
             InfoType.SQL_DDL_INDEX: SQLDdlIndex.SQL_DI_CREATE_INDEX | SQLDdlIndex.SQL_DI_DROP_INDEX,
             InfoType.SQL_DEFAULT_TXN_ISOLATION: SQLTxnIsolationOption.SQL_TXN_READ_COMMITTED,
             InfoType.SQL_DESCRIBE_PARAMETER: "N",
@@ -305,7 +306,7 @@ class TestOdbcPsqlA(DriverTest):
             InfoType.SQL_DRIVER_HSTMT: NotImplementedError("Unsupported InfoType: 5"),
             InfoType.SQL_DRIVER_NAME: "psqlodbca.so",
             InfoType.SQL_DRIVER_ODBC_VER: "03.51",
-            InfoType.SQL_DRIVER_VER: "17.00.0004",
+            InfoType.SQL_DRIVER_VER: partial(pytest.skip, reason="Unstable return value for SQL_DRIVER_VER"),
             InfoType.SQL_DROP_ASSERTION: SQLDropAssertion(0),
             InfoType.SQL_DROP_CHARACTER_SET: SQLDropCharacterSet(0),
             InfoType.SQL_DROP_COLLATION: SQLDropCollation(0),
@@ -442,7 +443,7 @@ class TestOdbcPsqlA(DriverTest):
             | SQLScrollOptions.SQL_SO_KEYSET_DRIVEN
             | SQLScrollOptions.SQL_SO_STATIC,
             InfoType.SQL_SEARCH_PATTERN_ESCAPE: "\\",
-            InfoType.SQL_SERVER_NAME: "postgresql",
+            InfoType.SQL_SERVER_NAME: partial(pytest.skip, reason="Unstable return value for SQL_SERVER_NAME"),
             InfoType.SQL_SPECIAL_CHARACTERS: "_",
             InfoType.SQL_SQL92_DATETIME_FUNCTIONS: SQLSql92DatetimeFunctions.SQL_SDF_CURRENT_DATE
             | SQLSql92DatetimeFunctions.SQL_SDF_CURRENT_TIME
