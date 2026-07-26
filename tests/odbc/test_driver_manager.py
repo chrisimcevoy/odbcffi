@@ -15,6 +15,40 @@ from tests.conftest import ConnectionInfo
 from tests.odbc.helpers import get_result_set
 
 
+class TestSQLCloseCursor:
+    def test_reusing_statement_handle(self, driver_manager: DriverManager, statement_handle: StatementHandle) -> None:
+
+        # This test exercises calling SQLCloseCursor in-between SQLExecDirectW calls.
+        # There are interesting differences of behaviour between drivers.
+        # PostgreSQL drivers and Microsoft drivers seem to enforce that an active cursor
+        # must be closed between executions.
+        # FreeTDS seems to allow you to do that too, but only if the result set has been
+        # fetched until SQL_NO_DATA is returned, otherwise it returns SQL_ERROR too.
+        # MySQL drivers are the most lenient, allowing multiple executions for the same
+        # statement handle irrespective of whether results are fetched or the active
+        # cursor is closed.
+        # In any case, this test simply checks that closing cursors between multiple
+        # executions, which is what the programmer is supposed to so, works as expected.
+
+        driver_manager.sql_exec_direct_w(
+            statement_handle=statement_handle,
+            statement_text="SELECT 1 as foo;",
+        )
+
+        assert get_result_set(driver_manager, statement_handle) == [{"foo": 1}]
+
+        driver_manager.sql_close_cursor(statement_handle)
+
+        driver_manager.sql_exec_direct_w(
+            statement_handle=statement_handle,
+            statement_text="select 2 as bar;",
+        )
+
+        assert get_result_set(driver_manager, statement_handle) == [{"bar": 2}]
+
+        driver_manager.sql_close_cursor(statement_handle)
+
+
 class TestSQLDriversW:
     def test_sql_drivers_w(self, driver_manager: DriverManager, environment_handle: EnvironmentHandle) -> None:
 
