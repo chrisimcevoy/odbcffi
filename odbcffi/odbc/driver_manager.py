@@ -162,6 +162,10 @@ SQLRETURN SQLNumResultCols(
      SQLHSTMT        StatementHandle,
      SQLSMALLINT *   ColumnCountPtr);
 
+SQLRETURN SQLRowCount(
+      SQLHSTMT   StatementHandle,
+      SQLLEN *   RowCountPtr);
+
 SQLRETURN SQLSetConnectAttrW(
      SQLHDBC      ConnectionHandle,
      SQLINTEGER   Attribute,
@@ -2405,6 +2409,42 @@ class DriverManager:
                     )
 
         return int(buffer[0])  # type narrowing
+
+    def sql_row_count(self, statement_handle: StatementHandle) -> int:
+        """Return the number of rows affected by a statement.
+
+        This can be:
+        - The number of rows affected by an INSERT, UPDATE or DELETE statement.
+        - An SQL_ADD, SQL_UPDATE_BY_BOOKMARK, or SQL_DELETE_BY_BOOKMARK operation in SQLBulkOperations.
+        - An SQL_UPDATE or SQL_DELETE operation in SQLSetPos.
+
+        Some data sources may be able to return the number of rows returned by a SELECT statement.
+
+        :param statement_handle: The statement handle.
+        :return: The number of rows affected by the statement.
+        """
+        row_count_ptr = self._ffi.new("SQLLEN *")
+
+        rc = self._lib.SQLRowCount(
+            statement_handle.handle,
+            row_count_ptr,
+        )
+
+        rc_enum = self._raise_for_fatal_return_code(return_code=rc, what="SQLRowCount", handle=statement_handle)
+
+        if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+            diagnostics = self.sql_get_diag_rec_w(statement_handle)
+            for sql_state, native_error, message in diagnostics:
+                logger.warning(
+                    "SQLRowCount returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                    sql_state,
+                    native_error,
+                    message,
+                )
+
+        row_count: int = row_count_ptr[0]
+
+        return row_count
 
     @overload
     def sql_set_connect_attr_w(

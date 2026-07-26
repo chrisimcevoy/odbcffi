@@ -785,7 +785,7 @@ class TestSQLGetInfoW:
 
         expected: str = {
             "Microsoft SQL Server": "master",
-            "MySQL": "null",
+            "MySQL": "mysql",
             "PostgreSQL": "",
         }[connection_info.dbms_name]
 
@@ -3248,3 +3248,44 @@ class TestSQLGetTypeInfoW:
                     "USERTYPE": 22,
                 },
             ]
+
+
+class TestSQLRowCount:
+    def test_insert_update_delete(
+        self, driver_manager: DriverManager, statement_handle: StatementHandle, connection_info: ConnectionInfo
+    ) -> None:
+
+        driver_manager.sql_exec_direct_w(
+            statement_handle,
+            "drop table if exists test_sql_row_count;",
+        )
+
+        driver_manager.sql_exec_direct_w(
+            statement_handle,
+            "create table test_sql_row_count (id integer);",
+        )
+
+        driver_manager.sql_exec_direct_w(statement_handle, "insert into test_sql_row_count (id) values (1), (2), (3);")
+
+        assert driver_manager.sql_row_count(statement_handle) == 3
+
+        driver_manager.sql_exec_direct_w(statement_handle, "delete from  test_sql_row_count where id = 4;")
+
+        assert driver_manager.sql_row_count(statement_handle) == 0
+
+        driver_manager.sql_exec_direct_w(statement_handle, "update test_sql_row_count set id = id * 2 where id > 2;")
+
+        assert driver_manager.sql_row_count(statement_handle) == 1
+
+        driver_manager.sql_exec_direct_w(statement_handle, "delete from test_sql_row_count where id = 6;")
+
+        assert driver_manager.sql_row_count(statement_handle) == 1
+
+        driver_manager.sql_exec_direct_w(statement_handle, "delete from test_sql_row_count where id < 3;")
+
+        assert driver_manager.sql_row_count(statement_handle) == 2
+
+        driver_manager.sql_exec_direct_w(
+            statement_handle,
+            "drop table test_sql_row_count;",
+        )
