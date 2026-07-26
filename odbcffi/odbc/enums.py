@@ -3020,6 +3020,8 @@ class SQLReturn(IntEnum):
     """Async operation in progress."""
     SQL_NEED_DATA = 99
     """Data-at-execution required."""
+    SQL_PARAM_DATA_AVAILABLE = 101
+    """Indicates that streamed output parameters are available for retrieval."""
 
 
 class SQLScrollConcurrency(IntFlag):

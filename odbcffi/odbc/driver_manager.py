@@ -90,6 +90,11 @@ SQLRETURN SQLDriversW(
      SQLSMALLINT     BufferLength2,
      SQLSMALLINT *   AttributesLengthPtr);
 
+SQLRETURN SQLExecDirectW(
+     SQLHSTMT     StatementHandle,
+     SQLWCHAR *   StatementText,
+     SQLINTEGER   TextLength);
+
 SQLRETURN SQLFetch(
      SQLHSTMT     StatementHandle);
 
@@ -647,6 +652,7 @@ class DriverManager:
         SQLReturn.SQL_NO_DATA,
         SQLReturn.SQL_NEED_DATA,
         SQLReturn.SQL_STILL_EXECUTING,
+        SQLReturn.SQL_PARAM_DATA_AVAILABLE,
     ]:
         """Raise ``ODBCError`` if the provided return code is fatal, i.e. SQL_ERROR or SQL_INVALID_HANDLE.
 
@@ -971,6 +977,78 @@ class DriverManager:
             )
 
         return driver_infos
+
+    # TODO: Should this return something to indicate that a result set is available?
+    #  Would it be a bool, or something more nuanced to distinguish SQL_SUCCESS from SQL_PARAM_DATA_AVAILABLE?
+    def sql_exec_direct_w(self, statement_handle: StatementHandle, statement_text: str) -> None:
+        """Execute a preparable statement.
+
+        SQLExecDirect is the fastest way to submit a SQL statement for one-time execution.
+
+        If executing a statement more than once, prepared execution using SQLPrepare/SQLExecute is preferable.
+
+        SQLExecDirect uses the current values of any parameters if they exist in the statement.
+
+        :param statement_handle: The statement handle.
+        :param statement_text: SQL Statement to be executed.
+        :raises ODBCError: SQL statement execution failed.
+        """
+        buffer = self._encode_sqlwchar_buffer(statement_text)
+
+        rc = self._lib.SQLExecDirectW(
+            statement_handle.handle,
+            buffer,
+            len(buffer),
+        )
+
+        return_code = self._raise_for_fatal_return_code(return_code=rc, what="SQLExecDirectW", handle=statement_handle)
+
+        if return_code == SQLReturn.SQL_SUCCESS:
+            return
+
+        if return_code == SQLReturn.SQL_NO_DATA:
+            # A searched update, insert or delete statement was executed
+            # which didn't affect any rows at the data source.
+            return
+
+        if return_code == SQLReturn.SQL_SUCCESS_WITH_INFO:
+            # TODO:
+            #  SQL_SUCCESS_WITH_INFO can occur for all sorts of reasons:
+            #  - String or binary data was truncated for a parameter (either input or input/output).
+            #  - Fractional truncation of numeric data returned for a parameter.
+            #  - The data in a bound parameter could not be converted to the specified type.
+            #  - The statement text contained a `revoke` statement but the user did not have the specified privelege.
+            #  - Invalid date/time/timestamp formats.
+            #  - A positioned update or delete statement and either more or less than 1 row was affected.
+            diagnostics = self.sql_get_diag_rec_w(handle=statement_handle)
+            if diagnostics:
+                for sql_state, native_error, message in diagnostics:
+                    logger.warning(
+                        "SQLExecDirectW returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                        sql_state,
+                        native_error,
+                        message,
+                    )
+
+        if return_code == SQLReturn.SQL_NEED_DATA:
+            # TODO:
+            #  If SQLExecDirect encounters a data-at-execution parameter, it returns SQL_NEED_DATA.
+            #  Send the data using SQLParamData and SQLPutData.
+            raise NotImplementedError(
+                "SQLExecDirectW returned SQL_NEED_DATA, but SQLParamData and SQLPutData are not implemented."
+            )
+
+        if return_code == SQLReturn.SQL_PARAM_DATA_AVAILABLE:
+            # This function was called before data was retrieved for all streamed parameters.
+            raise NotImplementedError(
+                "SQLExecDirectW returned SQL_PARAM_DATA_AVAILABLE, but SQLParamData is not implemented."
+            )
+
+        if return_code == SQLReturn.SQL_STILL_EXECUTING:
+            # SQLCompleteAsync has not been called to complete the previous asynchronous operation on this handle.
+            raise NotImplementedError(
+                "SQLExecDirectW returned SQL_STILL_EXECUTING, but SQLCompleteAsync is not implemented."
+            )
 
     def sql_fetch(self, statement_handle: StatementHandle) -> bool:
         """Fetch the next rowset of data from the result set, and write data for any bound columns.
