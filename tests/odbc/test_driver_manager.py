@@ -1,5 +1,5 @@
 from contextlib import nullcontext
-from typing import Any, Literal
+from typing import Literal
 
 import pytest
 
@@ -12,6 +12,7 @@ from odbcffi.odbc.environment_handle import EnvironmentHandle
 from odbcffi.odbc.errors import ODBCError
 from odbcffi.odbc.statement_handle import StatementHandle
 from tests.conftest import ConnectionInfo
+from tests.odbc.helpers import get_result_set
 
 
 class TestSQLDriversW:
@@ -24,6 +25,21 @@ class TestSQLDriversW:
         assert all(isinstance(driver_info, DriverInfo) for driver_info in actual)
         assert all(driver_info.description for driver_info in actual)
         assert all(isinstance(driver_info.attributes, dict) for driver_info in actual)
+
+
+class TestSQLExecDirectW:
+    def test_select_1(self, driver_manager: DriverManager, statement_handle: StatementHandle) -> None:
+
+        expected = [{"foo": 1}]
+
+        driver_manager.sql_exec_direct_w(
+            statement_handle=statement_handle,
+            statement_text="select 1 as foo;",
+        )
+
+        actual = get_result_set(driver_manager, statement_handle)
+
+        assert actual == expected
 
 
 class TestSQLGetInfoW:
@@ -2342,54 +2358,7 @@ class TestSQLGetTypeInfoW:
 
         driver_manager.sql_get_type_info_w(statement_handle=statement_handle, data_type=SQLDataType.SQL_UNKNOWN_TYPE)
 
-        num_cols = driver_manager.sql_num_result_cols(statement_handle=statement_handle)
-
-        assert num_cols > 0
-
-        column_descriptions = [
-            driver_manager.sql_describe_col_w(statement_handle=statement_handle, column_number=i)
-            for i in range(1, num_cols + 1)
-        ]
-
-        results: list[dict[str, Any]] = []
-
-        while driver_manager.sql_fetch(statement_handle=statement_handle):
-            row: dict[str, Any | None] = {}
-
-            for column_description in column_descriptions:
-                value = driver_manager.sql_get_data(
-                    statement_handle=statement_handle,
-                    col_or_param_num=column_description.column_number,
-                    target_type=column_description.data_type.to_c_data_type(),
-                )
-
-                if column_description.column_name == "DATA_TYPE" or column_description.column_name == "SQL_DATATYPE":
-                    value = SQLDataType(value)
-                elif column_description.column_name == "SQL_DATETIME_SUB":
-                    data_type = row["DATA_TYPE"]
-                    assert isinstance(data_type, SQLDataType)
-                    if data_type in (
-                        SQLDataType.SQL_TYPE_DATE,
-                        SQLDataType.SQL_TYPE_TIME,
-                        SQLDataType.SQL_TYPE_TIMESTAMP,
-                        SQLDataType.SQL_TIMESTAMP,
-                        SQLDataType.SQL_DATETIME,
-                        SQLDataType.SQL_INTERVAL,
-                        SQLDataType.SQL_SS_TIME2,
-                        SQLDataType.SQL_SS_TIMESTAMPOFFSET,
-                    ):
-                        value = SQLDataType(value)
-                    else:
-                        # `value` should be None, and that _should_ be reflected in the assert statement below.
-                        # However, mysql-connector-odbc returns a hard-coded 0 instead for char types...
-                        # Maybe that was intended as SQLDataType.UNKNOWN, but who knows for sure.
-                        # In any case, it doesn't comply with the spec.
-                        # https://github.com/mysql/mysql-connector-odbc/issues/17
-                        assert value in (None, 0), (data_type, value)
-
-                row[column_description.column_name] = value
-
-            results.append(row)
+        results = get_result_set(driver_manager=driver_manager, statement_handle=statement_handle)
 
         # Each row in the result set should have at least the 19 mandatory columns in the spec.
         # The spec allows for additional, driver-dependent columns to be provided.
