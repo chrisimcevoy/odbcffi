@@ -56,6 +56,9 @@ SQLRETURN SQLAllocHandle(
       SQLHANDLE     InputHandle,
       SQLHANDLE *   OutputHandlePtr);
 
+SQLRETURN SQLCloseCursor(
+     SQLHSTMT     StatementHandle);
+
 SQLRETURN SQLDescribeColW(
       SQLHSTMT       StatementHandle,
       SQLUSMALLINT   ColumnNumber,
@@ -756,6 +759,47 @@ class DriverManager:
             handle=parent_handle,
         )
         return output_handle_ptr[0]
+
+    def sql_close_cursor(self, statement_handle: StatementHandle) -> None:
+        """Close a cursor that has been opened on a statement and discard pending results.
+
+        SQLCloseCursor is the ODBC 3.x successor to calling SQLFreeStmt with SQL_CLOSE.
+
+        Both achieve the same result on the happy path, specifically closing the active cursor associated with the
+        statement handle and discarding any results.
+
+        The difference is that, unlike the SQLFreeStmt approach, SQLCloseCursor returns SQL_ERROR (that is to say,
+        raises ODBCError in Python) if no active cursor exists.
+
+        Given that cursors are often created implicitly when a SQL statement is executed, it will be challenging to
+        anticipate when this method will raise unless the programmer has prior knowledge of whether the SQL being
+        executed will produce a result set.
+
+        If the SQL statement being executed is unknown to the programmer, it may be preferable to call SQLFreeStmt with
+        SQL_CLOSE.
+
+        :param statement_handle: The statement handle.
+        :raises ODBCError: An error occurred.
+        """
+        rc = self._lib.SQLCloseCursor(statement_handle.handle)
+
+        # Possible return codes:
+        # - SQL_SUCCESS
+        # - SQL_SUCCESS_WITH_INFO
+        # - SQL_ERROR
+        # - SQL_INVALID_HANDLE
+
+        rc_enum = self._raise_for_fatal_return_code(return_code=rc, what="SQLCloseCursor", handle=statement_handle)
+
+        if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+            diagnostics = self.sql_get_diag_rec_w(statement_handle)
+            for sql_state, native_error, message in diagnostics:
+                logger.warning(
+                    "SQLCloseCursor returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                    sql_state,
+                    native_error,
+                    message,
+                )
 
     def sql_describe_col_w(self, statement_handle: StatementHandle, column_number: int) -> ColumnDescription:
         """Return the result descriptor for one column in the result set.
