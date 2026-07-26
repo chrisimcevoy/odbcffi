@@ -152,9 +152,13 @@ class ConnectionInfo:
                 port=3306,
                 username="root",
                 password="super-secret-password",  # noqa: S106
-                # Enable multi statements.
-                # https://dev.mysql.com/doc/connector-odbc/en/connector-odbc-configuration-connection-parameters.html#codbc-dsn-option-flags
-                suffix="OPTION=67108864",
+                suffix=(
+                    # Ensure we're using a database.
+                    "DATABASE=mysql;"
+                    # Enable multi statements.
+                    # https://dev.mysql.com/doc/connector-odbc/en/connector-odbc-configuration-connection-parameters.html#codbc-dsn-option-flags
+                    "OPTION=67108864;"
+                ),
             ),
             id="MySQL Unicode",
         ),
@@ -167,9 +171,11 @@ class ConnectionInfo:
                 username="root",
                 password="super-secret-password",  # noqa: S106
                 suffix=(
+                    # Ensure we're using a database.
+                    "DATABASE=mysql;"
                     # Enable multi statements.
                     # https://dev.mysql.com/doc/connector-odbc/en/connector-odbc-configuration-connection-parameters.html#codbc-dsn-option-flags
-                    "OPTION=67108864"
+                    "OPTION=67108864;"
                 ),
             ),
             id="MySQL ANSI",
