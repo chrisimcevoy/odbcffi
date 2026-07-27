@@ -266,13 +266,13 @@ def open_connection_handle(
 
 @pytest.fixture
 def isolated_open_connection_handle(
-    environment_handle: EnvironmentHandle, connection_string: str
+    isolated_environment_handle: EnvironmentHandle, connection_string: str
 ) -> Generator[ConnectionHandle]:
     """A connection handle that has already opened a connection, with the default "function" pytest scope.
 
     Useful for tests which need to mutate the connection state.
     """
-    with ConnectionHandle(environment_handle=environment_handle) as hdbc:
+    with ConnectionHandle(environment_handle=isolated_environment_handle) as hdbc:
         hdbc.open(connection_string=connection_string)
         yield hdbc
 

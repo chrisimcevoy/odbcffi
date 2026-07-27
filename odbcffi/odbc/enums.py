@@ -106,6 +106,7 @@ __all__ = [
     "SQLTxnCapable",
     "SQLTxnIsolationOption",
     "SQLUnion",
+    "TransactionCompletionType",
 ]
 
 
@@ -3914,6 +3915,7 @@ class SQLTxnCapable(IntEnum):
 
     (ODBC 1.0)
     """
+
     SQL_TC_DML = 1
     """Transactions can contain only Data Manipulation Language (DML) statements (SELECT, INSERT, UPDATE, DELETE).
 
@@ -3987,3 +3989,10 @@ class SQLUnion(IntFlag):
 
     (SQLGetInfo returns both SQL_U_UNION and SQL_U_UNION_ALL in this case.)
     """
+
+
+class TransactionCompletionType(IntEnum):
+    """Transaction completion options for `SQLEndTran`."""
+
+    SQL_COMMIT = 0
+    SQL_ROLLBACK = 1

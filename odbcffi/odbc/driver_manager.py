@@ -93,6 +93,11 @@ SQLRETURN SQLDriversW(
      SQLSMALLINT     BufferLength2,
      SQLSMALLINT *   AttributesLengthPtr);
 
+SQLRETURN SQLEndTran(
+     SQLSMALLINT   HandleType,
+     SQLHANDLE     Handle,
+     SQLSMALLINT   CompletionType);
+
 SQLRETURN SQLExecDirectW(
      SQLHSTMT     StatementHandle,
      SQLWCHAR *   StatementText,
@@ -1025,6 +1030,53 @@ class DriverManager:
             )
 
         return driver_infos
+
+    def sql_end_tran(
+        self, handle: ConnectionHandle | EnvironmentHandle, completion_type: TransactionCompletionType
+    ) -> None:
+        """Request a commit or rollback operation for all active operations associated with a connection.
+
+        SQLEndTran Can also request that a commit or rollback operation be performed for all active connections
+        associated with an environment. Connections that are not in a connected state do not affect the transaction.
+
+        :param handle: The connection or environment handle.
+        :param completion_type: The type of completion to request; either a commit or a rollback.
+        :raises ODBCError: The request was not successful.
+        """
+        rc = self._lib.SQLEndTran(
+            int(handle.handle_type),
+            handle.handle,
+            int(completion_type),
+        )
+
+        # Returns:
+        # - SQL_SUCCESS
+        # - SQL_SUCCESS_WITH_INFO
+        # - SQL_ERROR
+        # - SQL_INVALID_HANDLE
+        # - SQL_STILL_EXECUTING
+
+        rc_enum = self._raise_for_fatal_return_code(
+            return_code=rc,
+            what="SQLEndTran",
+            handle=handle,
+        )
+
+        if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+            diagnostics = self.sql_get_diag_rec_w(handle=handle)
+            for sql_state, native_error, message in diagnostics:
+                logger.warning(
+                    "SQLEndTran returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                    sql_state,
+                    native_error,
+                    message,
+                )
+
+        if rc_enum == SQLReturn.SQL_STILL_EXECUTING:
+            # SQLCompleteAsync has not been called to complete the previous asynchronous operation on this handle.
+            raise NotImplementedError(
+                "SQLEndTran returned SQL_STILL_EXECUTING, but SQLCompleteAsync is not implemented."
+            )
 
     # TODO: Should this return something to indicate that a result set is available?
     #  Would it be a bool, or something more nuanced to distinguish SQL_SUCCESS from SQL_PARAM_DATA_AVAILABLE?

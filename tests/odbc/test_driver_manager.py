@@ -61,6 +61,161 @@ class TestSQLDriversW:
         assert all(isinstance(driver_info.attributes, dict) for driver_info in actual)
 
 
+class TestSQLEndTran:
+    @pytest.mark.parametrize(
+        ("insert_statement_completion_type", "expected"),
+        [(TransactionCompletionType.SQL_COMMIT, [{"id": 1}]), (TransactionCompletionType.SQL_ROLLBACK, [])],
+    )
+    def test_sql_end_tran_for_connection(
+        self,
+        driver_manager: DriverManager,
+        isolated_open_connection_handle: ConnectionHandle,
+        insert_statement_completion_type: TransactionCompletionType,
+        expected: list[dict[str, int]],
+    ) -> None:
+        """Assert that calling SQLEndTran on a connection handle commits or rolls back as requested."""
+
+        # Test won't work if the driver does not support transactions
+        txn_capable: SQLTxnCapable = driver_manager.sql_get_info_w(
+            connection_handle=isolated_open_connection_handle,
+            info_type=InfoType.SQL_TXN_CAPABLE,
+        )
+        if txn_capable == SQLTxnCapable.SQL_TC_NONE:
+            pytest.skip("Driver does not support transactions.")
+
+        # Make sure the connection is in "manual commit" mode.
+        driver_manager.sql_set_connect_attr_w(
+            connection_handle=isolated_open_connection_handle,
+            attribute=ConnectionAttribute.SQL_ATTR_AUTOCOMMIT,
+            value=SQLAttrAutocommit.SQL_AUTOCOMMIT_OFF,
+        )
+
+        # How does a commit affect cursors?
+        cursor_commit_behavior: SQLCursorCommitBehavior = driver_manager.sql_get_info_w(
+            connection_handle=isolated_open_connection_handle,
+            info_type=InfoType.SQL_CURSOR_COMMIT_BEHAVIOR,
+        )
+
+        # Drop & create a table with one int column.
+        with StatementHandle(connection_handle=isolated_open_connection_handle) as statement_handle:
+            driver_manager.sql_exec_direct_w(
+                statement_handle,
+                "drop table if exists test_sql_end_tran_for_environment;",
+            )
+            driver_manager.sql_exec_direct_w(
+                statement_handle,
+                "create table test_sql_end_tran_for_environment (id integer);",
+            )
+            driver_manager.sql_end_tran(
+                handle=isolated_open_connection_handle,
+                completion_type=TransactionCompletionType.SQL_COMMIT,
+            )
+
+        # Insert one row to that table.
+        # Either roll back or commit the transaction.
+        with StatementHandle(connection_handle=isolated_open_connection_handle) as write_stmt:
+            driver_manager.sql_exec_direct_w(
+                write_stmt,
+                "insert into test_sql_end_tran_for_environment (id) values (1);",
+            )
+            driver_manager.sql_end_tran(
+                handle=isolated_open_connection_handle,
+                completion_type=insert_statement_completion_type,
+            )
+
+        # Fetch the result set.
+        with StatementHandle(connection_handle=isolated_open_connection_handle) as read_stmt:
+            driver_manager.sql_exec_direct_w(
+                read_stmt,
+                "select id from test_sql_end_tran_for_environment;",
+            )
+            actual = get_result_set(driver_manager, read_stmt)
+            driver_manager.sql_end_tran(
+                handle=isolated_open_connection_handle, completion_type=TransactionCompletionType.SQL_COMMIT
+            )
+            if cursor_commit_behavior == SQLCursorCommitBehavior.SQL_CB_PRESERVE:
+                driver_manager.sql_close_cursor(read_stmt)
+
+        assert actual == expected
+
+    @pytest.mark.parametrize(
+        ("insert_statement_completion_type", "expected"),
+        [(TransactionCompletionType.SQL_COMMIT, [{"id": 1}]), (TransactionCompletionType.SQL_ROLLBACK, [])],
+    )
+    def test_sql_end_tran_for_environment(
+        self,
+        driver_manager: DriverManager,
+        isolated_environment_handle: EnvironmentHandle,
+        isolated_open_connection_handle: ConnectionHandle,
+        insert_statement_completion_type: TransactionCompletionType,
+        expected: list[dict[str, int]],
+    ) -> None:
+        """Assert that calling SQLEndTran on an environment handle commits or rolls back as requested."""
+
+        # Test won't work if the driver does not support transactions
+        txn_capable: SQLTxnCapable = driver_manager.sql_get_info_w(
+            connection_handle=isolated_open_connection_handle,
+            info_type=InfoType.SQL_TXN_CAPABLE,
+        )
+        if txn_capable == SQLTxnCapable.SQL_TC_NONE:
+            pytest.skip("Driver does not support transactions.")
+
+        # Make sure the connection is in "manual commit" mode.
+        driver_manager.sql_set_connect_attr_w(
+            connection_handle=isolated_open_connection_handle,
+            attribute=ConnectionAttribute.SQL_ATTR_AUTOCOMMIT,
+            value=SQLAttrAutocommit.SQL_AUTOCOMMIT_OFF,
+        )
+
+        # How does a commit affect cursors?
+        cursor_commit_behavior: SQLCursorCommitBehavior = driver_manager.sql_get_info_w(
+            connection_handle=isolated_open_connection_handle,
+            info_type=InfoType.SQL_CURSOR_COMMIT_BEHAVIOR,
+        )
+
+        # Drop & create a table with one int column.
+        with StatementHandle(connection_handle=isolated_open_connection_handle) as statement_handle:
+            driver_manager.sql_exec_direct_w(
+                statement_handle,
+                "drop table if exists test_commit_in_manual_commit_mode;",
+            )
+            driver_manager.sql_exec_direct_w(
+                statement_handle,
+                "create table test_commit_in_manual_commit_mode (id integer);",
+            )
+            driver_manager.sql_end_tran(
+                handle=isolated_environment_handle,
+                completion_type=TransactionCompletionType.SQL_COMMIT,
+            )
+
+        # Insert one row to that table.
+        # Either roll back or commit the transaction.
+        with StatementHandle(connection_handle=isolated_open_connection_handle) as write_stmt:
+            driver_manager.sql_exec_direct_w(
+                write_stmt,
+                "insert into test_commit_in_manual_commit_mode (id) values (1);",
+            )
+            driver_manager.sql_end_tran(
+                handle=isolated_environment_handle,
+                completion_type=insert_statement_completion_type,
+            )
+
+        # Fetch the result set.
+        with StatementHandle(connection_handle=isolated_open_connection_handle) as read_stmt:
+            driver_manager.sql_exec_direct_w(
+                read_stmt,
+                "select id from test_commit_in_manual_commit_mode;",
+            )
+            actual = get_result_set(driver_manager, read_stmt)
+            driver_manager.sql_end_tran(
+                handle=isolated_environment_handle, completion_type=TransactionCompletionType.SQL_COMMIT
+            )
+            if cursor_commit_behavior == SQLCursorCommitBehavior.SQL_CB_PRESERVE:
+                driver_manager.sql_close_cursor(read_stmt)
+
+        assert actual == expected
+
+
 class TestSQLExecDirectW:
     def test_select_1(self, driver_manager: DriverManager, statement_handle: StatementHandle) -> None:
 
