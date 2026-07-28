@@ -230,6 +230,16 @@ class TestSQLExecDirectW:
 
         assert actual == expected
 
+    def test_escape_ucase(self, driver_manager: DriverManager, statement_handle: StatementHandle) -> None:
+        driver_manager.sql_exec_direct_w(
+            statement_handle=statement_handle,
+            statement_text="SELECT {fn UCASE('hi')} as upper_hi",
+        )
+
+        actual = get_result_set(driver_manager, statement_handle)
+
+        assert actual == [{"upper_hi": "HI"}]
+
 
 class TestSQLGetInfoW:
     def test_sql_accessible_procedures(
@@ -3403,6 +3413,25 @@ class TestSQLGetTypeInfoW:
                     "USERTYPE": 22,
                 },
             ]
+
+
+class TestSQLNativeSQLW:
+    def test_select_1(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual = driver_manager.sql_native_sql_w(connection_handle=open_connection_handle, statement_text="select 1")
+
+        assert actual == "select 1"
+
+    def test_microsoft_example(self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle) -> None:
+
+        actual = driver_manager.sql_native_sql_w(
+            connection_handle=open_connection_handle, statement_text="SELECT {fn UCASE('hi')};"
+        )
+
+        # SQLNativeSQL is supposed to return the translated SQL string.
+        # However, no drivers seem to actually implement it, and just return a copy of the input string.
+        # More details in the driver manager method.
+        assert actual == "SELECT {fn UCASE('hi')};"
 
 
 class TestSQLRowCount:

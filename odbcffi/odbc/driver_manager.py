@@ -163,6 +163,14 @@ SQLRETURN SQLGetTypeInfoW(
      SQLHSTMT      StatementHandle,
      SQLSMALLINT   DataType);
 
+SQLRETURN SQLNativeSqlW(
+     SQLHDBC        ConnectionHandle,
+     SQLWCHAR *     InStatementText,
+     SQLINTEGER     TextLength1,
+     SQLWCHAR *     OutStatementText,
+     SQLINTEGER     BufferLength,
+     SQLINTEGER *   TextLength2Ptr);
+
 SQLRETURN SQLNumResultCols(
      SQLHSTMT        StatementHandle,
      SQLSMALLINT *   ColumnCountPtr);
@@ -2430,6 +2438,82 @@ class DriverManager:
                         native_error,
                         message,
                     )
+
+    def sql_native_sql_w(self, connection_handle: ConnectionHandle, statement_text: str) -> str:
+        """Return the SQL string as modified by the driver. SQLNativeSql does not execute the SQL statement.
+
+        :param connection_handle: The connection handle.
+        :param statement_text: SQL text string to be translated.
+        :return: The translated SQL string.
+        :raises ODBCError: An error occurred.
+        """
+        # In theory, SQLNativeSQL is supposed to translate the ODBC escape clauses in the text provided and return the
+        # translated SQL string. Microsoft's ODBC docs give several examples of what output to expect for various escape
+        # clauses and drivers:
+        #
+        # https://learn.microsoft.com/en-us/sql/odbc/reference/syntax/sqlnativesql-function#comments
+        #
+        # In practice, barely any drivers implement this and, if they do, it is only partially implemented at best.
+        #
+        # MySQL and PostgreSQL drivers just return a copy of the input string.
+        #
+        # https://github.com/mysql/mysql-connector-odbc/blob/460666b544126973809cd6e8d21f364c99fa7c87/driver/unicode.cc#L763
+        #
+        # https://github.com/postgresql-interfaces/psqlodbc/blob/95b35ac7cb2c9ea9df087fda08a695d89b8f8134/execute.c#L1414
+        #
+        # FreeTDS seems to do some level of translation, but only for Sybase? It also has a table mapping ODBC escapes
+        # to actual functions, but it is behind a line that reads `#if 0 /* developing ... */`.
+        #
+        # https://github.com/FreeTDS/freetds/blob/master/src/odbc/native.c
+        #
+        # Even Microsoft's Native Client docs state that it "satisfies SQLNativeSql requests without visiting the
+        # server", merely checking the syntax of the input SQL. It provides no guarantees about whether it will be
+        # handled correctly at execution time.
+        #
+        # https://learn.microsoft.com/en-us/sql/relational-databases/native-client-odbc-api/sqlnativesql
+
+        in_statement = self._encode_sqlwchar_buffer(statement_text)
+        out_statement = self._ffi.new("SQLWCHAR[]", len(in_statement) * 2)
+        out_stmt_len_ptr = self._ffi.new("SQLINTEGER *")
+
+        while True:
+            rc = self._lib.SQLNativeSqlW(
+                connection_handle.handle,
+                in_statement,
+                len(statement_text),
+                out_statement,
+                len(out_statement),
+                out_stmt_len_ptr,
+            )
+
+            # Returns:
+            # - SQL_SUCCESS
+            # - SQL_SUCCESS_WITH_INFO
+            # - SQL_ERROR
+            # - SQL_INVALID_HANDLE
+
+            rc_enum = self._raise_for_fatal_return_code(rc, what="SQLNativeSqlW", handle=connection_handle)
+
+            out_stmt_len: int = out_stmt_len_ptr[0]
+
+            if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+                diagnostics = self.sql_get_diag_rec_w(connection_handle)
+
+                if diagnostics:
+                    if any(sql_state == "01004" for sql_state, native_error, message in diagnostics):
+                        out_statement = self._ffi.new("SQLWCHAR[]", out_stmt_len + 1)
+                        continue
+
+                    for sql_state, native_error, message in diagnostics:
+                        logger.warning(
+                            "SQLNativeSqlW returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                            sql_state,
+                            native_error,
+                            message,
+                        )
+            break
+
+        return self._decode_sqlwchar_buffer(out_statement, num_chars=out_stmt_len)
 
     def sql_num_result_cols(self, statement_handle: StatementHandle) -> int:
         """Return the number of columns in a result set.
