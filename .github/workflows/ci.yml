@@ -115,7 +115,7 @@ jobs:
 
       - name: Install MySQL (Windows)
         if: runner.os == 'Windows'
-        uses: shogo82148/actions-setup-mysql@9c42ca180d5f1dd4dceb54c23c5eda0384f4d265
+        uses: shogo82148/actions-setup-mysql@3dcedf762c5e82d781a9e414462785b30208e79c
         with:
           mysql-version: "26.7"
           root-password: super-secret-password
