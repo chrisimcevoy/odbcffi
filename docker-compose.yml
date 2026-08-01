@@ -50,7 +50,7 @@ services:
     <<: *common-setup
 
   mysql:
-    image: mysql:latest
+    image: mysql:latest@sha256:66aec17cd21a956029b83f083b813073859e8355dc1a00e55df6ba02f0e32345
     container_name: mysql
     ports:
       - "3306:3306"
@@ -65,7 +65,7 @@ services:
       retries: 10
 
   postgresql:
-    image: postgres:latest
+    image: postgres:latest@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
     container_name: postgres
     ports:
       - "5432:5432"
@@ -79,7 +79,7 @@ services:
       retries: 10
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server
+    image: mcr.microsoft.com/mssql/server@sha256:86cc6144ef39bb0fbed2329e1ad79b13ee82e7b2e4739213a0db0800e668a74a
     container_name: sqlserver
     environment:
       - ACCEPT_EULA=Y
