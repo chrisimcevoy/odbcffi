@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.11-trixie
+FROM ghcr.io/astral-sh/uv:0.12-trixie
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
