@@ -11,7 +11,7 @@ from tests.drivers.base import DriverTest
 
 @pytest.fixture(scope="module")
 def driver() -> str:
-    return "MySQL ODBC 9.7 ANSI Driver"
+    return "MySQL ODBC 26.7 ANSI Driver"
 
 
 class TestMyODBCA(DriverTest):
@@ -36,7 +36,7 @@ class TestMyODBCA(DriverTest):
                 what="SQLGetInfoW",
                 sql_state="HYC00",
                 native_error=4000,
-                message_text="[MySQL][ODBC 9.7(a) Driver]Unsupported option: 10025 to SQLGetInfo",
+                message_text="[MySQL][ODBC 26.7(a) Driver]Unsupported option: 10025 to SQLGetInfo",
                 return_code=SQLReturn.SQL_ERROR,
             ),
             InfoType.SQL_BATCH_ROW_COUNT: SQLBatchRowCount.SQL_BRC_EXPLICIT,
@@ -162,7 +162,7 @@ class TestMyODBCA(DriverTest):
                 what="SQLGetInfoW",
                 sql_state="HYC00",
                 native_error=4000,
-                message_text="[MySQL][ODBC 9.7(a) Driver]Unsupported option: 173 to SQLGetInfo",
+                message_text="[MySQL][ODBC 26.7(a) Driver]Unsupported option: 173 to SQLGetInfo",
                 return_code=SQLReturn.SQL_ERROR,
             ),
             InfoType.SQL_CONVERT_INTEGER: SQLConvert.SQL_CVT_CHAR
@@ -371,7 +371,7 @@ class TestMyODBCA(DriverTest):
                 what="SQLGetInfoW",
                 sql_state="HYC00",
                 native_error=4000,
-                message_text="[MySQL][ODBC 9.7(a) Driver]Unsupported option: 10024 to SQLGetInfo",
+                message_text="[MySQL][ODBC 26.7(a) Driver]Unsupported option: 10024 to SQLGetInfo",
                 return_code=SQLReturn.SQL_ERROR,
             ),
             InfoType.SQL_DRIVER_HDBC: NotImplementedError("Unsupported InfoType: 3"),
