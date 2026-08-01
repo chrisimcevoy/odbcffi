@@ -79,6 +79,9 @@ lint.extend-select = [
 ]
 lint.ignore = [
     "ANN401",
+    "D203",
+    "D213",
+    "D413",
     "F403",
     "F405",
 ]

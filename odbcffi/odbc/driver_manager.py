@@ -17,7 +17,7 @@ from .enums import *
 from .errors import ODBCError
 
 if TYPE_CHECKING:
-    from collections.abc import Collection, Mapping
+    from collections.abc import Collection, Mapping, Sequence
 
     from typing_extensions import Self
 
@@ -31,7 +31,8 @@ __all__ = ["DriverManager"]
 logger = logging.getLogger(__name__)
 
 
-SQL_NTS = -3
+SQL_NTS: Final = -3
+SQL_API_ODBC3_ALL_FUNCTIONS_SIZE: Final = 250
 
 
 FFI_CDEF: Final[str] = r"""
@@ -151,6 +152,11 @@ SQLRETURN SQLGetEnvAttr(
      SQLPOINTER     ValuePtr,
      SQLINTEGER     BufferLength,
      SQLINTEGER *   StringLengthPtr);
+
+SQLRETURN SQLGetFunctions(
+     SQLHDBC           ConnectionHandle,
+     SQLUSMALLINT      FunctionId,
+     SQLUSMALLINT *    SupportedPtr);
 
 SQLRETURN SQLGetInfoW(
      SQLHDBC         ConnectionHandle,
@@ -1196,6 +1202,25 @@ class DriverManager:
             handle=handle,
         )
 
+    @classmethod
+    def sql_func_exists(cls, functions: Sequence[int], function: SQLApi) -> bool:
+        """Return True if the `functions` bitmap indicates that the driver supports the ODBC function `function`.
+
+        This method is a Python equivalent to the SQL_FUNC_EXISTS macro which C programmers use after calling
+        SQLGetFunctions with SQL_API_ODBC3_ALL_FUNCTIONS.
+
+        :param functions: The 4000-bit bitmap returned by calling `DriverManager.sql_get_functions` with
+            `SQLApi.SQL_API_ODBC3_ALL_FUNCTIONS`.
+        :param function: The SQLApi representing the specific ODBC function.
+        :return: A bool indicating whether the specific ODBC function is supported by the driver.
+        """
+        word_index = function >> 4
+        word = functions[word_index]
+
+        bit_index = 1 << (function & 0x000F)
+
+        return (word & bit_index) != 0
+
     @overload
     def sql_get_connect_attr_w(
         self,
@@ -1627,6 +1652,125 @@ class DriverManager:
         if attribute == EnvironmentAttribute.SQL_ATTR_CP_MATCH:
             return SQLAttrCPMatch(ret)
         raise RuntimeError(f"Unsupported environment attribute: {attribute}")
+
+    @overload
+    def sql_get_functions(  # type: ignore[overload-overlap]
+        self,
+        connection_handle: ConnectionHandle,
+        function_id: Literal[SQLApi.SQL_API_ALL_FUNCTIONS, SQLApi.SQL_API_ODBC3_ALL_FUNCTIONS],
+    ) -> Sequence[int]: ...
+
+    @overload
+    def sql_get_functions(self, connection_handle: ConnectionHandle, function_id: SQLApi) -> Literal[0, 1]: ...
+
+    def sql_get_functions(
+        self, connection_handle: ConnectionHandle, function_id: SQLApi
+    ) -> Literal[0, 1] | Sequence[int]:
+        """Return information about which ODBC functions a driver supports.
+
+        Support for individual ODBC functions can be determined by passing the relevant SQLApi enum to this function,
+        in which case the return value will be either 0 (false) or 1 (true).
+
+        Example:
+
+        .. code-block:: python
+
+            >>> driver_manager.sql_get_functions(connection_handle, SQLApi.SQL_API_SQLALLOCHANDLE)
+            1
+
+        There are two special SQLApi enums which determine support for "all" functions at the same time. They both cause
+        this method to return a collection of integers, but the semantics around the return values are different.
+
+        The first of these special SQLApi enums is SQL_API_ALL_FUNCTIONS, which is the ODBC 2.x method of determining
+        support for all ODBC functions. When passed to this method, the return value is a collection of 100 integers,
+        with each element in the collection being either 0 (false) or 1 (true). By indexing into the collection, where
+        the index is the numerical value of a SQLApi enum representing an individual function, the element at that
+        index location determines whether that particular SQLApi is supported.
+
+        Example:
+
+        .. code-block:: python
+
+            >>> funcs = driver_manager.sql_get_functions(connection_handle, SQLApi.SQL_API_ALL_FUNCTIONS)
+            >>> is_sqlallocenv_supported = funcs[SQLApi.SQL_API_SQLALLOCENV]
+            >>> print(is_sqlallocenv_supported)
+            1
+
+        The ODBC 2.x approach worked, but it had limitations. Several functions have numerical identifiers which exceed
+        the bounds of that collection, and it could not represent whether they were supported or not.
+
+        The ODBC 3.x equivalent is SQL_API_ODBC3_ALL_FUNCTIONS, which again results in a return value of an int
+        collection. However, this time, the size of the collection is 250 (SQL_API_ODBC3_ALL_FUNCTIONS_SIZE) elements,
+        and rather than being a simple array of zeros and ones, it is a 4000-bit bitmap.
+
+        To determine support for individual functions using that bitmap, C programmers use a SQL_FUNC_EXISTS macro,
+        passing in the bitmap and the numerical identifier of the function they are interested in. In odbcffi, use the
+        equivalent `DriverManager.sql_func_exists` classmethod. Note that `sql_func_exists` returns a bool.
+
+        Example:
+
+        .. code-block:: python
+
+            >>> bitmap = driver_manager.sql_get_functions(connection_handle, SQLApi.SQL_API_ODBC3_ALL_FUNCTIONS)
+            >>> driver_manager.sql_func_exists(bitmap, SQLApi.SQL_API_SQLALLOCHANDLE)
+            True
+
+        :param connection_handle: The connection handle.
+        :param function_id: The identifier of an ODBC function, or the special values SQL_API_ALL_FUNCTIONS or
+            SQL_API_ODBC3_ALL_FUNCTIONS.
+        :return: if `function_id` is a SQLApi representing an individual function, either 0 or 1 is returned; If it is
+            SQL_API_ALL_FUNCTIONS, a 100-element sequence of integers is returned, containing 0 or 1 in each element
+            indicating which ODBC functions are supported via indexing into the sequence based on the function's
+            numerical identifier; If it is SQL_API_ODBC3_ALL_FUNCTIONS, the return value is a 4000-bit bitmap which
+            needs passed to `DriverManager.sql_func_exists` to determine whether a given ODBC function is supported.
+        :raises ODBCError: An error occurred.
+        """
+        if function_id == SQLApi.SQL_API_ALL_FUNCTIONS:
+            # Array of 100 words.
+            supported_ptr = self._ffi.new("SQLUSMALLINT[]", 100)
+        elif function_id == SQLApi.SQL_API_ODBC3_ALL_FUNCTIONS:
+            # Array of SQL_API_ODBC3_ALL_FUNCTIONS_SIZE words.
+            supported_ptr = self._ffi.new("SQLUSMALLINT[]", SQL_API_ODBC3_ALL_FUNCTIONS_SIZE)
+        else:
+            # function_id is an individual function.
+            supported_ptr = self._ffi.new("SQLUSMALLINT *")
+
+        rc = self._lib.SQLGetFunctions(
+            connection_handle.handle,
+            int(function_id),
+            supported_ptr,
+        )
+
+        # Returns:
+        # - SQL_SUCCESS
+        # - SQL_SUCCESS_WITH_INFO
+        # - SQL_ERROR
+        # - SQL_INVALID_HANDLE.
+        rc_enum = self._raise_for_fatal_return_code(
+            return_code=rc,
+            what="SQLGetFunctions",
+            handle=connection_handle,
+        )
+
+        if rc_enum == SQLReturn.SQL_SUCCESS_WITH_INFO:
+            diagnostics = self.sql_get_diag_rec_w(connection_handle)
+            for sql_state, native_error, message in diagnostics:
+                logger.warning(
+                    "SQLGetFunctions returned SQL_SUCCESS_WITH_INFO: [%s] [%s] %s",
+                    sql_state,
+                    native_error,
+                    message,
+                )
+
+        if function_id == SQLApi.SQL_API_ALL_FUNCTIONS:
+            return tuple(supported_ptr[i] for i in range(100))
+
+        if function_id == SQLApi.SQL_API_ODBC3_ALL_FUNCTIONS:
+            return tuple(supported_ptr[i] for i in range(SQL_API_ODBC3_ALL_FUNCTIONS_SIZE))
+
+        supported: Literal[0, 1] = supported_ptr[0]
+
+        return supported
 
     @overload
     def sql_get_info_w(

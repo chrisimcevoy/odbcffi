@@ -1,5 +1,5 @@
 from contextlib import nullcontext
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import pytest
 
@@ -13,6 +13,9 @@ from odbcffi.odbc.errors import ODBCError
 from odbcffi.odbc.statement_handle import StatementHandle
 from tests.conftest import ConnectionInfo
 from tests.odbc.helpers import get_result_set
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class TestSQLCloseCursor:
@@ -239,6 +242,41 @@ class TestSQLExecDirectW:
         actual = get_result_set(driver_manager, statement_handle)
 
         assert actual == [{"upper_hi": "HI"}]
+
+
+class TestSQLGetFunctions:
+    def test_sql_api_all_functions(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: Sequence[int] = driver_manager.sql_get_functions(open_connection_handle, SQLApi.SQL_API_ALL_FUNCTIONS)
+
+        assert len(actual) == 100
+        assert all(isinstance(element, int) for element in actual)
+        assert actual[SQLApi.SQL_API_SQLALLOCENV] == 1
+
+    def test_sql_api_odbc3_all_functions(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: Sequence[int] = driver_manager.sql_get_functions(
+            open_connection_handle, SQLApi.SQL_API_ODBC3_ALL_FUNCTIONS
+        )
+
+        assert len(actual) == 250
+        assert all(isinstance(element, int) for element in actual)
+        assert driver_manager.sql_func_exists(actual, SQLApi.SQL_API_SQLALLOCHANDLE)
+
+    def test_sql_api_sqlallochandle(
+        self, driver_manager: DriverManager, open_connection_handle: ConnectionHandle
+    ) -> None:
+
+        actual: int = driver_manager.sql_get_functions(
+            connection_handle=open_connection_handle,
+            function_id=SQLApi.SQL_API_SQLALLOCHANDLE,
+        )
+
+        assert actual == 1
 
 
 class TestSQLGetInfoW:
