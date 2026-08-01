@@ -200,13 +200,6 @@ def driver_manager() -> DriverManager:
     return DriverManager.autoload()
 
 
-@pytest.fixture
-def unixodbc_driver_manager() -> DriverManager:
-    dm = DriverManager(driver_manager_lib_name="libodbc.so.2")
-    assert dm.is_unixodbc, f"Expected unixODBC, got {dm.driver_manager_type} ({dm.driver_manager_lib_name})"
-    return dm
-
-
 @pytest.fixture(scope="session")
 def environment_handle(driver_manager: DriverManager) -> Generator[EnvironmentHandle]:
     """An environment handle fixture, with the "session" pytest scope.
@@ -264,6 +257,19 @@ def open_connection_handle(
         yield hdbc
 
 
+@pytest.fixture(scope="module")
+def module_scoped_open_connection_handle(
+    environment_handle: EnvironmentHandle, connection_string: str
+) -> Generator[ConnectionHandle]:
+    """A connection handle that has already opened a connection, with the "module" pytest scope.
+
+    Useful for making tests which do not mutate the connection state faster.
+    """
+    with ConnectionHandle(environment_handle=environment_handle) as hdbc:
+        hdbc.open(connection_string=connection_string)
+        yield hdbc
+
+
 @pytest.fixture
 def isolated_open_connection_handle(
     isolated_environment_handle: EnvironmentHandle, connection_string: str
@@ -282,4 +288,14 @@ def statement_handle(open_connection_handle: ConnectionHandle) -> Generator[Stat
     """A statement handle bound to an open connection."""
 
     with StatementHandle(connection_handle=open_connection_handle) as hstmt:
+        yield hstmt
+
+
+@pytest.fixture
+def module_scoped_statement_handle(
+    module_scoped_open_connection_handle: ConnectionHandle,
+) -> Generator[StatementHandle]:
+    """A statement handle bound to an open connection."""
+
+    with StatementHandle(connection_handle=module_scoped_open_connection_handle) as hstmt:
         yield hstmt
