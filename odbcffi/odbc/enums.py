@@ -7,6 +7,7 @@ They are logically grouped as Python enums to aid static typing for function arg
 
 from __future__ import annotations
 
+import platform
 from enum import Enum, IntEnum, IntFlag
 
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "SQLAggregateFunctions",
     "SQLAlterDomain",
     "SQLAlterTable",
+    "SQLApi",
     "SQLAsyncDbcFunctions",
     "SQLAsyncMode",
     "SQLAsyncNotification",
@@ -1529,6 +1531,108 @@ class SQLAlterTable(IntFlag):
     This bit is meaningful when support for adding column constraints or table constraints is reported by
     SQL_AT_ADD_CONSTRAINT or SQL_AT_ADD_TABLE_CONSTRAINT. (Full level) (ODBC 3.0)
     """
+
+
+class SQLApi(IntEnum):
+    """ODBC Function identifiers for SQLGetFunctions."""
+
+    SQL_API_ALL_FUNCTIONS = 0
+    """The ODBC 2.x identifier for "all functions".
+
+    See the ``DriverManager.sql_get_functions`` docstring for semantics.
+    """
+    SQL_API_ODBC3_ALL_FUNCTIONS = 999
+    """The ODBC 3.x identifier for "all functions".
+
+    See the ``DriverManager.sql_get_functions`` docstring for semantics.
+    """
+    SQL_API_SQLALLOCCONNECT = 1
+    SQL_API_SQLALLOCENV = 2
+    SQL_API_SQLALLOCHANDLE = 1001
+    SQL_API_SQLALLOCHANDLESTD = 73
+    SQL_API_SQLALLOCSTMT = 3
+    SQL_API_SQLBINDCOL = 4
+    SQL_API_SQLBINDPARAM = 1002
+    SQL_API_SQLBINDPARAMETER = 72
+    SQL_API_SQLBROWSECONNECT = 55
+    SQL_API_SQLBULKOPERATIONS = 24
+    SQL_API_SQLCANCEL = 5
+
+    # It seems that Microsoft changed the SQLCancelHandle ID from 1022 to 1550
+    # as of Windows 7 SP1 and Server 2008 R2 SP1. The only explanation offered is
+    # "for interoperability reasons". UnixODBC still has the original value, and
+    # iODBC does not have SQL_API_SQLCANCELHANDLE whatsoever.
+    # https://web.archive.org/web/20150121050805/http://support.microsoft.com/kb/2493935
+    SQL_API_SQLCANCELHANDLE = 1550 if platform.system() == "Windows" else 1022
+
+    SQL_API_SQLCLOSECURSOR = 1003
+    SQL_API_SQLCOLATTRIBUTE = 6
+    SQL_API_SQLCOLATTRIBUTES = 6
+    SQL_API_SQLCOLUMNPRIVILEGES = 56
+    SQL_API_SQLCOLUMNS = 40
+    SQL_API_SQLCOMPLETEASYNC = 1551
+    SQL_API_SQLCONNECT = 7
+    SQL_API_SQLCOPYDESC = 1004
+    SQL_API_SQLDATASOURCES = 57
+    SQL_API_SQLDESCRIBECOL = 8
+    SQL_API_SQLDESCRIBEPARAM = 58
+    SQL_API_SQLDISCONNECT = 9
+    SQL_API_SQLDRIVERCONNECT = 41
+    SQL_API_SQLDRIVERS = 71
+    SQL_API_SQLENDTRAN = 1005
+    SQL_API_SQLERROR = 10
+    SQL_API_SQLEXECDIRECT = 11
+    SQL_API_SQLEXECUTE = 12
+    SQL_API_SQLEXTENDEDFETCH = 59
+    SQL_API_SQLFETCH = 13
+    SQL_API_SQLFETCHSCROLL = 1021
+    SQL_API_SQLFOREIGNKEYS = 60
+    SQL_API_SQLFREECONNECT = 14
+    SQL_API_SQLFREEENV = 15
+    SQL_API_SQLFREEHANDLE = 1006
+    SQL_API_SQLFREESTMT = 16
+    SQL_API_SQLGETCONNECTATTR = 1007
+    SQL_API_SQLGETCONNECTOPTION = 42
+    SQL_API_SQLGETCURSORNAME = 17
+    SQL_API_SQLGETDATA = 43
+    SQL_API_SQLGETDESCFIELD = 1008
+    SQL_API_SQLGETDESCREC = 1009
+    SQL_API_SQLGETDIAGFIELD = 1010
+    SQL_API_SQLGETDIAGREC = 1011
+    SQL_API_SQLGETENVATTR = 1012
+    SQL_API_SQLGETFUNCTIONS = 44
+    SQL_API_SQLGETINFO = 45
+    SQL_API_SQLGETSTMTATTR = 1014
+    SQL_API_SQLGETSTMTOPTION = 46
+    SQL_API_SQLGETTYPEINFO = 47
+    SQL_API_SQLMORERESULTS = 61
+    SQL_API_SQLNATIVESQL = 62
+    SQL_API_SQLNUMPARAMS = 63
+    SQL_API_SQLNUMRESULTCOLS = 18
+    SQL_API_SQLPARAMDATA = 48
+    SQL_API_SQLPARAMOPTIONS = 64
+    SQL_API_SQLPREPARE = 19
+    SQL_API_SQLPRIMARYKEYS = 65
+    SQL_API_SQLPROCEDURECOLUMNS = 66
+    SQL_API_SQLPROCEDURES = 67
+    SQL_API_SQLPUTDATA = 49
+    SQL_API_SQLROWCOUNT = 20
+    SQL_API_SQLSETCONNECTATTR = 1016
+    SQL_API_SQLSETCONNECTOPTION = 50
+    SQL_API_SQLSETCURSORNAME = 21
+    SQL_API_SQLSETDESCFIELD = 1017
+    SQL_API_SQLSETDESCREC = 1018
+    SQL_API_SQLSETENVATTR = 1019
+    SQL_API_SQLSETPARAM = 22
+    SQL_API_SQLSETPOS = 68
+    SQL_API_SQLSETSCROLLOPTIONS = 69
+    SQL_API_SQLSETSTMTATTR = 1020
+    SQL_API_SQLSETSTMTOPTION = 51
+    SQL_API_SQLSPECIALCOLUMNS = 52
+    SQL_API_SQLSTATISTICS = 53
+    SQL_API_SQLTABLEPRIVILEGES = 70
+    SQL_API_SQLTABLES = 54
+    SQL_API_SQLTRANSACT = 23
 
 
 class SQLAsyncDbcFunctions(IntEnum):
