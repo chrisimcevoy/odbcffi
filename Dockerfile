@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:0.12-trixie@sha256:cdb9c942f24d6ef9a2888ba635e96a9c7c9758eb4dc58c1165f4b6c311d1cbc5
+FROM ghcr.io/astral-sh/uv:0.12-trixie@sha256:b1608d8d1c8c87c02c1ff588496820660146f2d067c53c78ada437113ce11dea
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
