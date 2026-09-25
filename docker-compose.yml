@@ -65,7 +65,7 @@ services:
       retries: 10
 
   postgresql:
-    image: postgres:latest@sha256:3a82e1f56c8f0f5616a11103ac3d47e632c3938698946a7ad26da0df1334744a
+    image: postgres:latest@sha256:5a5a84b19854a9ffaa54082c166ff4ec27473a361e496e5ea167f298f2da9722
     container_name: postgres
     ports:
       - "5432:5432"
