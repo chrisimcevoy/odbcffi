@@ -79,7 +79,7 @@ services:
       retries: 10
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server@sha256:86cc6144ef39bb0fbed2329e1ad79b13ee82e7b2e4739213a0db0800e668a74a
+    image: mcr.microsoft.com/mssql/server@sha256:742481d1b1186cccc81220a1eaacef244ca8d0f7d19c8e5c70df8ae541ffbab2
     container_name: sqlserver
     environment:
       - ACCEPT_EULA=Y
