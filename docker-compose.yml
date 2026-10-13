@@ -50,7 +50,7 @@ services:
     <<: *common-setup
 
   mysql:
-    image: mysql:latest@sha256:66aec17cd21a956029b83f083b813073859e8355dc1a00e55df6ba02f0e32345
+    image: mysql:latest@sha256:893418c8a7a34c60d2d961cc30ef136095da141478562ed2101ae3f5faba9c3f
     container_name: mysql
     ports:
       - "3306:3306"
